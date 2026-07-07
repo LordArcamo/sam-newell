@@ -1,0 +1,278 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Newsletter from '../components/Newsletter.astro';
+import PageHero from '../components/PageHero.astro';
+import { QUOTES, PODCAST } from '../data/site';
+
+const timeline = [
+  {
+    year: '2010',
+    title: 'Bought at the bottom',
+    body: 'Sam starts buying real estate at the floor of the recession — while still a construction management student at BYU. First flips, first lessons, first conviction that real estate builds real freedom.',
+  },
+  {
+    year: '2012',
+    title: 'BYU, Construction Management',
+    body: 'Graduates with a builder’s eye he still uses on every walkthrough. He doesn’t just see the house — he sees the framing, the bones, the budget to fix it.',
+  },
+  {
+    year: '2014',
+    title: 'Licensed & closing',
+    body: 'Goes full-time as an agent, then broker. Flips become fourplexes; fourplexes become a development playbook. Clients get the same underwriting he uses on his own money.',
+  },
+  {
+    year: '2018',
+    title: 'Multifamily Investment Club',
+    body: 'Founds MFI Club in Lehi — a private firm acquiring value-add multifamily across the US, held long-term for cash flow and appreciation. The portfolio grows past 2,000 doors.',
+  },
+  {
+    year: '2019',
+    title: 'Get Leveraged',
+    body: `Launches the ${PODCAST.name} podcast — ${PODCAST.episodes} of straight talk on multifamily, passive income, and durable wealth. ${PODCAST.rating}.`,
+  },
+  {
+    year: 'Today',
+    title: 'Broker · CCIM · Dad',
+    body: 'Top-producing Utah broker with $450M+ closed, CCIM designee, hotel and assisted-living operator — and, above all of it, husband to Lauren and dad to Heidi and Liam.',
+  },
+];
+---
+
+<Base
+  title="About Sam Newell — The Story Behind the Broker"
+  description="From buying at the bottom of the 2010 recession as a BYU student to $450M+ closed and 2,000+ multifamily doors — the real story of Utah broker Sam Newell."
+>
+  <PageHero
+    kicker="Sam’s story"
+    intro="Utah based, Idaho grown. Broker, builder, investor, podcast host — and the guy who’ll tell you the truth about a deal even when it costs him the commission."
+  >
+    Built the <em>slow, honest</em> way
+  </PageHero>
+
+  <!-- Portrait + values -->
+  <section class="section story">
+    <div class="container story-grid">
+      <div class="story-media" data-reveal="right">
+        <img src="/images/sam-about.png" alt="Sam Newell portrait" loading="lazy" data-parallax="0.08" />
+      </div>
+      <div class="story-copy">
+        <span class="kicker" data-reveal>Integrity first</span>
+        <h2 class="display story-title" data-reveal>
+          Advice he takes with <em>his own money</em>
+        </h2>
+        <p data-reveal>
+          Sam Newell is a seasoned real estate investor and broker with more than 15 years
+          in the game — managing over 2,000 apartment units and closing $450M+ in
+          transactions across the Wasatch Front. He’s a CCIM designee, one of the most
+          rigorous commercial real estate credentials in the industry.
+        </p>
+        <p data-reveal>
+          But the résumé isn’t the point. The point is how he got it: buying his first
+          properties at the bottom of the recession as a broke BYU student, framing houses
+          he’d later learn to underwrite, and building a reputation one straight answer at
+          a time. A church mission taught him people; construction taught him buildings;
+          the recession taught him price.
+        </p>
+        <p data-reveal>
+          Off the clock you’ll find him on a river with a fly rod, or home with Lauren,
+          Heidi, and Liam — the portfolio he actually brags about.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quote band #1 -->
+  <section class="quoteband grain">
+    <div class="container">
+      <blockquote class="display quoteband-text" data-reveal="scale">
+        “{QUOTES[0]}”
+      </blockquote>
+      <span class="quoteband-source" data-reveal>— Sam Newell</span>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="section tl">
+    <div class="container">
+      <span class="kicker" data-reveal>The long way here</span>
+      <h2 class="display tl-title" data-reveal>Fifteen years, <em>no shortcuts</em></h2>
+      <ol class="tl-list">
+        {timeline.map((t) => (
+          <li class="tl-item" data-reveal>
+            <span class="tl-year display">{t.year}</span>
+            <div class="tl-body">
+              <h3 class="tl-item-title">{t.title}</h3>
+              <p>{t.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Family -->
+  <section class="section family">
+    <div class="container family-grid">
+      <div class="family-copy">
+        <span class="kicker" data-reveal>The why</span>
+        <h2 class="display family-title" data-reveal>
+          Wealth is what’s <em>waiting at home</em>
+        </h2>
+        <p data-reveal>
+          Every unit, every close, every 6 a.m. walkthrough points at the same thing:
+          a strong home for Lauren, Heidi, and Liam — and the free Saturdays to fill it.
+          That’s the growth Sam is actually after, and it’s the lens he brings to yours.
+        </p>
+        <blockquote class="family-quote" data-reveal>
+          “{QUOTES[1]}”
+        </blockquote>
+      </div>
+      <div class="family-media" data-reveal="left">
+        <img src="/images/sam-family.jpg" alt="Sam Newell with his family" loading="lazy" data-parallax="0.1" />
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title="Hear the rest" em="in person." copy="The story’s better over a call — and so is the advice. Tell Sam where you’re headed." />
+  <Newsletter />
+</Base>
+
+<style>
+  .story-grid {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: clamp(2.5rem, 6vw, 5.5rem);
+    align-items: center;
+  }
+
+  .story-media img {
+    border-radius: 1.25rem;
+    background: var(--cream-2);
+    box-shadow: 0 40px 70px -30px rgba(19, 19, 19, 0.35);
+  }
+
+  .story-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 1.5rem;
+  }
+
+  .story-copy p {
+    margin-bottom: 1.25rem;
+    color: rgba(19, 19, 19, 0.75);
+  }
+
+  .quoteband {
+    background:
+      linear-gradient(rgba(19, 19, 19, 0.85), rgba(19, 19, 19, 0.9)),
+      url('/images/wasatch.jpg') center / cover no-repeat;
+    color: var(--cream);
+    padding-block: clamp(4.5rem, 9vw, 7rem);
+    text-align: center;
+    position: relative;
+    overflow: clip;
+  }
+
+  .quoteband-text {
+    font-size: var(--step-3);
+    max-width: 24ch;
+    margin-inline: auto;
+  }
+
+  .quoteband-source {
+    display: block;
+    margin-top: 1.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--brass-bright);
+  }
+
+  .tl {
+    background: var(--cream-2);
+  }
+
+  .tl-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 0;
+  }
+
+  .tl-list {
+    list-style: none;
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    display: grid;
+    gap: 0;
+  }
+
+  .tl-item {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: 2rem;
+    padding-block: 2rem;
+    border-top: 1px solid rgba(19, 19, 19, 0.12);
+  }
+
+  .tl-year {
+    font-size: var(--step-2);
+    color: var(--brass);
+  }
+
+  .tl-item-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .tl-body p {
+    color: rgba(19, 19, 19, 0.7);
+    max-width: 60ch;
+  }
+
+  .family {
+    background: var(--cream);
+  }
+
+  .family-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    align-items: center;
+  }
+
+  .family-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 1.5rem;
+  }
+
+  .family-copy p {
+    color: rgba(19, 19, 19, 0.75);
+  }
+
+  .family-quote {
+    margin-top: 2rem;
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--brass);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    color: var(--ink);
+  }
+
+  .family-media img {
+    border-radius: 1.25rem;
+    box-shadow: 0 40px 70px -30px rgba(19, 19, 19, 0.35);
+  }
+
+  @media (max-width: 900px) {
+    .story-grid,
+    .family-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tl-item {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+  }
+</style>

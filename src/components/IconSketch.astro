@@ -1,0 +1,101 @@
+---
+/**
+ * Animated line-art icons. Every path carries `data-draw`, so the global
+ * GSAP engine in Base.astro strokes them in when they scroll into view.
+ * Stroke inherits currentColor — drop the icon in any colored context.
+ */
+interface Props {
+  name: keyof typeof ICONS;
+  size?: number;
+  class?: string;
+}
+
+const ICONS = {
+  house: [
+    'M8 24 L24 10 L40 24',
+    'M12 21 V38 H36 V21',
+    'M20 38 V28 H28 V38',
+  ],
+  buildings: [
+    'M8 40 V18 H20 V40',
+    'M20 40 V10 H36 V40',
+    'M12 24 H16 M12 30 H16 M12 36 H16',
+    'M25 16 H31 M25 22 H31 M25 28 H31 M25 34 H31',
+    'M4 40 H44',
+  ],
+  hammer: [
+    'M22 22 L38 38',
+    'M12 20 L24 8 L30 14 L18 26 Z',
+  ],
+  heart: [
+    'M24 38 C10 28 8 18 14 13 C19 9 24 13 24 17 C24 13 29 9 34 13 C40 18 38 28 24 38 Z',
+  ],
+  key: [
+    'M10 24 A8 8 0 1 0 26 24 A8 8 0 1 0 10 24',
+    'M26 24 H42',
+    'M36 24 V30',
+    'M42 24 V28',
+  ],
+  tag: [
+    'M8 8 H22 L40 26 L26 40 L8 22 Z',
+    'M13 13 A2.5 2.5 0 1 0 18 13 A2.5 2.5 0 1 0 13 13',
+  ],
+  chart: [
+    'M8 8 V40 H40',
+    'M16 40 V28',
+    'M24 40 V20',
+    'M32 40 V12',
+  ],
+  clock: [
+    'M10 24 A14 14 0 1 0 38 24 A14 14 0 1 0 10 24',
+    'M24 16 V24 L31 28',
+  ],
+  dollar: [
+    'M24 10 V38',
+    'M31 16 C31 12 17 12 17 18 C17 24 31 24 31 30 C31 36 17 36 17 32',
+  ],
+  phone: [
+    'M10 12 C10 28 20 38 36 38 C38 38 40 36 40 34 V29 L32 27 L28 31 C23 28 20 25 17 20 L21 16 L19 8 H14 C12 8 10 10 10 12 Z',
+  ],
+  calendar: [
+    'M8 12 H40 V40 H8 Z',
+    'M8 20 H40',
+    'M16 8 V16',
+    'M32 8 V16',
+  ],
+  mic: [
+    'M18 14 A6 6 0 0 1 30 14 V22 A6 6 0 0 1 18 22 Z',
+    'M12 22 C12 32 36 32 36 22',
+    'M24 30 V38',
+    'M17 38 H31',
+  ],
+  compass: [
+    'M10 24 A14 14 0 1 0 38 24 A14 14 0 1 0 10 24',
+    'M30 18 L26 26 L18 30 L22 22 Z',
+  ],
+} as const;
+
+const { name, size = 44, class: className = '' } = Astro.props;
+const paths = ICONS[name];
+---
+
+<svg
+  class={`icon-sketch ${className}`}
+  width={size}
+  height={size}
+  viewBox="0 0 48 48"
+  fill="none"
+  aria-hidden="true"
+>
+  {paths.map((d, i) => (
+    <path
+      data-draw
+      data-draw-delay={(i * 0.18).toFixed(2)}
+      data-draw-duration="0.8"
+      d={d}
+      stroke="currentColor"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"></path>
+  ))}
+</svg>

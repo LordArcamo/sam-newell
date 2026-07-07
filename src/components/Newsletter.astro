@@ -1,0 +1,56 @@
+---
+import NewsletterForm from './NewsletterForm';
+---
+
+<section class="nl grain">
+  <div class="container nl-grid">
+    <div data-reveal>
+      <span class="kicker">The Friday Recap</span>
+      <h2 class="display nl-title">
+        One email a week.<br />
+        <em>Zero fluff.</em>
+      </h2>
+      <p class="nl-copy">
+        Market moves on the Wasatch Front, deals Sam is watching, and one honest
+        thought on building a life you don’t need a vacation from.
+      </p>
+    </div>
+    <div class="nl-form" data-reveal="left">
+      <NewsletterForm client:visible />
+    </div>
+  </div>
+</section>
+
+<style>
+  .nl {
+    background: var(--ink);
+    color: var(--cream);
+    padding-block: clamp(4.5rem, 9vw, 7.5rem);
+    position: relative;
+    overflow: clip;
+    border-top: 1px solid var(--cream-08);
+  }
+
+  .nl-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    align-items: center;
+  }
+
+  .nl-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 1rem;
+  }
+
+  .nl-copy {
+    color: var(--cream-60);
+    max-width: 42ch;
+  }
+
+  @media (max-width: 800px) {
+    .nl-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

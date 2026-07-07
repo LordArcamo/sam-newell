@@ -1,0 +1,193 @@
+---
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/500.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+import '@fontsource/poppins/800.css';
+import '@fontsource-variable/inter/index.css';
+import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** 'dark' when the page opens with a dark hero (header starts light-on-dark) */
+  headerTheme?: 'dark' | 'light';
+}
+
+const { title, description, headerTheme = 'dark' } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/images/sam-stats.png', Astro.site);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'RealEstateAgent',
+  name: 'Sam Newell',
+  url: Astro.site?.toString(),
+  telephone: '+1-801-995-2220',
+  image: ogImage.toString(),
+  address: { '@type': 'PostalAddress', addressLocality: 'Lehi', addressRegion: 'UT', addressCountry: 'US' },
+  areaServed: ['Salt Lake County, UT', 'Utah County, UT'],
+  memberOf: { '@type': 'Organization', name: 'KW Salt Lake City' },
+  founder: { '@type': 'Organization', name: 'Multifamily Investment Club', url: 'https://www.mficlub.com/' },
+  sameAs: [
+    'https://www.zillow.com/profile/Sam-Newell/',
+    'https://www.instagram.com/samnewellrealestate/',
+    'https://www.tiktok.com/@samnewellinvests',
+    'https://www.linkedin.com/in/sam-newell-70336642/',
+    'https://www.facebook.com/SamNewellRealtor/',
+    'https://www.youtube.com/channel/UCClcLF9jO5jqJb8LDK7VDlw',
+  ],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#131313" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <SiteHeader client:load theme={headerTheme} pathname={Astro.url.pathname} />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      import gsap from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          motionOK: '(prefers-reduced-motion: no-preference)',
+          reduceMotion: '(prefers-reduced-motion: reduce)',
+        },
+        (context) => {
+          const { reduceMotion } = context.conditions!;
+
+          if (reduceMotion) {
+            gsap.set('[data-reveal], [data-reveal-group] > *', {
+              opacity: 1,
+              clearProps: 'all',
+            });
+            return;
+          }
+
+          // Single elements — fromTo, because the .js CSS pre-hides these
+          // at opacity: 0 (a from() tween would animate 0 → 0).
+          gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
+            const dir = el.dataset.reveal || 'up';
+            const from: gsap.TweenVars = { autoAlpha: 0 };
+            if (dir === 'up') from.y = 48;
+            if (dir === 'down') from.y = -48;
+            if (dir === 'left') from.x = 64;
+            if (dir === 'right') from.x = -64;
+            if (dir === 'scale') from.scale = 0.92;
+
+            gsap.fromTo(el, from, {
+              autoAlpha: 1,
+              x: 0,
+              y: 0,
+              scale: 1,
+              duration: 1.1,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: el,
+                start: 'top 86%',
+                toggleActions: 'play none none none',
+              },
+            });
+          });
+
+          // Staggered groups
+          gsap.utils.toArray<HTMLElement>('[data-reveal-group]').forEach((group) => {
+            if (!group.children.length) return;
+            gsap.fromTo(
+              group.children,
+              { autoAlpha: 0, y: 40 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.9,
+                ease: 'power3.out',
+                stagger: 0.12,
+                scrollTrigger: {
+                  trigger: group,
+                  start: 'top 84%',
+                  toggleActions: 'play none none none',
+                },
+              }
+            );
+          });
+
+          // Animated SVG strokes: <path data-draw> draws itself in when
+          // its <svg> scrolls into view. data-draw-delay / data-draw-duration
+          // tune the timing per path.
+          gsap.utils.toArray<SVGGeometryElement>('svg [data-draw]').forEach((path) => {
+            if (typeof path.getTotalLength !== 'function') return;
+            const len = path.getTotalLength();
+            if (!len) return;
+            gsap.fromTo(
+              path,
+              { strokeDasharray: len, strokeDashoffset: len },
+              {
+                strokeDashoffset: 0,
+                duration: parseFloat(path.dataset.drawDuration || '1.4'),
+                delay: parseFloat(path.dataset.drawDelay || '0'),
+                ease: 'power2.inOut',
+                scrollTrigger: {
+                  trigger: path.closest('svg'),
+                  start: 'top 88%',
+                  toggleActions: 'play none none none',
+                },
+              }
+            );
+          });
+
+          // Parallax images: data-parallax="0.15" (drift amount)
+          gsap.utils.toArray<HTMLElement>('[data-parallax]').forEach((el) => {
+            const amount = parseFloat(el.dataset.parallax || '0.15');
+            gsap.fromTo(
+              el,
+              { yPercent: amount * 100 * -0.5 },
+              {
+                yPercent: amount * 100 * 0.5,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: el.parentElement,
+                  start: 'top bottom',
+                  end: 'bottom top',
+                  scrub: true,
+                },
+              }
+            );
+          });
+        }
+      );
+
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    </script>
+  </body>
+</html>

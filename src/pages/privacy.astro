@@ -1,0 +1,79 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+
+// Standard-practice template — have an attorney review before launch.
+const updated = 'July 7, 2026';
+
+const sections = [
+  {
+    h: 'What we collect',
+    p: 'When you use the contact or newsletter forms, we collect the information you type in: your name, email address, phone number, and message. We don’t run third-party ad trackers, and we don’t collect anything you don’t hand us.',
+  },
+  {
+    h: 'How we use it',
+    p: 'Form submissions are delivered to Sam by email so he can respond to you. Newsletter signups are used to send the Friday Recap — nothing else. We will never sell or spam your information.',
+  },
+  {
+    h: 'Who processes it',
+    p: 'Email delivery is handled by Resend (resend.com), and this site is hosted on modern cloud infrastructure. These providers process your data only to deliver the services described above.',
+  },
+  {
+    h: 'External links',
+    p: 'Listing cards link to Zillow, and podcast buttons link to Spotify and Apple Podcasts. Once you leave this site, those services’ own privacy policies apply.',
+  },
+  {
+    h: 'Your choices',
+    p: 'Every newsletter email includes an unsubscribe link. To have your information corrected or deleted, call (801) 995-2220 or send a message through the contact page and we’ll take care of it.',
+  },
+  {
+    h: 'Changes',
+    p: 'If this policy changes, the date above will be updated. Material changes will be noted on this page.',
+  },
+];
+---
+
+<Base
+  title="Privacy Policy — Sam Newell"
+  description="How samnewellrealestate.com collects, uses, and protects your information."
+>
+  <PageHero kicker="Privacy Policy" intro={`Last updated ${updated}. The short version: we only collect what you give us, we use it to reply to you, and we never sell it.`}>
+    Your info, <em>handled straight</em>
+  </PageHero>
+
+  <section class="section legal">
+    <div class="container legal-body">
+      {sections.map((s) => (
+        <div class="legal-block" data-reveal>
+          <h2>{s.h}</h2>
+          <p>{s.p}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .legal {
+    background: var(--cream);
+  }
+
+  .legal-body {
+    max-width: 44rem;
+    margin-inline: auto;
+    display: grid;
+    gap: 2.25rem;
+  }
+
+  .legal-block h2 {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  .legal-block p {
+    color: rgba(19, 19, 19, 0.72);
+    line-height: 1.7;
+  }
+</style>

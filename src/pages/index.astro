@@ -1,0 +1,1003 @@
+---
+import Base from '../layouts/Base.astro';
+import StatCounters from '../components/StatCounters';
+import TestimonialCarousel from '../components/TestimonialCarousel';
+import Newsletter from '../components/Newsletter.astro';
+import CtaBand from '../components/CtaBand.astro';
+import IconSketch from '../components/IconSketch.astro';
+import { SERVICES, LISTINGS, PARTNERS, PODCAST, ZILLOW_PROFILE, BIO_SHORT, QUOTES } from '../data/site';
+
+const marquee = [
+  'Top 1% Utah Realtor',
+  '$450M+ Closed',
+  '2,000+ Doors',
+  'CCIM Designee',
+  'KW Salt Lake City',
+  'Get Leveraged Podcast',
+  'Lehi · Wasatch Front',
+];
+---
+
+<Base
+  title="Sam Newell — Utah Real Estate Broker & Multifamily Investor"
+  description="Real talk. Real growth. Sam Newell is a top-producing Utah broker and multifamily investor — $450M+ closed, 2,000+ doors, CCIM. Buy, sell, or invest on the Wasatch Front."
+>
+  <!-- ================= HERO ================= -->
+  <section class="hero grain">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="kicker hero-kicker">Utah Broker · Investor · CCIM</span>
+        <h1 class="display hero-title" aria-label="Real Talk. Real Growth.">
+          <span class="hero-line"><span class="hero-word">Real</span> <span class="hero-word">Talk.</span></span>
+          <span class="hero-line">
+            <span class="hero-word">Real</span>{' '}
+            <span class="hero-word accent">
+              Growth.
+              <svg class="hero-squiggle" viewBox="0 0 220 14" fill="none" aria-hidden="true" preserveAspectRatio="none">
+                <path
+                  data-draw
+                  data-draw-delay="1.35"
+                  data-draw-duration="0.9"
+                  d="M3 10 C 32 3, 62 3, 88 8 S 152 14, 217 4"
+                  stroke="currentColor"
+                  stroke-width="4"
+                  stroke-linecap="round"></path>
+              </svg>
+            </span>
+          </span>
+        </h1>
+        <p class="hero-sub">
+          Honest conversations — and honest deals — that build wealth, family,
+          and a life worth staying home for. 15 years on the Wasatch Front.
+        </p>
+        <div class="hero-actions">
+          <a href="/contact/" class="btn btn--brass">Work with Sam <span class="arrow">→</span></a>
+          <a href="/about/" class="btn btn--ghost-light">Sam’s story</a>
+        </div>
+      </div>
+
+      <div class="hero-media">
+        <div class="hero-portrait-wrap">
+          <div class="hero-arch" aria-hidden="true"></div>
+          <img
+            src="/images/sam-stats.png"
+            alt="Sam Newell, Utah real estate broker"
+            class="hero-portrait"
+            fetchpriority="high"
+          />
+          <div class="hero-badge">
+            <span class="hero-badge-num">TOP 1%</span>
+            <span class="hero-badge-label">Realtor in Utah</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scrollcue" aria-hidden="true">
+      <span></span>
+    </div>
+  </section>
+
+  <!-- ================= MARQUEE ================= -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      {[0, 1].map(() => (
+        <div class="marquee-group">
+          {marquee.map((m) => (
+            <span class="marquee-item">{m} <span class="marquee-dot">◆</span></span>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- ================= WHO IS SAM ================= -->
+  <section class="who section">
+    <div class="container who-grid">
+      <div class="who-media" data-reveal="right">
+        <img src="/images/sam-hero.jpg" alt="Sam Newell with his kids, Heidi and Liam" loading="lazy" />
+        <figure class="who-quote-card" data-reveal="scale">
+          <blockquote>“{QUOTES[0]}”</blockquote>
+          <figcaption>— Sam Newell</figcaption>
+        </figure>
+      </div>
+      <div class="who-copy">
+        <span class="kicker" data-reveal>Who is Sam?</span>
+        <h2 class="display who-title" data-reveal>
+          The broker who <em>owns</em> what he preaches
+        </h2>
+        <p data-reveal>{BIO_SHORT}</p>
+        <p data-reveal>
+          He started buying real estate in 2010 — at the bottom of the recession, while
+          still a construction management student at BYU. Since then: single-family flips,
+          fourplex developments, and apartment communities across the country. When Sam
+          gives you advice, it’s the same advice he takes with his own money.
+        </p>
+        <div data-reveal>
+          <a href="/about/" class="btn btn--ink">Sam’s story <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= STATS ================= -->
+  <section class="numbers section grain">
+    <svg class="numbers-house" viewBox="0 0 200 160" fill="none" aria-hidden="true">
+      <path data-draw data-draw-duration="1.2" d="M20 80 L100 20 L180 80" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path data-draw data-draw-delay="0.35" data-draw-duration="1.2" d="M35 70 V142 H165 V70" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+      <path data-draw data-draw-delay="0.8" d="M88 142 V106 H118 V142" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+      <path data-draw data-draw-delay="1" d="M54 96 H80 V120 H54 Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"></path>
+      <path data-draw data-draw-delay="1.15" d="M138 44 V26 H153 V56" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+    </svg>
+    <div class="container">
+      <div class="numbers-head">
+        <span class="kicker" data-reveal>The track record</span>
+        <h2 class="display numbers-title" data-reveal>
+          Numbers don’t <em>flatter.</em><br />They testify.
+        </h2>
+      </div>
+      <StatCounters client:visible />
+    </div>
+  </section>
+
+  <!-- ================= SERVICES ================= -->
+  <section class="services section">
+    <div class="container">
+      <div class="services-head">
+        <span class="kicker" data-reveal>What Sam does</span>
+        <h2 class="display services-title" data-reveal>
+          Four ways to <em>build</em> with Sam
+        </h2>
+      </div>
+      <div class="services-grid" data-reveal-group>
+        {SERVICES.map((s) => (
+          <a href={s.href} class="service-card">
+            <div class="service-media">
+              <img src={s.image} alt="" loading="lazy" />
+            </div>
+            <div class="service-body">
+              <span class="service-icon"><IconSketch name={s.icon} size={26} /></span>
+              <span class="service-kicker">{s.kicker}</span>
+              <h3 class="service-title">{s.title}</h3>
+              <p class="service-blurb">{s.blurb}</p>
+              <span class="service-link">Explore <span class="arrow">→</span></span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LISTINGS ================= -->
+  <section class="listings section grain">
+    <div class="container">
+      <div class="listings-head">
+        <div>
+          <span class="kicker" data-reveal>On the market</span>
+          <h2 class="display listings-title" data-reveal>
+            Homes Sam has <em>moved</em>
+          </h2>
+        </div>
+        <a href={ZILLOW_PROFILE} target="_blank" rel="noopener" class="btn btn--ghost-light" data-reveal>
+          Search Utah listings
+        </a>
+      </div>
+      <div class="listings-grid" data-reveal-group>
+        {LISTINGS.slice(0, 6).map((l) => (
+          <a href={l.href} target="_blank" rel="noopener" class="listing-card">
+            <span class="listing-media">
+              <img src={l.image} alt={`${l.address}, ${l.city}`} loading="lazy" />
+            </span>
+            <span class="listing-body">
+              <span class="listing-address">{l.address}</span>
+              <span class="listing-city">{l.city}</span>
+              <span class="listing-cta">View on Zillow <span class="arrow">→</span></span>
+            </span>
+          </a>
+        ))}
+      </div>
+      <p class="listings-note" data-reveal>
+        Full, always-current inventory lives on Sam’s Zillow profile — updated with every deal.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= TESTIMONIALS ================= -->
+  <section class="reviews section">
+    <div class="container">
+      <div class="reviews-head">
+        <span class="kicker" data-reveal>Word on the street</span>
+        <h2 class="display reviews-title" data-reveal>
+          Clients say it <em>better</em>
+        </h2>
+      </div>
+      <div data-reveal>
+        <TestimonialCarousel client:visible />
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PODCAST ================= -->
+  <section class="pod section grain">
+    <div class="container pod-grid">
+      <div class="pod-copy">
+        <span class="kicker" data-reveal>The podcast</span>
+        <h2 class="display pod-title" data-reveal>
+          Get <em>Leveraged</em>
+        </h2>
+        <p data-reveal>{PODCAST.blurb}</p>
+        <svg class="pod-wave" viewBox="0 0 280 36" aria-hidden="true" data-reveal>
+          {Array.from({ length: 28 }).map((_, i) => (
+            <rect class="wave-bar" x={i * 10} y="0" width="5" height="36" rx="2.5" fill="currentColor"></rect>
+          ))}
+        </svg>
+        <p class="pod-meta" data-reveal>{PODCAST.episodes} · {PODCAST.rating}</p>
+        <div class="pod-actions" data-reveal-group>
+          <a href={PODCAST.spotify} target="_blank" rel="noopener" class="btn btn--brass">Listen on Spotify</a>
+          <a href={PODCAST.apple} target="_blank" rel="noopener" class="btn btn--ghost-light">Listen on Apple</a>
+        </div>
+      </div>
+      <div class="pod-media" data-reveal="left">
+        <img src="/images/sam-podcast.png" alt="The Get Leveraged podcast playing on two phones" loading="lazy" data-parallax="0.12" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PARTNERS ================= -->
+  <section class="partners section">
+    <div class="container">
+      <span class="kicker" data-reveal>Partners</span>
+      <h2 class="display partners-title" data-reveal>
+        The bench behind <em>every deal</em>
+      </h2>
+      <div class="partners-grid" data-reveal-group>
+        {PARTNERS.map((p) => (
+          <div class="partner-card">
+            <div class="partner-logo grain">
+              <img src={p.image} alt={`${p.name} logo`} loading="lazy" />
+            </div>
+            <h3 class="partner-name">{p.name}</h3>
+            <p class="partner-blurb">{p.blurb}</p>
+            {p.href && (
+              <a href={p.href} target="_blank" rel="noopener" class="partner-link">
+                Visit site <span class="arrow">→</span>
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+  <Newsletter />
+</Base>
+
+<script>
+  import gsap from 'gsap';
+
+  // Hero entrance — one orchestrated timeline
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    tl.from('.hero-kicker', { y: 24, autoAlpha: 0, duration: 0.7 }, 0.2)
+      .from(
+        '.hero-word',
+        { yPercent: 110, autoAlpha: 0, duration: 1.1, ease: 'power4.out', stagger: 0.09 },
+        0.35
+      )
+      .from('.hero-sub', { y: 30, autoAlpha: 0, duration: 0.8 }, '-=0.55')
+      .from('.hero-actions > *', { y: 24, autoAlpha: 0, duration: 0.7, stagger: 0.1, clearProps: 'all' }, '-=0.5')
+      .from('.hero-arch', { yPercent: 20, autoAlpha: 0, duration: 1.2, ease: 'power4.out' }, 0.4)
+      .from('.hero-portrait', { y: 90, autoAlpha: 0, duration: 1.3, ease: 'power4.out' }, 0.55)
+      .from('.hero-badge', { scale: 0.8, autoAlpha: 0, duration: 0.8, ease: 'back.out(1.7)' }, '-=0.5')
+      .from('.hero-scrollcue', { autoAlpha: 0, duration: 0.8 }, '-=0.4');
+
+    // Podcast waveform — bars pulse like live audio
+    gsap.utils.toArray<SVGRectElement>('.wave-bar').forEach((bar, i) => {
+      gsap.set(bar, { transformOrigin: 'center bottom', scaleY: 0.25 });
+      gsap.to(bar, {
+        scaleY: () => 0.3 + Math.random() * 0.7,
+        duration: 0.45 + Math.random() * 0.5,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: i * 0.04,
+      });
+    });
+  }
+</script>
+
+<style>
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    background:
+      radial-gradient(90rem 60rem at 85% -10%, rgba(90, 90, 90, 0.55), transparent 60%),
+      radial-gradient(60rem 40rem at -10% 110%, rgba(140, 140, 140, 0.14), transparent 60%),
+      linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+    color: var(--cream);
+    overflow: clip;
+    padding-block: 8rem 4rem;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-title {
+    font-size: var(--step-5);
+    margin-top: 1.75rem;
+  }
+
+  .hero-line {
+    display: block;
+    overflow: clip;
+    padding-bottom: 0.22em;
+  }
+
+  .hero-word {
+    display: inline-block;
+  }
+
+  .hero-word.accent {
+    position: relative;
+  }
+
+  .hero-squiggle {
+    position: absolute;
+    left: 2%;
+    bottom: -0.14em;
+    width: 96%;
+    height: 0.12em;
+    color: var(--bone);
+    overflow: visible;
+  }
+
+  .hero-sub {
+    margin-top: 1.9rem;
+    max-width: 42ch;
+    font-size: var(--step-1);
+    line-height: 1.55;
+    color: var(--cream-60);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .hero-media {
+    display: flex;
+    justify-content: center;
+    align-self: end;
+  }
+
+  .hero-portrait-wrap {
+    position: relative;
+    width: min(26rem, 100%);
+  }
+
+  .hero-arch {
+    position: absolute;
+    inset: 12% 0 0 0;
+    background: linear-gradient(180deg, var(--navy-soft) 0%, var(--navy) 100%);
+    border: 1px solid rgba(140, 140, 140, 0.35);
+    border-radius: 999px 999px 1.5rem 1.5rem;
+  }
+
+  .hero-portrait {
+    position: relative;
+    z-index: 1;
+    width: 92%;
+    margin-inline: auto;
+    filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.45));
+  }
+
+  .hero-badge {
+    position: absolute;
+    z-index: 2;
+    left: -1.25rem;
+    bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    background: var(--cream);
+    color: var(--ink);
+    border-radius: 0.9rem;
+    padding: 0.9rem 1.3rem;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.55);
+  }
+
+  .hero-badge-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--navy);
+  }
+
+  .hero-badge-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .hero-scrollcue {
+    position: absolute;
+    left: 50%;
+    bottom: 2rem;
+    translate: -50% 0;
+    width: 1px;
+    height: 3.5rem;
+    background: var(--cream-20);
+    overflow: hidden;
+  }
+
+  .hero-scrollcue span {
+    position: absolute;
+    inset: 0;
+    background: var(--bone);
+    animation: cue 1.8s var(--ease-out-expo) infinite;
+  }
+
+  @keyframes cue {
+    0% { transform: translateY(-100%); }
+    60%, 100% { transform: translateY(100%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-scrollcue span { animation: none; }
+  }
+
+  /* ---------- Marquee ---------- */
+  .marquee {
+    background: var(--bone);
+    color: var(--ink);
+    overflow: clip;
+    padding-block: 0.9rem;
+    border-block: 1px solid rgba(19, 19, 19, 0.25);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+  }
+
+  .marquee-group {
+    display: flex;
+  }
+
+  .marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.6rem;
+    padding-inline: 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .marquee-dot {
+    font-size: 0.5rem;
+    opacity: 0.6;
+  }
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; }
+  }
+
+  /* ---------- Who ---------- */
+  .who {
+    background: var(--cream);
+  }
+
+  .who-grid {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: clamp(2.5rem, 6vw, 5.5rem);
+    align-items: center;
+  }
+
+  .who-media {
+    position: relative;
+  }
+
+  .who-media > img {
+    border-radius: 1.25rem;
+    box-shadow: 0 40px 70px -30px rgba(19, 19, 19, 0.35);
+  }
+
+  .who-quote-card {
+    position: absolute;
+    right: -1.5rem;
+    bottom: -2rem;
+    max-width: 19rem;
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: 1rem;
+    padding: 1.5rem 1.6rem;
+    box-shadow: 0 30px 50px -20px rgba(19, 19, 19, 0.5);
+  }
+
+  .who-quote-card blockquote {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1.4;
+  }
+
+  .who-quote-card figcaption {
+    margin-top: 0.75rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brass-bright);
+  }
+
+  .who-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 1.5rem;
+  }
+
+  .who-copy p {
+    margin-bottom: 1.25rem;
+    color: rgba(19, 19, 19, 0.75);
+  }
+
+  .who-copy .btn {
+    margin-top: 0.75rem;
+  }
+
+  /* ---------- Stats ---------- */
+  .numbers {
+    background: linear-gradient(160deg, var(--ink) 0%, var(--navy) 130%);
+    color: var(--cream);
+    overflow: clip;
+    position: relative;
+  }
+
+  .numbers-house {
+    position: absolute;
+    right: clamp(1rem, 6vw, 6rem);
+    top: 50%;
+    translate: 0 -50%;
+    width: clamp(10rem, 22vw, 18rem);
+    color: var(--bone);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  @media (max-width: 960px) {
+    .numbers-house {
+      display: none;
+    }
+  }
+
+  .numbers-head {
+    margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .numbers-title {
+    font-size: var(--step-3);
+    margin-top: 1.25rem;
+  }
+
+  /* ---------- Services ---------- */
+  .services {
+    background: var(--cream);
+  }
+
+  .services-head {
+    margin-bottom: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .services-title {
+    font-size: var(--step-3);
+    margin-top: 1.25rem;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .service-card {
+    display: grid;
+    grid-template-rows: 14rem auto;
+    text-decoration: none;
+    color: inherit;
+    background: var(--white);
+    border: 1px solid rgba(19, 19, 19, 0.08);
+    border-radius: 1.25rem;
+    overflow: clip;
+    transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+  }
+
+  .service-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 35px 60px -25px rgba(19, 19, 19, 0.3);
+  }
+
+  .service-media {
+    overflow: clip;
+  }
+
+  .service-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+    transition: transform 0.8s var(--ease-out-expo);
+  }
+
+  .service-card:hover .service-media img {
+    transform: scale(1.06);
+  }
+
+  .service-body {
+    padding: 1.75rem 1.9rem 2rem;
+    position: relative;
+  }
+
+  .service-icon {
+    position: absolute;
+    top: -1.75rem;
+    right: 1.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    display: grid;
+    place-items: center;
+    background: var(--ink);
+    color: var(--bone);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    box-shadow: 0 12px 24px -8px rgba(19, 19, 19, 0.5);
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+
+  .service-card:hover .service-icon {
+    transform: translateY(-4px) rotate(-6deg);
+  }
+
+  .service-kicker {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .service-title {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 600;
+    margin-block: 0.6rem 0.75rem;
+  }
+
+  .service-blurb {
+    font-size: 0.95rem;
+    color: rgba(19, 19, 19, 0.65);
+    line-height: 1.6;
+  }
+
+  .service-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .service-card:hover .service-link {
+    color: var(--brass);
+  }
+
+  .service-link .arrow {
+    transition: transform 0.35s var(--ease-out-expo);
+  }
+
+  .service-card:hover .service-link .arrow {
+    transform: translateX(5px);
+  }
+
+  /* ---------- Listings ---------- */
+  .listings {
+    background: var(--ink-2);
+    color: var(--cream);
+    overflow: clip;
+  }
+
+  .listings-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .listings-title {
+    font-size: var(--step-3);
+    margin-top: 1.25rem;
+  }
+
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .listing-card {
+    display: grid;
+    grid-template-rows: 11rem auto;
+    text-decoration: none;
+    color: var(--cream);
+    background: var(--cream-08);
+    border: 1px solid var(--cream-08);
+    border-radius: 1rem;
+    overflow: clip;
+    transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.5s var(--ease-out-expo);
+  }
+
+  .listing-card:hover {
+    border-color: rgba(140, 140, 140, 0.5);
+    background: rgba(140, 140, 140, 0.08);
+    transform: translateY(-5px);
+  }
+
+  .listing-media {
+    overflow: clip;
+  }
+
+  .listing-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s var(--ease-out-expo);
+  }
+
+  .listing-card:hover .listing-media img {
+    transform: scale(1.06);
+  }
+
+  .listing-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.4rem 1.6rem 1.6rem;
+  }
+
+  .listing-address {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+
+  .listing-city {
+    font-size: 0.85rem;
+    color: var(--cream-60);
+    letter-spacing: 0.04em;
+  }
+
+  .listing-cta {
+    margin-top: 1.1rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--brass-bright);
+  }
+
+  .listings-note {
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: var(--cream-60);
+  }
+
+  /* ---------- Reviews ---------- */
+  .reviews {
+    background: var(--cream-2);
+  }
+
+  .reviews-head {
+    text-align: center;
+    margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .reviews-title {
+    font-size: var(--step-3);
+    margin-top: 1.25rem;
+  }
+
+  .reviews-head .kicker::before {
+    display: none;
+  }
+
+  /* ---------- Podcast ---------- */
+  .pod {
+    background:
+      radial-gradient(70rem 45rem at 110% 10%, rgba(90, 90, 90, 0.5), transparent 55%),
+      var(--ink);
+    color: var(--cream);
+    overflow: clip;
+  }
+
+  .pod-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    align-items: center;
+  }
+
+  .pod-title {
+    font-size: var(--step-4);
+    margin-block: 1.25rem 1.25rem;
+  }
+
+  .pod-copy p {
+    color: var(--cream-60);
+    max-width: 46ch;
+  }
+
+  .pod-wave {
+    width: min(20rem, 80%);
+    height: 2.25rem;
+    margin-top: 1.5rem;
+    color: var(--bone);
+    opacity: 0.85;
+  }
+
+  .pod-meta {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass-bright) !important;
+  }
+
+  .pod-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  /* ---------- Partners ---------- */
+  .partners {
+    background: var(--cream);
+  }
+
+  .partners-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 0;
+  }
+
+  .partners-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .partner-card {
+    background: var(--white);
+    border: 1px solid rgba(19, 19, 19, 0.08);
+    border-radius: 1.1rem;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    overflow: clip;
+    transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+  }
+
+  .partner-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 50px -25px rgba(19, 19, 19, 0.25);
+  }
+
+  /* Logos are white-on-transparent — they need a dark band to be visible */
+  .partner-logo {
+    position: relative;
+    margin: -2rem -2rem 1.5rem;
+    padding: 1.9rem 2rem;
+    min-height: 6.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(150deg, var(--ink) 0%, var(--navy-soft) 130%);
+  }
+
+  .partner-logo img {
+    max-height: 3.25rem;
+    width: auto;
+    max-width: min(14rem, 80%);
+    object-fit: contain;
+  }
+
+  .partner-name {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+
+  .partner-blurb {
+    font-size: 0.92rem;
+    color: rgba(19, 19, 19, 0.65);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .partner-link {
+    margin-top: 1.25rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--brass);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 960px) {
+    .hero-grid,
+    .who-grid,
+    .pod-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .hero {
+      padding-top: 7rem;
+    }
+
+    .hero-media {
+      order: -1;
+    }
+
+    .hero-portrait-wrap {
+      width: min(20rem, 80%);
+    }
+
+    .listings-grid,
+    .partners-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .services-grid,
+    .listings-grid,
+    .partners-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .who-quote-card {
+      position: static;
+      margin-top: 1.25rem;
+      max-width: none;
+    }
+  }
+</style>

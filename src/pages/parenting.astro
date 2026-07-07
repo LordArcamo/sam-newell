@@ -1,0 +1,168 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Newsletter from '../components/Newsletter.astro';
+import PageHero from '../components/PageHero.astro';
+import { PODCAST, QUOTES } from '../data/site';
+
+const beliefs = [
+  {
+    title: 'Presence beats presents',
+    body: 'The portfolio funds the free Saturdays — not the other way around. Sam builds businesses that hold themselves so the family time doesn’t have to be scheduled around them.',
+  },
+  {
+    title: 'Kids learn what they watch',
+    body: 'Work ethic, honesty in a deal, how you treat people when it costs you — Heidi and Liam see all of it. Parenting is mostly modeling, with commentary.',
+  },
+  {
+    title: 'Strong homes are framed early',
+    body: 'Like a house, a family is only as strong as what’s behind the drywall: routines, dinner tables, hard conversations had early and kindly.',
+  },
+];
+---
+
+<Base
+  title="Parenting & Family — Sam Newell"
+  description="Building strong foundations, one family at a time. Sam Newell on fatherhood, presence, and raising kids while building businesses — real talk, real growth."
+>
+  <PageHero
+    kicker="Real talk · Real growth"
+    intro="Husband to Lauren. Dad to Heidi and Liam. The honest conversation about building a strong home — the kind that has nothing to do with square footage."
+    image="/images/parenting-1.jpg"
+    imageAlt="Family time outdoors"
+  >
+    Strong foundations, <em>one family</em> at a time
+    <Fragment slot="actions">
+      <a href="/contact/" class="btn btn--brass">Chat with Sam <span class="arrow">→</span></a>
+    </Fragment>
+  </PageHero>
+
+  <!-- Beliefs -->
+  <section class="section beliefs">
+    <div class="container">
+      <span class="kicker" data-reveal>Parenting with purpose</span>
+      <h2 class="display beliefs-title" data-reveal>
+        What Sam is <em>actually</em> building
+      </h2>
+      <div class="beliefs-grid" data-reveal-group>
+        {beliefs.map((b, i) => (
+          <article class="belief">
+            <span class="belief-num display">0{i + 1}</span>
+            <h3 class="belief-title">{b.title}</h3>
+            <p>{b.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Photo + quote -->
+  <section class="section fam2">
+    <div class="container fam2-grid">
+      <div class="fam2-media" data-reveal="right">
+        <img src="/images/parenting-2.jpg" alt="Sam Newell family moment" loading="lazy" data-parallax="0.1" />
+      </div>
+      <div class="fam2-copy">
+        <span class="kicker" data-reveal>Want to build a stronger home?</span>
+        <h2 class="display fam2-title" data-reveal>
+          It starts with <em>showing up</em>
+        </h2>
+        <p data-reveal>
+          Sam talks about fatherhood the same way he talks about deals: honestly,
+          including the parts that didn’t go to plan. On the {PODCAST.name} podcast and
+          in his weekly recap, the family threads run right alongside the market ones —
+          because for Sam they were never separate.
+        </p>
+        <blockquote class="fam2-quote" data-reveal>“{QUOTES[0]}”</blockquote>
+        <div data-reveal>
+          <a href="/contact/" class="btn btn--ink">Chat with Sam <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title="Build the home" em="behind the house." copy="Questions about balancing the business and the family? Sam’s been asked worse." />
+  <Newsletter />
+</Base>
+
+<style>
+  .beliefs {
+    background: var(--cream);
+  }
+
+  .beliefs-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 0;
+  }
+
+  .beliefs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .belief {
+    border-top: 2px solid var(--brass);
+    padding-top: 1.5rem;
+  }
+
+  .belief-num {
+    font-size: 0.95rem;
+    color: var(--brass);
+  }
+
+  .belief-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-block: 0.4rem 0.75rem;
+  }
+
+  .belief p {
+    color: rgba(19, 19, 19, 0.7);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .fam2 {
+    background: var(--cream-2);
+  }
+
+  .fam2-grid {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    align-items: center;
+  }
+
+  .fam2-media img {
+    border-radius: 1.25rem;
+    box-shadow: 0 40px 70px -30px rgba(19, 19, 19, 0.35);
+  }
+
+  .fam2-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 1.5rem;
+  }
+
+  .fam2-copy p {
+    color: rgba(19, 19, 19, 0.75);
+    margin-bottom: 1.5rem;
+  }
+
+  .fam2-quote {
+    margin-bottom: 2rem;
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--brass);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+  }
+
+  @media (max-width: 900px) {
+    .beliefs-grid,
+    .fam2-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

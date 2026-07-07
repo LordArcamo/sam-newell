@@ -1,0 +1,185 @@
+---
+import { CONTACT, SOCIALS, PODCAST } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer grain">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand" data-reveal>
+        <img src="/images/logo.svg" alt="Sam Newell logo" class="footer-logo" width="150" loading="lazy" />
+        <p class="footer-tag display">Real talk.<br /><em>Real growth.</em></p>
+      </div>
+
+      <nav class="footer-col" aria-label="Footer — pages" data-reveal>
+        <h3 class="footer-heading">Explore</h3>
+        <a href="/">Home</a>
+        <a href="/about/">About Sam</a>
+        <a href="/services/">Services</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+
+      <nav class="footer-col" aria-label="Footer — services" data-reveal>
+        <h3 class="footer-heading">Services</h3>
+        <a href="/real-estate/">Utah Real Estate</a>
+        <a href="/multi-investments/">Multifamily Investments</a>
+        <a href="/framing/">Framing</a>
+        <a href="/parenting/">Parenting & Family</a>
+      </nav>
+
+      <div class="footer-col" data-reveal>
+        <h3 class="footer-heading">Reach Sam</h3>
+        <a href={CONTACT.phoneHref}>{CONTACT.phone}</a>
+        <a href={CONTACT.calendly} target="_blank" rel="noopener">Book a call</a>
+        <a href={PODCAST.apple} target="_blank" rel="noopener">Get Leveraged podcast</a>
+        <span class="footer-loc">{CONTACT.base} · Serving {CONTACT.serving}</span>
+      </div>
+    </div>
+
+    <div class="footer-socials" data-reveal-group>
+      {SOCIALS.map((s) => (
+        <a href={s.href} target="_blank" rel="noopener" class="footer-social">
+          {s.label}
+        </a>
+      ))}
+    </div>
+
+    <div class="footer-bottom">
+      <span>© {year} Sam Newell · All rights reserved</span>
+      <span class="footer-legal">
+        <a href="/terms/">Terms</a>
+        <a href="/privacy/">Privacy</a>
+      </span>
+      <span>Broker · KW Salt Lake City · CCIM</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--ink);
+    color: var(--cream);
+    padding-block: clamp(4rem, 8vw, 6.5rem) 2rem;
+    position: relative;
+    overflow: clip;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-bottom: 3.5rem;
+    border-bottom: 1px solid var(--cream-08);
+  }
+
+  .footer-logo {
+    height: 44px;
+    width: auto;
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-tag {
+    font-size: var(--step-2);
+    color: var(--cream);
+  }
+
+  .footer-heading {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 1.2rem;
+  }
+
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .footer-col a {
+    color: var(--cream-60);
+    text-decoration: none;
+    font-size: 0.95rem;
+    width: fit-content;
+    transition: color 0.2s ease, transform 0.3s var(--ease-out-expo);
+  }
+
+  .footer-col a:hover {
+    color: var(--brass-bright);
+    transform: translateX(4px);
+  }
+
+  .footer-loc {
+    color: var(--cream-60);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .footer-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-block: 2.25rem;
+  }
+
+  .footer-social {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--cream);
+    border: 1px solid var(--cream-20);
+    border-radius: 999px;
+    padding: 0.55rem 1.2rem;
+    transition: border-color 0.25s ease, color 0.25s ease, transform 0.35s var(--ease-out-expo);
+  }
+
+  .footer-social:hover {
+    border-color: var(--brass);
+    color: var(--brass-bright);
+    transform: translateY(-3px);
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--cream-08);
+    font-size: 0.8rem;
+    color: var(--cream-60);
+  }
+
+  .footer-legal {
+    display: flex;
+    gap: 1.25rem;
+  }
+
+  .footer-legal a {
+    color: var(--cream-60);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .footer-legal a:hover {
+    color: var(--brass-bright);
+  }
+
+  @media (max-width: 900px) {
+    .footer-top {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .footer-top {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

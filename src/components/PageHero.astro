@@ -1,0 +1,90 @@
+---
+interface Props {
+  kicker: string;
+  intro?: string;
+  image?: string;
+  imageAlt?: string;
+}
+
+const { kicker, intro, image, imageAlt = '' } = Astro.props;
+const hasActions = Astro.slots.has('actions');
+---
+
+<section class={`ph grain ${image ? 'ph--split' : ''}`}>
+  <div class="container ph-grid">
+    <div class="ph-copy">
+      <span class="kicker" data-reveal>{kicker}</span>
+      <h1 class="display ph-title" data-reveal><slot /></h1>
+      {intro && <p class="ph-intro" data-reveal>{intro}</p>}
+      {
+        hasActions && (
+          <div class="ph-actions" data-reveal-group>
+            <slot name="actions" />
+          </div>
+        )
+      }
+    </div>
+    {
+      image && (
+        <div class="ph-media" data-reveal="left">
+          <img src={image} alt={imageAlt} loading="eager" data-parallax="0.08" />
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .ph {
+    background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+    color: var(--cream);
+    padding-block: clamp(9rem, 16vw, 13rem) clamp(4rem, 8vw, 6rem);
+    position: relative;
+    overflow: clip;
+  }
+
+  .ph-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: end;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ph--split .ph-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+
+  .ph-title {
+    font-size: var(--step-5);
+    margin-top: 1.5rem;
+    max-width: 14ch;
+  }
+
+  .ph-intro {
+    margin-top: 1.75rem;
+    max-width: 46ch;
+    font-size: var(--step-1);
+    line-height: 1.55;
+    color: var(--cream-60);
+  }
+
+  .ph-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2.25rem;
+  }
+
+  .ph-media img {
+    border-radius: 1.25rem;
+    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.6);
+  }
+
+  @media (max-width: 900px) {
+    .ph--split .ph-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

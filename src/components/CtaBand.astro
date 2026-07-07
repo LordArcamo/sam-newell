@@ -1,0 +1,55 @@
+---
+import { CONTACT } from '../data/site';
+
+interface Props {
+  title?: string;
+  em?: string;
+  copy?: string;
+}
+
+const {
+  title = 'Ready when',
+  em = 'you are.',
+  copy = `One call. No pressure, no script — just a straight answer about your next move on the Wasatch Front.`,
+} = Astro.props;
+---
+
+<section class="cta section">
+  <div class="container cta-inner">
+    <h2 class="display cta-title" data-reveal>
+      {title} <em>{em}</em>
+    </h2>
+    <p class="cta-copy" data-reveal>{copy}</p>
+    <div class="cta-actions" data-reveal-group>
+      <a href="/contact/" class="btn btn--ink">Work with Sam <span class="arrow">→</span></a>
+      <a href={CONTACT.phoneHref} class="btn btn--ghost-dark">{CONTACT.phone}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    background: var(--cream-2);
+    text-align: center;
+  }
+
+  .cta-title {
+    font-size: var(--step-4);
+  }
+
+  .cta-copy {
+    max-width: 44ch;
+    margin: 1.5rem auto 0;
+    color: rgba(19, 19, 19, 0.65);
+    font-size: var(--step-1);
+    line-height: 1.55;
+  }
+
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+</style>

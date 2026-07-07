@@ -1,0 +1,291 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Newsletter from '../components/Newsletter.astro';
+import PageHero from '../components/PageHero.astro';
+import IconSketch from '../components/IconSketch.astro';
+import { PODCAST } from '../data/site';
+
+const how = [
+  {
+    step: 'We buy',
+    icon: 'tag' as const,
+    body: 'Value-add multifamily properties across the US — assets with fixable problems and durable demand, bought below replacement cost.',
+  },
+  {
+    step: 'We improve',
+    icon: 'hammer' as const,
+    body: 'Construction-managed renovations that raise rents the honest way: better units, better operations, better tenant experience.',
+  },
+  {
+    step: 'We hold',
+    icon: 'clock' as const,
+    body: 'Long-term holds for cash flow and appreciation — not quick flips. Wealth compounds when you stop interrupting it.',
+  },
+  {
+    step: 'We distribute',
+    icon: 'dollar' as const,
+    body: 'Investors share in the cash flow and the upside, with direct access to the people running the deal — no black box.',
+  },
+];
+
+const pillars = [
+  {
+    title: 'Personal investor relationships',
+    body: 'MFI investors get a personalized relationship and direct access to the club’s principals and managers. You invest with people, not a portal.',
+  },
+  {
+    title: 'Skin in the game',
+    body: 'Sam invests in the same deals he offers — the underwriting you see is the underwriting he trusts with his own capital.',
+  },
+  {
+    title: 'CCIM-grade underwriting',
+    body: 'Every acquisition is vetted with the discipline of a CCIM designee and 15 years of cycle experience — including buying at the bottom of one.',
+  },
+];
+---
+
+<Base
+  title="Multifamily Investments — MFI Club by Sam Newell"
+  description="Multifamily Investment Club: a private real estate firm founded by Sam Newell in 2018 — 2,000+ doors, value-add acquisitions across the US, held long-term for cash flow and appreciation."
+>
+  <PageHero
+    kicker="Multifamily Investment Club · Est. 2018"
+    intro="A privately held real estate investment firm buying value-add properties across the US — held long term for cash flow and appreciation. 2,000+ doors and counting."
+    image="/images/multi-invest.jpg"
+    imageAlt="Multifamily apartment community"
+  >
+    High returns through <em>held</em> real estate
+    <Fragment slot="actions">
+      <a href="https://www.mficlub.com/" target="_blank" rel="noopener" class="btn btn--brass">Visit MFI Club <span class="arrow">→</span></a>
+      <a href="/contact/" class="btn btn--ghost-light">Talk to Sam</a>
+    </Fragment>
+  </PageHero>
+
+  <!-- Big numbers -->
+  <section class="mi-band">
+    <div class="container mi-band-row" data-reveal-group>
+      <div class="mi-stat">
+        <span class="mi-stat-num display">2,000+</span>
+        <span class="mi-stat-label">Doors owned & managed</span>
+      </div>
+      <div class="mi-stat">
+        <span class="mi-stat-num display">~$300M</span>
+        <span class="mi-stat-label">Portfolio value</span>
+      </div>
+      <div class="mi-stat">
+        <span class="mi-stat-num display">2018</span>
+        <span class="mi-stat-label">Founded in Lehi, Utah</span>
+      </div>
+      <div class="mi-stat">
+        <span class="mi-stat-num display">US-wide</span>
+        <span class="mi-stat-label">Value-add acquisitions</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section how">
+    <div class="container">
+      <span class="kicker" data-reveal>How it works</span>
+      <h2 class="display how-title" data-reveal>Four verbs, <em>one flywheel</em></h2>
+      <div class="how-grid">
+        {how.map((h, i) => (
+          <article class="how-card" data-reveal>
+            <span class="how-head">
+              <span class="how-num display">0{i + 1}</span>
+              <span class="how-icon"><IconSketch name={h.icon} size={26} /></span>
+            </span>
+            <h3 class="how-step display">{h.step}</h3>
+            <p>{h.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Pillars -->
+  <section class="section pillars grain">
+    <div class="container">
+      <span class="kicker" data-reveal>Why investors stay</span>
+      <h2 class="display pillars-title" data-reveal>No black box, <em>no tourists</em></h2>
+      <div class="pillars-grid" data-reveal-group>
+        {pillars.map((p) => (
+          <article class="pillar">
+            <h3 class="pillar-title">{p.title}</h3>
+            <p>{p.body}</p>
+          </article>
+        ))}
+      </div>
+      <p class="pillars-note" data-reveal>
+        Interested in passive multifamily income? Start with the
+        <a href={PODCAST.spotify} target="_blank" rel="noopener"> Get Leveraged podcast</a> —
+        then bring your questions.
+      </p>
+    </div>
+  </section>
+
+  <CtaBand title="Invest alongside," em="not underneath." copy="Ask Sam what MFI Club is buying right now — and why." />
+  <Newsletter />
+</Base>
+
+<style>
+  .mi-band {
+    background: var(--bone);
+    color: var(--ink);
+    padding-block: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .mi-band-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+
+  .mi-stat-num {
+    display: block;
+    font-size: var(--step-3);
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .mi-stat-label {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+
+  .how {
+    background: var(--cream);
+  }
+
+  .how-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 0;
+  }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    counter-reset: step;
+  }
+
+  .how-card {
+    background: var(--white);
+    border: 1px solid rgba(19, 19, 19, 0.08);
+    border-radius: 1.1rem;
+    padding: 2rem 1.75rem;
+    transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+  }
+
+  .how-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 30px 50px -25px rgba(19, 19, 19, 0.25);
+  }
+
+  .how-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+
+  .how-num {
+    font-size: 0.95rem;
+    color: var(--brass);
+  }
+
+  .how-icon {
+    width: 3rem;
+    height: 3rem;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    border: 1.5px solid rgba(19, 19, 19, 0.2);
+    border-radius: 50%;
+  }
+
+  .how-step {
+    font-size: var(--step-2);
+    margin-block: 0.4rem 0.75rem;
+  }
+
+  .how-card p {
+    font-size: 0.92rem;
+    color: rgba(19, 19, 19, 0.7);
+    line-height: 1.6;
+  }
+
+  .pillars {
+    background: var(--ink);
+    color: var(--cream);
+    position: relative;
+    overflow: clip;
+  }
+
+  .pillars-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 0;
+  }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .pillar {
+    border-top: 1px solid var(--cream-20);
+    padding-top: 1.5rem;
+  }
+
+  .pillar-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--brass-bright);
+  }
+
+  .pillar p {
+    color: var(--cream-60);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .pillars-note {
+    margin-top: 3rem;
+    color: var(--cream-60);
+    font-size: 0.92rem;
+  }
+
+  .pillars-note a {
+    color: var(--brass-bright);
+    font-weight: 600;
+  }
+
+  @media (max-width: 960px) {
+    .mi-band-row,
+    .how-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .pillars-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .mi-band-row,
+    .how-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,178 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import ContactForm from '../components/ContactForm';
+import IconSketch from '../components/IconSketch.astro';
+import Newsletter from '../components/Newsletter.astro';
+import { CONTACT, SOCIALS, PODCAST } from '../data/site';
+---
+
+<Base
+  title="Contact Sam Newell — Utah Real Estate & Investing"
+  description="Get in touch with Sam Newell — Utah real estate broker and multifamily investor. Call (801) 995-2220, book a call, or send a message."
+>
+  <PageHero
+    kicker="Get in touch"
+    intro="Buying, selling, investing, framing, or just a hard question about any of them — start here. Straight answers, usually same-day."
+  >
+    Say the thing <em>out loud</em>
+    <Fragment slot="actions">
+      <a href={CONTACT.phoneHref} class="btn btn--brass">{CONTACT.phone}</a>
+      <a href={CONTACT.calendly} target="_blank" rel="noopener" class="btn btn--ghost-light">Book a call</a>
+    </Fragment>
+  </PageHero>
+
+  <section class="section ct">
+    <div class="container ct-grid">
+      <div class="ct-form" data-reveal>
+        <h2 class="display ct-form-title">Send a <em>message</em></h2>
+        <ContactForm client:visible />
+      </div>
+
+      <aside class="ct-side">
+        <div class="ct-card" data-reveal>
+          <span class="ct-card-icon"><IconSketch name="phone" size={24} /></span>
+          <h3 class="ct-card-title">Direct line</h3>
+          <a href={CONTACT.phoneHref} class="ct-phone display">{CONTACT.phone}</a>
+          <p class="ct-card-note">Based in {CONTACT.base} · Serving {CONTACT.serving}</p>
+          <a href={CONTACT.calendly} target="_blank" rel="noopener" class="btn btn--ink ct-cal">
+            Book on Calendly <span class="arrow">→</span>
+          </a>
+        </div>
+
+        <div class="ct-card" data-reveal>
+          <span class="ct-card-icon"><IconSketch name="mic" size={24} /></span>
+          <h3 class="ct-card-title">While you wait</h3>
+          <p class="ct-card-note">
+            {PODCAST.episodes} of {PODCAST.name} — Sam’s take on multifamily, money,
+            and doing both honestly.
+          </p>
+          <div class="ct-pod-links">
+            <a href={PODCAST.spotify} target="_blank" rel="noopener">Spotify</a>
+            <a href={PODCAST.apple} target="_blank" rel="noopener">Apple Podcasts</a>
+          </div>
+        </div>
+
+        <div class="ct-card" data-reveal>
+          <span class="ct-card-icon"><IconSketch name="compass" size={24} /></span>
+          <h3 class="ct-card-title">Find Sam elsewhere</h3>
+          <div class="ct-socials">
+            {SOCIALS.map((s) => (
+              <a href={s.href} target="_blank" rel="noopener">{s.label}</a>
+            ))}
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <Newsletter />
+</Base>
+
+<style>
+  .ct {
+    background: var(--cream);
+  }
+
+  .ct-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 0.8fr;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    align-items: start;
+  }
+
+  .ct-form-title {
+    font-size: var(--step-3);
+    margin-bottom: 2rem;
+  }
+
+  .ct-side {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .ct-card {
+    background: var(--white);
+    border: 1px solid rgba(19, 19, 19, 0.08);
+    border-radius: 1.1rem;
+    padding: 1.9rem;
+  }
+
+  .ct-card-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    color: var(--ink);
+    border: 1.5px solid rgba(19, 19, 19, 0.2);
+    border-radius: 50%;
+    margin-bottom: 0.9rem;
+  }
+
+  .ct-card-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 0.9rem;
+  }
+
+  .ct-phone {
+    display: inline-block;
+    font-size: var(--step-2);
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .ct-phone:hover {
+    color: var(--navy-soft);
+  }
+
+  .ct-card-note {
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    color: rgba(19, 19, 19, 0.6);
+    line-height: 1.6;
+  }
+
+  .ct-cal {
+    margin-top: 1.25rem;
+  }
+
+  .ct-pod-links,
+  .ct-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+
+  .ct-pod-links a,
+  .ct-socials a {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    border: 1px solid rgba(19, 19, 19, 0.15);
+    border-radius: 999px;
+    padding: 0.5rem 1.05rem;
+    transition: border-color 0.25s ease, color 0.25s ease, transform 0.3s var(--ease-out-expo);
+  }
+
+  .ct-pod-links a:hover,
+  .ct-socials a:hover {
+    border-color: var(--brass);
+    color: var(--brass);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 900px) {
+    .ct-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

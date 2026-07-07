@@ -1,0 +1,169 @@
+/* ---------- Contact form ---------- */
+
+.cf {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.cf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.4rem;
+}
+
+.cf-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.cf-field span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.cf-field input,
+.cf-field select,
+.cf-field textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid rgba(19, 19, 19, 0.14);
+  border-radius: 0.6rem;
+  padding: 0.85rem 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cf-field input:focus,
+.cf-field select:focus,
+.cf-field textarea:focus {
+  outline: none;
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(140, 140, 140, 0.18);
+}
+
+.cf-field textarea {
+  resize: vertical;
+}
+
+.cf .btn {
+  justify-self: start;
+  border: none;
+}
+
+.cf-done {
+  background: var(--white);
+  border: 1px solid rgba(19, 19, 19, 0.08);
+  border-radius: 1rem;
+  padding: 2.5rem;
+}
+
+.cf-done-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--brass);
+  color: var(--ink);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+}
+
+.cf-done-title {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.cf-done a {
+  color: var(--brick);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .cf-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Newsletter ---------- */
+
+.nf {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr auto;
+  gap: 0.9rem;
+  align-items: center;
+}
+
+.nf input {
+  font: inherit;
+  color: var(--cream);
+  background: var(--cream-08);
+  border: 1px solid var(--cream-20);
+  border-radius: 999px;
+  padding: 0.85rem 1.3rem;
+  transition: border-color 0.2s ease;
+}
+
+.nf input::placeholder {
+  color: var(--cream-60);
+}
+
+.nf input:focus {
+  outline: none;
+  border-color: var(--brass);
+}
+
+.nf .btn {
+  border: none;
+  white-space: nowrap;
+}
+
+.nf-note {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  color: var(--cream-60);
+  letter-spacing: 0.04em;
+}
+
+.nf-done {
+  color: var(--brass-bright);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .nf {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Honeypot — visually gone, still in the form for bots */
+.cf-hp {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  padding: 0;
+}
+
+.cf-error {
+  color: #8f1f1f;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.cf .btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.nf-note--error {
+  color: #ffb4b4;
+}

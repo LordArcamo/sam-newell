@@ -1,0 +1,233 @@
+/* ============================================
+   SAM NEWELL — Modern Personal Brand
+   Deep ink navy · warm bone cream · brass
+   Poppins (display) · Inter (body)
+   ============================================ */
+
+:root {
+  /* Palette — original site: #131313 / #FFFFFF / #D9D9D9 monochrome */
+  --ink: #131313;
+  --ink-2: #1b1b1b;
+  --navy: #232323;
+  --navy-soft: #2e2e2e;
+  --cream: #ffffff;
+  --cream-2: #f4f4f4;
+  --bone: #d9d9d9;
+  --brass: #757575;
+  --brass-bright: #d9d9d9;
+  --brick: #131313;
+  --white: #ffffff;
+  --ink-40: rgba(19, 19, 19, 0.4);
+  --cream-60: rgba(255, 255, 255, 0.65);
+  --cream-20: rgba(255, 255, 255, 0.2);
+  --cream-08: rgba(255, 255, 255, 0.07);
+
+  /* Type */
+  --font-display: 'Poppins', 'Helvetica Neue', sans-serif;
+  --font-body: 'Inter Variable', 'Helvetica Neue', sans-serif;
+
+  /* Scale */
+  --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.94rem);
+  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.4rem);
+  --step-2: clamp(1.5rem, 1.35rem + 0.9vw, 2rem);
+  --step-3: clamp(1.9rem, 1.6rem + 1.7vw, 2.8rem);
+  --step-4: clamp(2.4rem, 1.9rem + 2.8vw, 4rem);
+  --step-5: clamp(2.8rem, 2rem + 4.2vw, 5.4rem);
+
+  /* Layout */
+  --container: 76rem;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --section-pad: clamp(4.5rem, 10vw, 8.5rem);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Dark so iOS rubber-band overscroll matches the header/hero, not white */
+  background: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--bone);
+  color: var(--ink);
+}
+
+/* ---------- Utilities ---------- */
+
+.container {
+  width: min(var(--container), 100% - var(--gutter) * 2);
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: var(--section-pad);
+  position: relative;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.72;
+}
+
+.kicker::before {
+  content: '';
+  width: 2.25rem;
+  height: 1px;
+  background: currentColor;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.display em,
+.display .accent {
+  font-style: normal;
+  color: var(--brass);
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.95rem 1.9rem;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  transition: transform 0.35s var(--ease-out-expo), background-color 0.25s ease,
+    color 0.25s ease, border-color 0.25s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn .arrow {
+  transition: transform 0.35s var(--ease-out-expo);
+}
+
+.btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+.btn--brass {
+  background: var(--bone);
+  color: var(--ink);
+}
+
+.btn--brass:hover {
+  background: #c9c9c9;
+}
+
+.btn--ink {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.btn--ink:hover {
+  background: var(--navy);
+}
+
+.btn--ghost-light {
+  border-color: var(--cream-20);
+  color: var(--cream);
+  background: transparent;
+}
+
+.btn--ghost-light:hover {
+  border-color: var(--brass);
+  color: var(--brass-bright);
+}
+
+.btn--ghost-dark {
+  border-color: var(--ink-40);
+  color: var(--ink);
+  background: transparent;
+}
+
+.btn--ghost-dark:hover {
+  border-color: var(--ink);
+}
+
+/* ---------- Reveal (GSAP hooks) ---------- */
+
+[data-reveal],
+[data-reveal-group] > * {
+  will-change: transform, opacity;
+}
+
+/* Pre-hide only when JS is available (set on <html> inline) */
+.js [data-reveal],
+.js [data-reveal-group] > * {
+  opacity: 0;
+}
+
+/* ---------- Texture ---------- */
+
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://samnewellrealestate.com/sitemap-index.xml

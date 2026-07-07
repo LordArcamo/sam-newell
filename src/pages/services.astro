@@ -1,0 +1,139 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Newsletter from '../components/Newsletter.astro';
+import PageHero from '../components/PageHero.astro';
+import { SERVICES } from '../data/site';
+---
+
+<Base
+  title="Services — Real Estate, Investments, Framing & Family | Sam Newell"
+  description="Four ways to build with Sam Newell: Utah real estate, multifamily investments through MFI Club, expert framing, and real talk on parenting and family."
+>
+  <PageHero
+    kicker="Services"
+    intro="Real estate, multifamily investing, framing, and family — four practices, one operating principle: say the true thing, do the right work."
+  >
+    Four ways to <em>build</em>
+  </PageHero>
+
+  <section class="section svc">
+    <div class="container">
+      <div class="svc-list">
+        {SERVICES.map((s, i) => (
+          <a href={s.href} class="svc-row" data-reveal>
+            <span class="svc-num display">0{i + 1}</span>
+            <div class="svc-media">
+              <img src={s.image} alt="" loading="lazy" />
+            </div>
+            <div class="svc-body">
+              <span class="svc-kicker">{s.kicker}</span>
+              <h2 class="svc-title display">{s.title}</h2>
+              <p class="svc-blurb">{s.blurb}</p>
+            </div>
+            <span class="svc-arrow display" aria-hidden="true">→</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+  <Newsletter />
+</Base>
+
+<style>
+  .svc {
+    background: var(--cream);
+  }
+
+  .svc-list {
+    display: grid;
+  }
+
+  .svc-row {
+    display: grid;
+    grid-template-columns: 4rem 16rem 1fr 4rem;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-items: center;
+    padding-block: 2.5rem;
+    border-top: 1px solid rgba(19, 19, 19, 0.12);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .svc-row:last-child {
+    border-bottom: 1px solid rgba(19, 19, 19, 0.12);
+  }
+
+  .svc-num {
+    font-size: 1.05rem;
+    color: var(--brass);
+  }
+
+  .svc-media {
+    height: 11rem;
+    border-radius: 1rem;
+    overflow: clip;
+  }
+
+  .svc-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+    transition: transform 0.8s var(--ease-out-expo);
+  }
+
+  .svc-row:hover .svc-media img {
+    transform: scale(1.07);
+  }
+
+  .svc-kicker {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .svc-title {
+    font-size: var(--step-3);
+    margin-block: 0.4rem 0.75rem;
+    transition: color 0.25s ease;
+  }
+
+  .svc-row:hover .svc-title {
+    color: var(--navy-soft);
+  }
+
+  .svc-blurb {
+    color: rgba(19, 19, 19, 0.65);
+    max-width: 60ch;
+  }
+
+  .svc-arrow {
+    font-size: 2rem;
+    color: var(--brass);
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+
+  .svc-row:hover .svc-arrow {
+    transform: translateX(8px);
+  }
+
+  @media (max-width: 900px) {
+    .svc-row {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .svc-media {
+      height: 14rem;
+    }
+
+    .svc-arrow {
+      display: none;
+    }
+  }
+</style>

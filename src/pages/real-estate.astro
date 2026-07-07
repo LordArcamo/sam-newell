@@ -1,0 +1,398 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Newsletter from '../components/Newsletter.astro';
+import PageHero from '../components/PageHero.astro';
+import TestimonialCarousel from '../components/TestimonialCarousel';
+import IconSketch from '../components/IconSketch.astro';
+import { LISTINGS, ZILLOW_PROFILE } from '../data/site';
+
+const tracks = [
+  {
+    title: 'Buying',
+    icon: 'key' as const,
+    body: 'From first home to fifteenth door, Sam walks the property like the builder he trained to be — framing, bones, and budget — then negotiates like the investor he is. You’ll know what it’s worth before you offer.',
+    points: ['Wasatch Front coverage: Salt Lake & Utah County', 'Builder’s-eye walkthroughs (BS, Construction Mgmt — BYU)', 'Lending partner for faster approvals & stronger offers'],
+  },
+  {
+    title: 'Selling',
+    icon: 'tag' as const,
+    body: 'Pricing is a science; the story is an art. Sam brings both — with the track record ($450M+ closed) to back the number he puts on your home and the negotiating spine to defend it.',
+    points: ['Data-driven pricing, no wishful math', 'Top 1% Utah production', 'Straight answers on prep, timing, and net proceeds'],
+  },
+  {
+    title: 'Investing',
+    icon: 'chart' as const,
+    body: 'This is the home turf. Sam owns and manages 2,000+ doors and holds the CCIM designation — the commercial industry’s gold standard. Cash flow, cap rates, and exit plans, underwritten like it’s his own money. Because usually, it is.',
+    points: ['CCIM-designee underwriting', '1031 exchanges & portfolio strategy', 'Off-market deal flow through MFI Club'],
+  },
+];
+
+const areas = ['Lehi', 'Provo', 'Orem', 'Salt Lake City', 'Sandy', 'Herriman', 'Eagle Mountain', 'Saratoga Springs', 'Cedar Hills', 'Salem'];
+---
+
+<Base
+  title="Utah Real Estate — Buy, Sell, Invest with Sam Newell"
+  description="Buy, sell, or invest on the Wasatch Front with Sam Newell — Top 1% Utah broker, $450M+ closed, CCIM designee, Zillow-preferred. Serving Salt Lake & Utah County."
+>
+  <PageHero
+    kicker="Utah Real Estate"
+    intro="Top 1% production, a builder’s eye, and an investor’s spreadsheet — on your side of the table for a change."
+    image="/images/real-estate-hero.jpg"
+    imageAlt="A Utah home listed by Sam Newell"
+  >
+    Bought and sold like it’s <em>his own money</em>
+    <Fragment slot="actions">
+      <a href="/contact/" class="btn btn--brass">Work with Sam <span class="arrow">→</span></a>
+      <a href={ZILLOW_PROFILE} target="_blank" rel="noopener" class="btn btn--ghost-light">Search Utah listings</a>
+    </Fragment>
+  </PageHero>
+
+  <!-- Trust strip -->
+  <section class="trust">
+    <div class="container trust-row" data-reveal-group>
+      <span class="trust-item"><strong>$450M+</strong> closed volume</span>
+      <span class="trust-item"><strong>Top 1%</strong> Utah Realtor</span>
+      <span class="trust-item"><strong>CCIM</strong> designee</span>
+      <span class="trust-item"><strong>Zillow</strong> preferred agent</span>
+    </div>
+  </section>
+
+  <!-- Tracks -->
+  <section class="section tracks">
+    <div class="container">
+      <span class="kicker" data-reveal>Three ways in</span>
+      <h2 class="display tracks-title" data-reveal>Pick your <em>lane</em></h2>
+      <div class="tracks-grid">
+        {tracks.map((t, i) => (
+          <article class="track" data-reveal>
+            <span class="track-head">
+              <span class="track-num display">0{i + 1}</span>
+              <span class="track-icon"><IconSketch name={t.icon} size={28} /></span>
+            </span>
+            <h3 class="track-title display">{t.title}</h3>
+            <p class="track-body">{t.body}</p>
+            <ul class="track-points">
+              {t.points.map((p) => (
+                <li>{p}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Areas served -->
+  <section class="areas grain">
+    <div class="container">
+      <span class="kicker" data-reveal>Where Sam works</span>
+      <h2 class="display areas-title" data-reveal>The <em>Wasatch Front,</em> door to door</h2>
+      <div class="areas-cloud" data-reveal-group>
+        {areas.map((a) => (
+          <span class="area-chip">{a}</span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Listings -->
+  <section class="section sold">
+    <div class="container">
+      <div class="sold-head">
+        <div>
+          <span class="kicker" data-reveal>Recent work</span>
+          <h2 class="display sold-title" data-reveal>Homes Sam has <em>moved</em></h2>
+        </div>
+        <a href={ZILLOW_PROFILE} target="_blank" rel="noopener" class="btn btn--ink" data-reveal>
+          Search Utah listings
+        </a>
+      </div>
+      <div class="sold-grid" data-reveal-group>
+        {LISTINGS.map((l) => (
+          <a href={l.href} target="_blank" rel="noopener" class="sold-card">
+            <span class="sold-media">
+              <img src={l.image} alt={`${l.address}, ${l.city}`} loading="lazy" />
+            </span>
+            <span class="sold-body">
+              <span class="sold-address">{l.address}</span>
+              <span class="sold-city">{l.city}</span>
+              <span class="sold-cta">View on Zillow <span class="arrow">→</span></span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Reviews -->
+  <section class="section rev">
+    <div class="container">
+      <div class="rev-head">
+        <span class="kicker" data-reveal>Client words</span>
+        <h2 class="display rev-title" data-reveal>Proof, not <em>promises</em></h2>
+      </div>
+      <div data-reveal>
+        <TestimonialCarousel client:visible />
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title="Your move," em="literally." copy="Buying, selling, or building a portfolio — start with one honest conversation." />
+  <Newsletter />
+</Base>
+
+<style>
+  .trust {
+    background: var(--bone);
+    color: var(--ink);
+    padding-block: 1.4rem;
+  }
+
+  .trust-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+  }
+
+  .trust-item {
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .trust-item strong {
+    font-weight: 800;
+  }
+
+  .tracks {
+    background: var(--cream);
+  }
+
+  .tracks-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 0;
+  }
+
+  .tracks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .track {
+    background: var(--white);
+    border: 1px solid rgba(19, 19, 19, 0.08);
+    border-radius: 1.25rem;
+    padding: 2.25rem 2rem;
+    transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+  }
+
+  .track:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 35px 60px -25px rgba(19, 19, 19, 0.25);
+  }
+
+  .track-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .track-num {
+    font-size: 1rem;
+    color: var(--brass);
+  }
+
+  .track-icon {
+    width: 3.25rem;
+    height: 3.25rem;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    border: 1.5px solid rgba(19, 19, 19, 0.2);
+    border-radius: 50%;
+  }
+
+  .track-title {
+    font-size: var(--step-2);
+    margin-block: 0.5rem 0.9rem;
+  }
+
+  .track-body {
+    font-size: 0.95rem;
+    color: rgba(19, 19, 19, 0.7);
+    line-height: 1.65;
+  }
+
+  .track-points {
+    list-style: none;
+    margin-top: 1.4rem;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .track-points li {
+    position: relative;
+    padding-left: 1.4rem;
+    font-size: 0.88rem;
+    color: rgba(19, 19, 19, 0.8);
+  }
+
+  .track-points li::before {
+    content: '◆';
+    position: absolute;
+    left: 0;
+    top: 0.15em;
+    font-size: 0.55rem;
+    color: var(--brass);
+  }
+
+  .areas {
+    background:
+      linear-gradient(rgba(19, 19, 19, 0.82), rgba(19, 19, 19, 0.88)),
+      url('/images/utah-road.jpg') center 65% / cover no-repeat;
+    color: var(--cream);
+    padding-block: clamp(4rem, 8vw, 6rem);
+    position: relative;
+    overflow: clip;
+  }
+
+  .areas-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 0;
+  }
+
+  .areas-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 2.25rem;
+  }
+
+  .area-chip {
+    padding: 0.6rem 1.3rem;
+    border: 1px solid var(--cream-20);
+    border-radius: 999px;
+    font-size: 0.88rem;
+    letter-spacing: 0.06em;
+    transition: border-color 0.25s ease, color 0.25s ease, transform 0.3s var(--ease-out-expo);
+  }
+
+  .area-chip:hover {
+    border-color: var(--brass);
+    color: var(--brass-bright);
+    transform: translateY(-3px);
+  }
+
+  .sold {
+    background: var(--cream-2);
+  }
+
+  .sold-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .sold-title {
+    font-size: var(--step-3);
+    margin-top: 1.25rem;
+  }
+
+  .sold-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .sold-card {
+    display: grid;
+    grid-template-rows: 11rem auto;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--white);
+    border: 1px solid rgba(19, 19, 19, 0.08);
+    border-radius: 1rem;
+    overflow: clip;
+    transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+  }
+
+  .sold-media {
+    overflow: clip;
+  }
+
+  .sold-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s var(--ease-out-expo);
+  }
+
+  .sold-card:hover .sold-media img {
+    transform: scale(1.06);
+  }
+
+  .sold-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.4rem 1.6rem 1.6rem;
+  }
+
+  .sold-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 50px -25px rgba(19, 19, 19, 0.25);
+  }
+
+  .sold-address {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .sold-city {
+    font-size: 0.85rem;
+    color: rgba(19, 19, 19, 0.55);
+  }
+
+  .sold-cta {
+    margin-top: 1rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .rev {
+    background: var(--cream);
+  }
+
+  .rev-head {
+    text-align: center;
+    margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .rev-head .kicker::before {
+    display: none;
+  }
+
+  .rev-title {
+    font-size: var(--step-3);
+    margin-top: 1.25rem;
+  }
+
+  @media (max-width: 900px) {
+    .tracks-grid,
+    .sold-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

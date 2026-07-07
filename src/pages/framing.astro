@@ -1,0 +1,189 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Newsletter from '../components/Newsletter.astro';
+import PageHero from '../components/PageHero.astro';
+
+const scopes = [
+  { title: 'Custom homes', body: 'Framing that honors the architect’s intent and survives the inspector’s level — square, plumb, and on schedule.' },
+  { title: 'Attached housing', body: 'Townhomes and multifamily framing built for repetition without sloppiness — the production rhythm that keeps developments on budget.' },
+  { title: 'Production homes', body: 'Volume framing with a custom-home conscience. A decade of crews that show up, and stay until it’s right.' },
+  { title: 'Small commercial', body: 'Light commercial structures framed to spec and code, coordinated cleanly with the trades that follow.' },
+];
+---
+
+<Base
+  title="Framing — A Framing Company | Sam Newell"
+  description="A Framing Company: a decade of expert wood framing for custom homes, attached housing, production homes, and small commercial buildings across Utah."
+>
+  <PageHero
+    kicker="A Framing Company"
+    intro="Wood framing is the backbone of Utah construction — durable, cost-effective, and suited to the region’s climate. For the last decade, A Framing Company has delivered precision-built framing for homes, businesses, and large-scale developments."
+    image="/images/framing-hero.jpg"
+    imageAlt="Framed structure by A Framing Company"
+  >
+    Precision framing, <em>custom-home</em> quality
+    <Fragment slot="actions">
+      <a href="https://aframingcompany.com/" target="_blank" rel="noopener" class="btn btn--brass">Visit A Framing Company <span class="arrow">→</span></a>
+      <a href="/contact/" class="btn btn--ghost-light">Contact us</a>
+    </Fragment>
+  </PageHero>
+
+  <!-- Why it matters -->
+  <section class="section fw">
+    <div class="container fw-grid">
+      <div>
+        <span class="kicker" data-reveal>Why framing first</span>
+        <h2 class="display fw-title" data-reveal>
+          Everything leans on <em>the bones</em>
+        </h2>
+      </div>
+      <div class="fw-copy">
+        <p data-reveal>
+          Sam’s real estate career started here — a construction management degree and
+          years around framing crews taught him what a good house is actually made of.
+          A Framing Company is that standard, applied: expert craftsmanship, strength,
+          and efficiency, tailored to Utah’s unique building needs.
+        </p>
+        <p data-reveal>
+          It’s also why one client hired the crew to fix what another crew walked away
+          from — and said he’d hire them again.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scope grid -->
+  <section class="section scopes grain">
+    <div class="container">
+      <span class="kicker" data-reveal>What we frame</span>
+      <h2 class="display scopes-title" data-reveal>Four builds, <em>one standard</em></h2>
+      <div class="scopes-grid" data-reveal-group>
+        {scopes.map((s, i) => (
+          <article class="scope">
+            <span class="scope-num display">0{i + 1}</span>
+            <h3 class="scope-title">{s.title}</h3>
+            <p>{s.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonial spotlight -->
+  <section class="section spot">
+    <div class="container spot-inner">
+      <blockquote class="display spot-quote" data-reveal="scale">
+        “I would definitely work with Sam and Oscar again. Their crew repaired a framing
+        job that another crew messed up — and just walked off the job.”
+      </blockquote>
+      <span class="spot-source" data-reveal>— John H., General Contractor</span>
+    </div>
+  </section>
+
+  <CtaBand title="Get it framed" em="right the first time." copy="Send the plans. You’ll get a straight bid and a crew that finishes what it starts." />
+  <Newsletter />
+</Base>
+
+<style>
+  .fw {
+    background: var(--cream);
+  }
+
+  .fw-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    align-items: start;
+  }
+
+  .fw-title {
+    font-size: var(--step-3);
+    margin-top: 1.25rem;
+  }
+
+  .fw-copy p {
+    margin-bottom: 1.25rem;
+    color: rgba(19, 19, 19, 0.75);
+    font-size: var(--step-1);
+    line-height: 1.6;
+  }
+
+  .scopes {
+    background: var(--ink);
+    color: var(--cream);
+    position: relative;
+    overflow: clip;
+  }
+
+  .scopes-title {
+    font-size: var(--step-3);
+    margin-block: 1.25rem 0;
+  }
+
+  .scopes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .scope {
+    border: 1px solid var(--cream-08);
+    background: var(--cream-08);
+    border-radius: 1.1rem;
+    padding: 2rem;
+    transition: border-color 0.3s ease, transform 0.5s var(--ease-out-expo);
+  }
+
+  .scope:hover {
+    border-color: rgba(140, 140, 140, 0.5);
+    transform: translateY(-5px);
+  }
+
+  .scope-num {
+    font-size: 0.95rem;
+    color: var(--brass-bright);
+  }
+
+  .scope-title {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 600;
+    margin-block: 0.4rem 0.75rem;
+  }
+
+  .scope p {
+    color: var(--cream-60);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .spot {
+    background: var(--cream-2);
+    text-align: center;
+  }
+
+  .spot-quote {
+    font-size: var(--step-2);
+    max-width: 30ch;
+    margin-inline: auto;
+  }
+
+  .spot-source {
+    display: block;
+    margin-top: 1.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  @media (max-width: 900px) {
+    .fw-grid,
+    .scopes-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

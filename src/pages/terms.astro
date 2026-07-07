@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+
+// Standard-practice template — have an attorney review before launch.
+const updated = 'July 7, 2026';
+
+const sections = [
+  {
+    h: 'What this site is',
+    p: 'samnewellrealestate.com is the personal and business website of Sam Newell, a licensed real estate broker in Utah (KW Salt Lake City). Content here is provided for general information about Sam’s services in real estate, multifamily investing, and framing.',
+  },
+  {
+    h: 'Not professional advice',
+    p: 'Nothing on this site is a substitute for individual real estate, investment, legal, or tax advice. Market stats, opinions, and podcast content are general in nature — talk to Sam (or your own advisors) about your specific situation before acting.',
+  },
+  {
+    h: 'Investment disclosures',
+    p: 'References to Multifamily Investment Club and past performance are informational only and are not an offer to sell or a solicitation to buy securities. Any investment opportunity is made only through its own offering documents to qualified investors.',
+  },
+  {
+    h: 'Listings and third-party data',
+    p: 'Property cards link to Zillow for current pricing, status, and details. Listing information changes constantly; the linked Zillow page — not this site — is the source of truth. Third-party trademarks (Zillow, Spotify, Apple) belong to their owners.',
+  },
+  {
+    h: 'Intellectual property',
+    p: 'The Sam Newell name, logo, photography, and site content belong to Sam Newell and may not be reproduced for commercial use without permission.',
+  },
+  {
+    h: 'Liability',
+    p: 'This site is provided “as is.” While we work to keep information accurate and current, we make no warranties and accept no liability for decisions made from general website content.',
+  },
+  {
+    h: 'Questions',
+    p: 'Anything unclear? Call (801) 995-2220 or use the contact page — a straight answer is kind of the whole brand.',
+  },
+];
+---
+
+<Base
+  title="Terms & Conditions — Sam Newell"
+  description="Terms of use for samnewellrealestate.com — what this site is, what it isn't, and how its content may be used."
+>
+  <PageHero kicker="Terms & Conditions" intro={`Last updated ${updated}. Plain-English terms for using this site.`}>
+    The fine print, <em>minus the fog</em>
+  </PageHero>
+
+  <section class="section legal">
+    <div class="container legal-body">
+      {sections.map((s) => (
+        <div class="legal-block" data-reveal>
+          <h2>{s.h}</h2>
+          <p>{s.p}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .legal {
+    background: var(--cream);
+  }
+
+  .legal-body {
+    max-width: 44rem;
+    margin-inline: auto;
+    display: grid;
+    gap: 2.25rem;
+  }
+
+  .legal-block h2 {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  .legal-block p {
+    color: rgba(19, 19, 19, 0.72);
+    line-height: 1.7;
+  }
+</style>

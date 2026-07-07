@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Page not found — Sam Newell" description="This page doesn't exist. Head back to samnewellrealestate.com.">
+  <section class="nf-page grain">
+    <div class="container">
+      <span class="kicker" data-reveal>404</span>
+      <h1 class="display nf-title" data-reveal>This lot is <em>vacant.</em></h1>
+      <p class="nf-copy" data-reveal>
+        The page you’re after isn’t on the market — but plenty of good ones are.
+      </p>
+      <div data-reveal>
+        <a href="/" class="btn btn--brass">Back to home <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf-page {
+    min-height: 90svh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+    color: var(--cream);
+    position: relative;
+    overflow: clip;
+  }
+
+  .nf-title {
+    font-size: var(--step-5);
+    margin-block: 1.5rem 1.25rem;
+  }
+
+  .nf-copy {
+    color: var(--cream-60);
+    margin-bottom: 2.25rem;
+    font-size: var(--step-1);
+  }
+</style>
