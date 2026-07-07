@@ -216,16 +216,22 @@
 }
 
 /* Mobile panel — white so it never reads as a black screen;
-   the header strip above it stays dark for the white logo/✕ */
+   the logo inverts and the ✕ goes ink while it's open.
+   Literal color + explicit z-index + dvh so the overlay is
+   opaque and full-screen no matter what. */
 .sh-mobile {
   display: none;
   position: fixed;
   inset: 0;
-  background: var(--white);
+  height: 100dvh;
+  z-index: 105;
+  background: #ffffff;
+  background: var(--white, #ffffff);
   padding: 7.5rem var(--gutter) 3rem;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.35s ease, visibility 0.35s;
+  overflow-y: auto;
 }
 
 .sh--open .sh-mobile {
