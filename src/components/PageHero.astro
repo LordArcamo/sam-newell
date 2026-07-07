@@ -1,16 +1,22 @@
 ---
+import IconSketch from './IconSketch.astro';
+
 interface Props {
   kicker: string;
   intro?: string;
+  /** Photo shown in an arch frame on the right */
   image?: string;
   imageAlt?: string;
+  /** Fallback visual when there's no photo: a big animated line-art icon */
+  icon?: 'house' | 'buildings' | 'hammer' | 'heart' | 'key' | 'tag' | 'chart' | 'clock' | 'dollar' | 'phone' | 'calendar' | 'mic' | 'compass';
 }
 
-const { kicker, intro, image, imageAlt = '' } = Astro.props;
+const { kicker, intro, image, imageAlt = '', icon } = Astro.props;
 const hasActions = Astro.slots.has('actions');
+const hasVisual = Boolean(image || icon);
 ---
 
-<section class={`ph grain ${image ? 'ph--split' : ''}`}>
+<section class={`ph grain ${hasVisual ? 'ph--split' : ''}`}>
   <div class="container ph-grid">
     <div class="ph-copy">
       <span class="kicker" data-reveal>{kicker}</span>
@@ -27,7 +33,14 @@ const hasActions = Astro.slots.has('actions');
     {
       image && (
         <div class="ph-media" data-reveal="left">
-          <img src={image} alt={imageAlt} loading="eager" data-parallax="0.08" />
+          <img src={image} alt={imageAlt} loading="eager" />
+        </div>
+      )
+    }
+    {
+      !image && icon && (
+        <div class="ph-icon" data-reveal="left">
+          <IconSketch name={icon} size={170} class="ph-icon-svg" />
         </div>
       )
     }
@@ -36,9 +49,12 @@ const hasActions = Astro.slots.has('actions');
 
 <style>
   .ph {
-    background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+    background:
+      radial-gradient(70rem 45rem at 88% -20%, rgba(90, 90, 90, 0.4), transparent 60%),
+      radial-gradient(50rem 35rem at -10% 120%, rgba(90, 90, 90, 0.22), transparent 60%),
+      linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
     color: var(--cream);
-    padding-block: clamp(9rem, 16vw, 13rem) clamp(4rem, 8vw, 6rem);
+    padding-block: clamp(8.5rem, 15vw, 12rem) clamp(4rem, 8vw, 6rem);
     position: relative;
     overflow: clip;
   }
@@ -46,20 +62,20 @@ const hasActions = Astro.slots.has('actions');
   .ph-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 3rem;
-    align-items: end;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    align-items: center;
     position: relative;
     z-index: 1;
   }
 
   .ph--split .ph-grid {
-    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-columns: 1.25fr 0.75fr;
   }
 
   .ph-title {
     font-size: var(--step-5);
     margin-top: 1.5rem;
-    max-width: 14ch;
+    max-width: 16ch;
   }
 
   .ph-intro {
@@ -77,14 +93,54 @@ const hasActions = Astro.slots.has('actions');
     margin-top: 2.25rem;
   }
 
+  /* Photo — arch frame, same family as the homepage hero */
+  .ph-media {
+    aspect-ratio: 0.92;
+    border-radius: 999px 999px 1.5rem 1.5rem;
+    overflow: clip;
+    border: 1px solid rgba(217, 217, 217, 0.28);
+    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.65);
+    justify-self: end;
+    width: min(24rem, 100%);
+  }
+
   .ph-media img {
-    border-radius: 1.25rem;
-    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.6);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Icon — big drawn line-art in an arch panel */
+  .ph-icon {
+    aspect-ratio: 0.92;
+    width: min(22rem, 100%);
+    justify-self: end;
+    display: grid;
+    place-items: center;
+    border-radius: 999px 999px 1.5rem 1.5rem;
+    border: 1px solid rgba(217, 217, 217, 0.28);
+    background: linear-gradient(180deg, rgba(46, 46, 46, 0.65) 0%, rgba(27, 27, 27, 0.4) 100%);
+  }
+
+  .ph-icon :global(.ph-icon-svg) {
+    color: var(--bone);
+    opacity: 0.9;
   }
 
   @media (max-width: 900px) {
     .ph--split .ph-grid {
       grid-template-columns: 1fr;
+    }
+
+    .ph-media,
+    .ph-icon {
+      justify-self: center;
+      width: min(18rem, 88%);
+    }
+
+    .ph-icon :global(.ph-icon-svg) {
+      width: 120px;
+      height: 120px;
     }
   }
 </style>

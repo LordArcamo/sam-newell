@@ -44,6 +44,7 @@ const timeline = [
   description="From buying at the bottom of the 2010 recession as a BYU student to $450M+ closed and 2,000+ multifamily doors — the real story of Utah broker Sam Newell."
 >
   <PageHero
+    icon="compass"
     kicker="Sam’s story"
     intro="Utah based, Idaho grown. Broker, builder, investor, podcast host — and the guy who’ll tell you the truth about a deal even when it costs him the commission."
   >
@@ -54,7 +55,9 @@ const timeline = [
   <section class="section story">
     <div class="container story-grid">
       <div class="story-media" data-reveal="right">
-        <img src="/images/sam-about.png" alt="Sam Newell portrait" loading="lazy" data-parallax="0.08" />
+        <div class="story-arch grain">
+          <img src="/images/sam-about.png" alt="Sam Newell portrait" loading="lazy" />
+        </div>
       </div>
       <div class="story-copy">
         <span class="kicker" data-reveal>Integrity first</span>
@@ -146,10 +149,23 @@ const timeline = [
     align-items: center;
   }
 
-  .story-media img {
-    border-radius: 1.25rem;
-    background: var(--cream-2);
-    box-shadow: 0 40px 70px -30px rgba(19, 19, 19, 0.35);
+  /* The portrait PNG has a baked-in fade at the bottom — it only looks
+     right on a dark panel, where the fade melts into the background */
+  .story-arch {
+    position: relative;
+    border-radius: 999px 999px 1.5rem 1.5rem;
+    background: linear-gradient(180deg, var(--navy-soft) 0%, var(--ink) 100%);
+    border: 1px solid rgba(217, 217, 217, 0.22);
+    padding: 2.75rem 2rem 0;
+    overflow: clip;
+    box-shadow: 0 40px 70px -30px rgba(19, 19, 19, 0.5);
+  }
+
+  .story-arch img {
+    display: block;
+    margin-inline: auto;
+    width: min(20rem, 100%);
+    filter: drop-shadow(0 24px 32px rgba(0, 0, 0, 0.4));
   }
 
   .story-title {
