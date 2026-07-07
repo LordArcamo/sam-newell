@@ -69,20 +69,22 @@ const hasVisual = Boolean(image || icon);
   }
 
   .ph--split .ph-grid {
-    grid-template-columns: 1.25fr 0.75fr;
+    grid-template-columns: 1.15fr 0.85fr;
   }
 
+  /* Internal pages: one step smaller than the homepage hero so the
+     title and photo share the stage instead of fighting for it */
   .ph-title {
-    font-size: var(--step-5);
-    margin-top: 1.5rem;
-    max-width: 16ch;
+    font-size: var(--step-4);
+    margin-top: 1.25rem;
+    max-width: 20ch;
   }
 
   .ph-intro {
-    margin-top: 1.75rem;
-    max-width: 46ch;
-    font-size: var(--step-1);
-    line-height: 1.55;
+    margin-top: 1.5rem;
+    max-width: 52ch;
+    font-size: var(--text-lg);
+    line-height: 1.65;
     color: var(--cream-60);
   }
 
@@ -96,7 +98,7 @@ const hasVisual = Boolean(image || icon);
   /* Photo — boxy rounded frame with a controlled 4:3 crop */
   .ph-media {
     aspect-ratio: 4 / 3;
-    width: min(30rem, 100%);
+    width: min(32rem, 100%);
     border-radius: 1.25rem;
     overflow: clip;
     border: 1px solid rgba(217, 217, 217, 0.28);
