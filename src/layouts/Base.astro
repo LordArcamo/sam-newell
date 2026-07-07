@@ -14,12 +14,14 @@ interface Props {
   description: string;
   /** 'dark' when the page opens with a dark hero (header starts light-on-dark) */
   headerTheme?: 'dark' | 'light';
+  /** Per-page social share image (path); defaults to Sam's portrait */
+  ogImage?: string;
 }
 
-const { title, description, headerTheme = 'dark' } = Astro.props;
+const { title, description, headerTheme = 'dark', ogImage: ogImageProp } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL('/images/sam-stats.png', Astro.site);
+const ogImage = new URL(ogImageProp ?? '/images/sam-stats.png', Astro.site);
 
 // BreadcrumbList for internal pages (Home → Page)
 const CRUMB_NAMES: Record<string, string> = {
@@ -28,6 +30,7 @@ const CRUMB_NAMES: Record<string, string> = {
   framing: 'Framing',
   parenting: 'Parenting & Family',
   services: 'Services',
+  blog: 'Blog',
   about: 'About Sam',
   contact: 'Contact',
   terms: 'Terms & Conditions',

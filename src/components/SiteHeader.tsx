@@ -15,6 +15,7 @@ const SERVICES = [
 const LINKS = [
   { href: '/', label: 'Home' },
   { href: '/about/', label: 'About' },
+  { href: '/blog/', label: 'Blog' },
   { href: '/contact/', label: 'Contact' },
 ];
 
@@ -122,6 +123,9 @@ export default function SiteHeader({ theme, pathname }: Props) {
           </div>
           <a href="/about/" className={`sh-link ${isActive('/about/') ? 'is-active' : ''}`}>
             About
+          </a>
+          <a href="/blog/" className={`sh-link ${isActive('/blog/') ? 'is-active' : ''}`}>
+            Blog
           </a>
           <a href="/contact/" className={`sh-link ${isActive('/contact/') ? 'is-active' : ''}`}>
             Contact

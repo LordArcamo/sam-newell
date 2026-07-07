@@ -1,0 +1,155 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Newsletter from '../../components/Newsletter.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+---
+
+<Base
+  title="Blog — Real Talk on Utah Real Estate | Sam Newell"
+  description="Straight answers on buying, selling, and investing along the Wasatch Front — from a broker with $450M+ closed and 2,000+ doors of his own."
+>
+  <PageHero
+    icon="pen"
+    kicker="The blog"
+    intro="Buying, selling, investing, and the occasional hard truth — written the way Sam talks. No fluff, no recycled national headlines."
+  >
+    Real talk, <em>written down</em>
+  </PageHero>
+
+  <section class="section bl">
+    <div class="container">
+      <div class="bl-grid" data-reveal-group>
+        {posts.map((post) => (
+          <a href={`/blog/${post.id}/`} class="bl-card">
+            {post.data.cover && (
+              <span class="bl-media">
+                <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading="lazy" />
+              </span>
+            )}
+            <div class="bl-meta">
+              <span class="bl-tag">{post.data.tag}</span>
+              <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time>
+            </div>
+            <h2 class="bl-title display">{post.data.title}</h2>
+            <p class="bl-desc">{post.data.description}</p>
+            <span class="bl-more">Read the post <span class="arrow">→</span></span>
+          </a>
+        ))}
+      </div>
+      {posts.length === 0 && <p class="bl-empty">First posts landing soon — join the Friday Recap below so you don’t miss them.</p>}
+    </div>
+  </section>
+
+  <Newsletter />
+</Base>
+
+<style>
+  .bl {
+    background: var(--cream);
+  }
+
+  .bl-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .bl-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border: 1px solid rgba(19, 19, 19, 0.08);
+    border-radius: 1.25rem;
+    overflow: clip;
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+  }
+
+  .bl-media {
+    display: block;
+    aspect-ratio: 16 / 9;
+    margin: -2rem -2rem 1.5rem;
+    overflow: clip;
+  }
+
+  .bl-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s var(--ease-out-expo);
+  }
+
+  .bl-card:hover .bl-media img {
+    transform: scale(1.05);
+  }
+
+  .bl-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 35px 60px -25px rgba(19, 19, 19, 0.25);
+  }
+
+  .bl-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 1.1rem;
+  }
+
+  .bl-tag {
+    border: 1px solid rgba(19, 19, 19, 0.18);
+    border-radius: 999px;
+    padding: 0.3rem 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .bl-title {
+    font-size: var(--title-card);
+    line-height: 1.25;
+    margin-bottom: 0.85rem;
+  }
+
+  .bl-desc {
+    font-size: var(--text-md);
+    color: rgba(19, 19, 19, 0.68);
+    line-height: 1.65;
+    flex: 1;
+  }
+
+  .bl-more {
+    margin-top: 1.5rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .bl-card:hover .bl-more {
+    color: var(--brass);
+  }
+
+  .bl-empty {
+    color: rgba(19, 19, 19, 0.6);
+  }
+
+  @media (max-width: 960px) {
+    .bl-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
