@@ -35,6 +35,14 @@
   --step-4: clamp(2.4rem, 1.9rem + 2.8vw, 4rem);
   --step-5: clamp(2.8rem, 2rem + 4.2vw, 5.4rem);
 
+  /* Fixed type tokens — every non-heading font size on the site
+     maps to one of these four. */
+  --text-xs: 0.72rem; /* micro labels, legal, footer meta */
+  --text-sm: 0.8rem; /* buttons, kickers, nav, chips */
+  --text-md: 0.93rem; /* card body copy */
+  --text-lg: 1.08rem; /* emphasized body, small numerals */
+  --title-card: 1.35rem; /* card/list titles */
+
   /* Layout */
   --container: 76rem;
   --gutter: clamp(1.25rem, 4vw, 3rem);
@@ -78,6 +86,9 @@ svg,
 video {
   display: block;
   max-width: 100%;
+  /* height:auto so width/height attributes (CLS hints) never distort
+     images when CSS scales their width */
+  height: auto;
 }
 
 a {
@@ -110,7 +121,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.78rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -146,7 +157,7 @@ button {
   gap: 0.65rem;
   padding: 0.95rem 1.9rem;
   font-family: var(--font-body);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;

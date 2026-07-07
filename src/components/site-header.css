@@ -69,7 +69,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -148,7 +148,7 @@
 
 .sh-menu-link {
   padding: 0.7rem 0.9rem;
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--ink);
   text-decoration: none;
@@ -166,7 +166,7 @@
    transform during the header intro, and a CSS transition on the same
    property fights the tween (button freezes mid-air). */
 .sh-cta {
-  font-size: 0.78rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;

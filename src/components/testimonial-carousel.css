@@ -44,12 +44,12 @@
 
 .tc-name {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: var(--text-md);
   letter-spacing: 0.02em;
 }
 
 .tc-role {
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: rgba(19, 19, 19, 0.55);
   letter-spacing: 0.04em;
 }
@@ -69,7 +69,7 @@
   border: 1px solid rgba(19, 19, 19, 0.2);
   background: transparent;
   color: var(--ink);
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   transition: background-color 0.25s ease, color 0.25s ease, transform 0.3s var(--ease-out-expo);
 }
 

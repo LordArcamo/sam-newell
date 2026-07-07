@@ -93,14 +93,15 @@ const hasVisual = Boolean(image || icon);
     margin-top: 2.25rem;
   }
 
-  /* Photo — boxy rounded frame */
+  /* Photo — boxy rounded frame with a controlled 4:3 crop */
   .ph-media {
+    aspect-ratio: 4 / 3;
+    width: min(30rem, 100%);
     border-radius: 1.25rem;
     overflow: clip;
     border: 1px solid rgba(217, 217, 217, 0.28);
     box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.65);
     justify-self: end;
-    width: 100%;
   }
 
   .ph-media img {
@@ -131,15 +132,22 @@ const hasVisual = Boolean(image || icon);
       grid-template-columns: 1fr;
     }
 
-    .ph-media,
+    /* Stacked: the photo goes full-width and cinematic instead of
+       floating as a small box in dark space */
+    .ph-media {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      justify-self: stretch;
+    }
+
     .ph-icon {
       justify-self: center;
-      width: min(18rem, 88%);
+      width: min(16rem, 70%);
     }
 
     .ph-icon :global(.ph-icon-svg) {
-      width: 120px;
-      height: 120px;
+      width: 110px;
+      height: 110px;
     }
   }
 </style>
