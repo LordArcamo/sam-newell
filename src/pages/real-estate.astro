@@ -28,6 +28,18 @@ const tracks = [
   },
 ];
 
+const listingsSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Homes Sam Newell has listed and sold',
+  itemListElement: LISTINGS.map((l, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: `${l.address}, ${l.city}`,
+    url: l.href,
+  })),
+};
+
 const areas = ['Lehi', 'Provo', 'Orem', 'Salt Lake City', 'Sandy', 'Herriman', 'Eagle Mountain', 'Saratoga Springs', 'Cedar Hills', 'Salem'];
 ---
 
@@ -47,6 +59,8 @@ const areas = ['Lehi', 'Provo', 'Orem', 'Salt Lake City', 'Sandy', 'Herriman', '
       <a href={ZILLOW_PROFILE} target="_blank" rel="noopener" class="btn btn--ghost-light">Search Utah listings</a>
     </Fragment>
   </PageHero>
+
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(listingsSchema)} />
 
   <!-- Trust strip -->
   <section class="trust">

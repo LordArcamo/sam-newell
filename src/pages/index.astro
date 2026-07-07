@@ -7,6 +7,16 @@ import CtaBand from '../components/CtaBand.astro';
 import IconSketch from '../components/IconSketch.astro';
 import { SERVICES, LISTINGS, PARTNERS, PODCAST, ZILLOW_PROFILE, BIO_SHORT, QUOTES } from '../data/site';
 
+const podcastSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'PodcastSeries',
+  name: PODCAST.name,
+  description: PODCAST.blurb,
+  url: PODCAST.spotify,
+  sameAs: [PODCAST.apple, PODCAST.spotify],
+  author: { '@type': 'Person', name: 'Sam Newell' },
+};
+
 const marquee = [
   'Top 1% Utah Realtor',
   '$450M+ Closed',
@@ -22,6 +32,8 @@ const marquee = [
   title="Sam Newell — Utah Real Estate Broker & Multifamily Investor"
   description="Real talk. Real growth. Sam Newell is a top-producing Utah broker and multifamily investor — $450M+ closed, 2,000+ doors, CCIM. Buy, sell, or invest on the Wasatch Front."
 >
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(podcastSchema)} />
+
   <!-- ================= HERO ================= -->
   <section class="hero grain">
     <div class="container hero-grid">
@@ -63,6 +75,8 @@ const marquee = [
             src="/images/sam-stats.png"
             alt="Sam Newell, Utah real estate broker"
             class="hero-portrait"
+            width="912"
+            height="1024"
             fetchpriority="high"
           />
           <div class="hero-badge">
@@ -95,7 +109,7 @@ const marquee = [
   <section class="who section">
     <div class="container who-grid">
       <div class="who-media" data-reveal="right">
-        <img src="/images/sam-hero.jpg" alt="Sam Newell with his kids, Heidi and Liam" loading="lazy" />
+        <img src="/images/sam-hero.jpg" alt="Sam Newell with his kids, Heidi and Liam" width="1024" height="900" loading="lazy" />
         <figure class="who-quote-card" data-reveal="scale">
           <blockquote>“{QUOTES[0]}”</blockquote>
           <figcaption>— Sam Newell</figcaption>
@@ -153,7 +167,7 @@ const marquee = [
         {SERVICES.map((s) => (
           <a href={s.href} class="service-card">
             <div class="service-media">
-              <img src={s.image} alt="" loading="lazy" />
+              <img src={s.image} alt={`${s.title} — Sam Newell`} loading="lazy" />
             </div>
             <div class="service-body">
               <span class="service-icon"><IconSketch name={s.icon} size={26} /></span>
@@ -238,7 +252,7 @@ const marquee = [
         </div>
       </div>
       <div class="pod-media" data-reveal="left">
-        <img src="/images/sam-podcast.png" alt="The Get Leveraged podcast playing on two phones" loading="lazy" data-parallax="0.12" />
+        <img src="/images/sam-podcast.png" alt="The Get Leveraged podcast playing on two phones" width="1024" height="1001" loading="lazy" data-parallax="0.12" />
       </div>
     </div>
   </section>

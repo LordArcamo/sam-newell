@@ -93,15 +93,14 @@ const hasVisual = Boolean(image || icon);
     margin-top: 2.25rem;
   }
 
-  /* Photo — arch frame, same family as the homepage hero */
+  /* Photo — boxy rounded frame */
   .ph-media {
-    aspect-ratio: 0.92;
-    border-radius: 999px 999px 1.5rem 1.5rem;
+    border-radius: 1.25rem;
     overflow: clip;
     border: 1px solid rgba(217, 217, 217, 0.28);
     box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.65);
     justify-self: end;
-    width: min(24rem, 100%);
+    width: 100%;
   }
 
   .ph-media img {
@@ -110,14 +109,14 @@ const hasVisual = Boolean(image || icon);
     object-fit: cover;
   }
 
-  /* Icon — big drawn line-art in an arch panel */
+  /* Icon — big drawn line-art in a boxy panel */
   .ph-icon {
-    aspect-ratio: 0.92;
+    aspect-ratio: 1.05;
     width: min(22rem, 100%);
     justify-self: end;
     display: grid;
     place-items: center;
-    border-radius: 999px 999px 1.5rem 1.5rem;
+    border-radius: 1.25rem;
     border: 1px solid rgba(217, 217, 217, 0.28);
     background: linear-gradient(180deg, rgba(46, 46, 46, 0.65) 0%, rgba(27, 27, 27, 0.4) 100%);
   }
