@@ -66,7 +66,7 @@ const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
     <h1 class="title" id="hero-title">Sam<br /> Newell</h1>
     <div class="side">
       <p class="sentence">Real estate broker in Lehi, Utah. Buying, selling and investing on the Wasatch Front, with straight answers.</p>
-      <p class="proof num"><b>{ZILLOW.rating}</b> from {ZILLOW.reviews} Zillow reviews <b>{ZILLOW.sold}</b> homes sold</p>
+      <p class="proof num"><b>{ZILLOW.rating}</b> from {ZILLOW.reviews} Zillow reviews · <b>{ZILLOW.sold}</b> homes sold</p>
       <a class="btn" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call with Sam <span class="arrow" aria-hidden="true">→</span></a>
     </div>
   </div>
@@ -169,9 +169,6 @@ const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
   }
   .proof b {
     font-weight: 600;
-  }
-  .proof b + * {
-    margin-right: 8px;
   }
   .side .btn {
     width: 100%;

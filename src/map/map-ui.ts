@@ -54,11 +54,12 @@ export function initMap() {
   function apply(v: typeof vb) {
     vb = v;
     const W = stage.clientWidth, H = stage.clientHeight;
+    const minX = free().l - 12; // anything left of this sits under the panel and card on desktop
     svg.setAttribute('viewBox', `${v.x.toFixed(3)} ${v.y.toFixed(3)} ${(W / v.s).toFixed(3)} ${(H / v.s).toFixed(3)}`);
     const place = (el: HTMLElement, p: Pt) => {
       const px = (p.x - v.x) * v.s, py = (p.y - v.y) * v.s;
       el.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px)`;
-      el.style.visibility = px < -40 || py < -40 || px > W + 40 || py > H + 40 ? 'hidden' : '';
+      el.style.visibility = px < Math.max(-40, minX) || py < -40 || px > W + 40 || py > H + 40 ? 'hidden' : '';
     };
     pins.forEach((el) => {
       const p = gl ? null : pinPt[el.dataset.pin!];
@@ -68,6 +69,7 @@ export function initMap() {
       const t = townPt[el.dataset.label!];
       const px = (t.x - v.x) * v.s, py = (t.y - v.y) * v.s;
       el.style.transform = `translate(${(px + 10).toFixed(1)}px, ${(py - 10).toFixed(1)}px)`;
+      el.style.visibility = px < minX || py < 0 || px > W - 40 || py > H ? 'hidden' : '';
     });
     const spx = (data.sn.x - v.x) * v.s, spy = (data.sn.y - v.y) * v.s;
     sn.style.transform = `translate(${(spx - 15).toFixed(1)}px, ${(spy - 34).toFixed(1)}px)`;
@@ -136,7 +138,7 @@ export function initMap() {
   toolbar.addEventListener('keydown', (e) => {
     const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
     if (i < 0) return;
-    const horizontal = getComputedStyle(toolbar).display === 'flex';
+    const horizontal = getComputedStyle(toolbar).display === 'flex' && innerWidth >= 1024;
     const next = horizontal ? ['ArrowRight', 'ArrowDown'] : ['ArrowDown', 'ArrowRight'];
     const prev = horizontal ? ['ArrowLeft', 'ArrowUp'] : ['ArrowUp', 'ArrowLeft'];
     let j = -1;

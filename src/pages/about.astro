@@ -52,7 +52,7 @@ const timeline = [
       <h2 class="h" id="be-h" data-rv>The builder’s eye</h2>
       <p class="lead" data-rv style="--i:1">Sam studied construction management at BYU, and he still frames houses with his friend Oscar at <a class="link" href={FRAMING.url} rel="noopener" target="_blank">{FRAMING.name}</a>, from Park City to the Provo Riverbottoms. It is why he looks past the paint.</p>
       <figure class="be-q" data-rv style="--i:2">
-        <blockquote class="statement"><p>“{FRAMING_QUOTE.text}”</p></blockquote>
+        <blockquote class="lead"><p>“{FRAMING_QUOTE.text}”</p></blockquote>
         <figcaption>{FRAMING_QUOTE.name}, {FRAMING_QUOTE.role}</figcaption>
       </figure>
       <figure class="be-q2" data-rv style="--i:3">
@@ -98,7 +98,7 @@ const timeline = [
     margin-bottom: 18px;
   }
   .tl-t {
-    font-size: 22px;
+    font-size: 24px;
     letter-spacing: -0.02em;
     margin-bottom: 8px;
   }
@@ -117,8 +117,11 @@ const timeline = [
   .be-q {
     margin-top: 56px;
   }
-  .be-q .statement {
-    max-width: 24ch;
+  .be-q .lead {
+    font-family: var(--display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    max-width: 34ch;
   }
   .be-q figcaption,
   .be-q2 figcaption {
@@ -174,6 +177,9 @@ const timeline = [
     }
   }
   @media (max-width: 767px) {
+    .tl-list {
+      grid-template-columns: 1fr;
+    }
     .fam > *,
     .fam :global(.fam-1),
     .fam :global(.fam-2),

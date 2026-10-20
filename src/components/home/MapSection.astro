@@ -127,7 +127,7 @@ const mapData = {
     height: 100svh;
     min-height: 760px;
     overflow: hidden;
-    background: var(--paper);
+    background: var(--tone);
   }
   .stage {
     position: absolute;
@@ -241,7 +241,7 @@ const mapData = {
     z-index: 2;
   }
   .panel-h {
-    font-size: 26px;
+    font-size: 32px;
     letter-spacing: -0.025em;
     margin: 0 8px 14px;
   }
@@ -253,7 +253,7 @@ const mapData = {
   .town {
     text-align: left;
     padding: 8px 10px;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 500;
     min-height: 40px;
     transition: background-color var(--hover), color var(--hover), padding var(--hover) var(--ease-out);
@@ -280,10 +280,10 @@ const mapData = {
     overflow-y: auto;
     z-index: 2;
   }
-  .js .tc {
+  :global(.js) .tc {
     display: none;
   }
-  .js .tc.on {
+  :global(.js) .tc.on {
     display: block;
     animation: card-in 0.15s ease-out;
   }
@@ -314,7 +314,7 @@ const mapData = {
     padding: 20px 22px 22px;
   }
   .tc-town {
-    font-size: 30px;
+    font-size: 32px;
     letter-spacing: -0.025em;
   }
   .tc-homes {
@@ -346,12 +346,12 @@ const mapData = {
   .addr {
     font-family: var(--display);
     font-weight: 600;
-    font-size: 20px;
+    font-size: 24px;
     letter-spacing: -0.02em;
     line-height: 1.2;
   }
   .det {
-    font-size: 15px;
+    font-size: 16px;
   }
   .run {
     font-weight: 600;
@@ -421,7 +421,7 @@ const mapData = {
     gap: 16px;
   }
   .sheet-h {
-    font-size: clamp(30px, 3vw, 44px);
+    font-size: var(--t-sub);
   }
   .sheet-x {
     font-weight: 600;
@@ -455,7 +455,7 @@ const mapData = {
   }
   @media (prefers-reduced-motion: reduce) {
     .sheet[open],
-    .js .tc.on {
+    :global(.js) .tc.on {
       animation: none;
     }
   }
@@ -479,16 +479,15 @@ const mapData = {
     }
     .town-list {
       display: flex;
-      overflow-x: auto;
+      flex-wrap: wrap;
       gap: 6px;
-      padding-bottom: 6px;
-      scrollbar-width: none;
     }
     .town {
       flex: none;
       background: var(--tone);
       white-space: nowrap;
       min-height: 44px;
+      font-size: 16px;
     }
     .stage {
       position: relative;

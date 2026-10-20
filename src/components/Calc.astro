@@ -95,19 +95,19 @@ const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a m
   <div class="outputs">
     <p class="sr-only" aria-live="polite" data-summary>{summary}</p>
     <div class="lead-out">
-      <p class="ol">{lead.label}</p>
       <p class="big num" data-out={lead.k}>{lead.v}</p>
+      <p class="ol">{lead.label}</p>
       <p class="small">{lead.line} <span class="f">{lead.f}</span></p>
     </div>
-    <dl class="rest">
+    <div class="rest">
       {rest.map((o) => (
         <div>
-          <dt>{o.label}</dt>
-          <dd class="num" data-out={o.k}>{o.v}</dd>
-          <dd class="small">{o.line} <span class="f">{o.f}</span></dd>
+          <p class="rv num" data-out={o.k}>{o.v}</p>
+          <p class="rl">{o.label}</p>
+          <p class="small">{o.line} <span class="f">{o.f}</span></p>
         </div>
       ))}
-    </dl>
+    </div>
     <p class="fine small">
       This is an example to help you think, not a loan estimate, an appraisal, or tax, legal or investment advice.
       Rates, taxes, insurance, HOA dues and rents vary. Ask a licensed lender for a loan estimate. Sam Newell is a
@@ -135,7 +135,7 @@ const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a m
     align-content: start;
   }
   .fl {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
   }
   .in {
@@ -193,7 +193,7 @@ const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a m
     font-size: clamp(56px, 6vw, 96px);
     letter-spacing: -0.04em;
     line-height: 1;
-    margin: 6px 0 12px;
+    margin: 0 0 10px;
     transition: opacity 0.15s;
   }
   .f {
@@ -204,14 +204,14 @@ const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a m
   .rest {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 26px 28px;
-    margin-top: 28px;
+    gap: 48px 28px;
+    margin-top: 32px;
   }
-  .rest dt {
+  .rl {
     font-weight: 600;
-    font-size: 15px;
+    margin-bottom: 2px;
   }
-  .rest dd.num {
+  .rest .rv {
     font-family: var(--display);
     font-weight: 600;
     font-size: 34px;
@@ -250,8 +250,8 @@ const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a m
     .inputs {
       grid-template-columns: 1fr 1fr;
     }
-    .rest dd.num {
-      font-size: 30px;
+    .rest .rv {
+      font-size: 32px;
     }
   }
 </style>

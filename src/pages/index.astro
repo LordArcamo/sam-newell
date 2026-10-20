@@ -44,7 +44,7 @@ const jsonld = [
   <!-- 2 · Intro: the statement, photos pass in the side columns -->
   <section class="intro sec wrap" aria-label="Sam's promise">
     <Pic class="i1" src={img('photos/framed-house-wasatch.jpg')} alt="A new house framed in timber below the Wasatch mountains" sizes="(max-width: 767px) 60vw, 22vw" ratio="r45" pos="58% 50%" />
-    <p class="statement intro-s" data-rv>Honest feedback on every house.<br /> The numbers before you offer.</p>
+    <p class="statement intro-s" data-rv><span>Honest feedback on every house.</span><br /> <span>The numbers before you offer.</span></p>
     <div class="i-right">
       <Pic class="i2" src={img('photos/listing-kitchen-2026-05.jpg')} alt="A bright listing kitchen with a quartz island, Lehi" sizes="(max-width: 767px) 80vw, 26vw" ratio="r1610" pos="50% 62%" i={1} />
       <Pic class="i3" src={img('photos/family-river.jpg')} alt="Sam with Heidi and Liam by a river in red-rock country" sizes="(max-width: 767px) 50vw, 18vw" ratio="r11" pos="50% 45%" i={2} />
@@ -132,7 +132,7 @@ const jsonld = [
   <!-- 7 · 235: the figure on the photo's edge -->
   <section class="proof dark" aria-labelledby="proof-h">
     <div class="proof-photo">
-      <Pic src={img('photos/valley-view-utah-county.jpg')} alt="Utah County from a new home: a road, a golden field and the valley running to the mountains" sizes="(max-width: 767px) 100vw, 1350px" pos="50% 64%" rv={false} />
+      <Pic src={img('photos/valley-view-utah-county.jpg')} alt="Utah County from a new home: a road, a golden field and the valley running to the mountains" sizes="(max-width: 767px) 100vw, 1350px" pos="50% 37%" rv={false} />
     </div>
     <div class="proof-fig wrap">
       <p class="title proof-n num" aria-hidden="true" data-rise>{ZILLOW.sold}</p>
@@ -241,22 +241,31 @@ const jsonld = [
   /* 2 · intro */
   .intro {
     display: grid;
-    grid-template-columns: 22vw 1fr 26vw;
-    gap: 4vw;
+    grid-template-columns: 18vw 1fr 22vw;
+    gap: 3vw;
     align-items: start;
   }
   .intro-s {
     align-self: center;
     text-align: center;
-    font-size: clamp(30px, 3vw, 46px);
-    max-width: 17ch;
+    font-size: 36px;
     margin-inline: auto;
+  }
+  @media (min-width: 1200px) {
+    .intro-s span {
+      white-space: nowrap;
+    }
+  }
+  @media (max-width: 1199px) {
+    .intro-s {
+      font-size: 24px;
+    }
   }
   .i-right :global(.i2) {
     margin-top: 160px;
   }
   .i-right :global(.i3) {
-    width: 18vw;
+    width: 15vw;
     margin-top: 56px;
   }
 
@@ -281,7 +290,7 @@ const jsonld = [
   .r-name {
     font-family: var(--display);
     font-weight: 500;
-    font-size: clamp(24px, 2.5vw, 40px);
+    font-size: clamp(24px, 2.5vw, 36px);
     letter-spacing: -0.025em;
     line-height: 1.1;
   }
@@ -295,7 +304,7 @@ const jsonld = [
     outline-offset: 2px;
   }
   .r-det {
-    font-size: 17px;
+    font-size: 18px;
     white-space: nowrap;
   }
   .homes-foot {
@@ -374,7 +383,7 @@ const jsonld = [
     justify-self: end;
   }
   .bsi-t h3 {
-    font-size: clamp(28px, 2.6vw, 40px);
+    font-size: var(--t-sub);
     letter-spacing: -0.025em;
     margin-bottom: 12px;
   }
@@ -385,14 +394,13 @@ const jsonld = [
   /* 5 · review */
   .review {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: 6vw;
-    align-items: center;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: 5vw;
+    align-items: end;
     padding-bottom: var(--sec);
   }
   .rv-q .statement {
-    font-size: clamp(26px, 2.5vw, 36px);
-    max-width: 24ch;
+    font-size: clamp(24px, 2.5vw, 36px);
   }
   .rv-q figcaption {
     margin-top: 24px;
@@ -465,7 +473,7 @@ const jsonld = [
     width: min(330px, 46%);
     background: var(--paper);
     padding: 20px 22px;
-    font-size: 17px;
+    font-size: 18px;
   }
   .about-block .more {
     display: inline-flex;
@@ -491,9 +499,6 @@ const jsonld = [
     width: 100%;
     height: 100%;
   }
-  .tile-map :global(.rg-lake) {
-    fill: var(--paper);
-  }
   .tile-sn {
     position: absolute;
     display: flex;
@@ -501,7 +506,7 @@ const jsonld = [
     gap: 6px;
     transform: translate(-11px, -50%);
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px;
     background: var(--tone);
     padding-right: 6px;
   }
@@ -515,7 +520,7 @@ const jsonld = [
     gap: 22px 28px;
   }
   .facts dt {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
   }
   .facts dd {
@@ -536,14 +541,14 @@ const jsonld = [
     padding: 44px 48px 40px;
   }
   .sheet-p .h {
-    font-size: clamp(40px, 3.6vw, 56px);
+    font-size: var(--t-head);
     margin-bottom: 12px;
   }
   .meta {
     margin-bottom: 18px;
   }
   .grp h3 {
-    font-size: 21px;
+    font-size: 24px;
     letter-spacing: -0.02em;
     margin: 22px 0 6px;
   }
@@ -554,7 +559,7 @@ const jsonld = [
   /* 10 · talk */
   .talk {
     position: relative;
-    height: 110svh;
+    height: 100svh;
     min-height: 720px;
     overflow: hidden;
     background: var(--ink);
@@ -564,16 +569,16 @@ const jsonld = [
     inset: 0;
   }
   .visit {
-    position: sticky;
-    top: calc(var(--bar) + 40px);
-    margin: 60px var(--m) 0 auto;
+    position: absolute;
+    top: 60px;
+    right: var(--m);
     width: 400px;
     background: var(--paper);
     padding: 32px;
     z-index: 1;
   }
   .visit .h {
-    font-size: 44px;
+    font-size: var(--t-head);
     margin-bottom: 14px;
   }
   .visit p {
@@ -582,7 +587,7 @@ const jsonld = [
   .visit-call a {
     font-weight: 600;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 24px;
   }
   .visit .btn {
     width: 100%;
@@ -593,6 +598,16 @@ const jsonld = [
   }
 
   @media (max-width: 1023px) {
+    .review {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 32px;
+    }
+    .review :global(.ph) {
+      max-width: 420px;
+    }
+    .rv-q .statement {
+      font-size: 24px;
+    }
     .homes {
       grid-template-columns: 1fr;
     }
@@ -623,7 +638,10 @@ const jsonld = [
       grid-row: 1;
       text-align: left;
       margin: 0 0 12px;
-      font-size: 30px;
+      font-size: 24px;
+    }
+    .intro-s span {
+      white-space: normal;
     }
     .intro :global(.i1) {
       grid-row: 2;
@@ -644,7 +662,7 @@ const jsonld = [
       padding: 14px 0;
     }
     .r-name {
-      font-size: 26px;
+      font-size: 32px;
     }
     .bsi-row,
     .bsi-row.flip {
@@ -666,6 +684,9 @@ const jsonld = [
     .review {
       grid-template-columns: 1fr;
       gap: 32px;
+    }
+    .rv-q .statement {
+      font-size: 24px;
     }
     .proof-photo {
       height: 70svh;
@@ -703,6 +724,7 @@ const jsonld = [
     .visit {
       position: relative;
       top: auto;
+      right: auto;
       width: auto;
       margin: -80px var(--m) 0;
       padding: 28px 24px;
