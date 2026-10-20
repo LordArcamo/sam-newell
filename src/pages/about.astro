@@ -1,294 +1,189 @@
 ---
 import Base from '../layouts/Base.astro';
-import CtaBand from '../components/CtaBand.astro';
-import Newsletter from '../components/Newsletter.astro';
-import PageHero from '../components/PageHero.astro';
-import { QUOTES, PODCAST } from '../data/site';
+import InnerHero from '../components/InnerHero.astro';
+import Pic from '../components/Pic.astro';
+import { img } from '../lib/images';
+import { review, reviewDate } from '../data/reviews';
+import { CONTACT, SAM_SAYS, FRAMING, FRAMING_QUOTE, ZILLOW, PODCAST, MFI, BROKERAGE, SITE } from '../data/site';
+import { CONFIRM } from '../data/confirm';
+import { EPISODES } from '../lib/podcast';
 
+const scott = review(8);
+const firstEp = EPISODES[EPISODES.length - 1];
+const year = (d: string) => new Date(d + 'T12:00:00Z').getUTCFullYear();
+// Years shown only for verified items. 2010 / BYU years / CCIM stay behind CONFIRM flags.
 const timeline = [
-  {
-    year: '2010',
-    title: 'Bought at the bottom',
-    body: 'Sam starts buying real estate at the floor of the recession — while still a construction management student at BYU. First flips, first lessons, first conviction that real estate builds real freedom.',
-  },
-  {
-    year: '2012',
-    title: 'BYU, Construction Management',
-    body: 'Graduates with a builder’s eye he still uses on every walkthrough. He doesn’t just see the house — he sees the framing, the bones, the budget to fix it.',
-  },
-  {
-    year: '2014',
-    title: 'Licensed & closing',
-    body: 'Goes full-time as an agent, then broker. Flips become fourplexes; fourplexes become a development playbook. Clients get the same underwriting he uses on his own money.',
-  },
-  {
-    year: '2018',
-    title: 'Multifamily Investment Club',
-    body: 'Founds MFI Club in Lehi — a private firm acquiring value-add multifamily across the US, held long-term for cash flow and appreciation. The portfolio grows past 2,000 doors.',
-  },
-  {
-    year: '2019',
-    title: 'Get Leveraged',
-    body: `Launches the ${PODCAST.name} podcast — ${PODCAST.episodes} of straight talk on multifamily, passive income, and durable wealth. ${PODCAST.rating}.`,
-  },
-  {
-    year: 'Today',
-    title: 'Broker · CCIM · Dad',
-    body: 'Top-producing Utah broker with $450M+ closed, CCIM designee, hotel and assisted-living operator — and, above all of it, husband to Lauren and dad to Heidi and Liam.',
-  },
+  { y: String(ZILLOW.memberSince), t: 'Joins Zillow as an agent', s: 'Member since January 2014, per his Zillow profile.' },
+  ...(CONFIRM.mfiClub ? [{ y: String(MFI.founded), t: `Founds ${MFI.name}`, s: 'Larger apartment buildings, bought and run with investors.' }] : []),
+  { y: String(year(firstEp.date)), t: 'Starts the podcast', s: 'First as Recession Proof, later as Get Leveraged.' },
+  { y: '2025', t: 'Records episode 103', s: `The last of ${PODCAST.episodes}, on March 24, 2025. The archive stays up.` },
+  { y: '2026', t: `${ZILLOW.sold} homes sold`, s: `As counted on his Zillow profile in ${ZILLOW.asOf}, with ${BROKERAGE.short}.` },
 ];
 ---
-
 <Base
-  title="About Sam Newell — The Story Behind the Broker"
-  description="From buying at the bottom of the 2010 recession as a BYU student to $450M+ closed and 2,000+ multifamily doors — the real story of Utah broker Sam Newell."
+  title="About Sam Newell | Lehi Broker, Builder's Eye, Dad"
+  description="Sam Newell sells homes on the Wasatch Front, frames houses with his friend Oscar at A Framing Company, and fly-fishes with his kids whenever he can."
+  crumbs={[{ name: 'About', path: '/about/' }]}
 >
-  <PageHero
-    icon="compass"
-    kicker="Sam’s story"
-    intro="Utah based, Idaho grown. Broker, builder, investor, podcast host — and the guy who’ll tell you the truth about a deal even when it costs him the commission."
-  >
-    Built the <em>slow, honest</em> way
-  </PageHero>
+  <InnerHero
+    title={`Dad, ${SITE.title.split(' ').pop()}, fly fisherman`}
+    lead="Sam sells homes on the Wasatch Front, frames houses with his friend Oscar and fly-fishes whenever he can."
+    cta={{ href: CONTACT.calendly, label: 'Book a call', external: true }}
+    image={img('photos/family-brighton-2026-10.jpg')}
+    alt="Sam with his kids, Heidi and Liam, among autumn aspens at Brighton"
+    pos="50% 30%"
+  />
 
-  <!-- Portrait + values -->
-  <section class="section story">
-    <div class="container story-grid">
-      <div class="story-media" data-reveal="right">
-        <div class="story-arch grain">
-          <img src="/images/sam-about.png" alt="Sam Newell portrait" loading="lazy" />
-        </div>
-      </div>
-      <div class="story-copy">
-        <span class="kicker" data-reveal>Integrity first</span>
-        <h2 class="display story-title" data-reveal>
-          Advice he takes with <em>his own money</em>
-        </h2>
-        <p data-reveal>
-          Sam Newell is a seasoned real estate investor and broker with more than 15 years
-          in the game — managing over 2,000 apartment units and closing $450M+ in
-          transactions across the Wasatch Front. He’s a CCIM designee, one of the most
-          rigorous commercial real estate credentials in the industry.
-        </p>
-        <p data-reveal>
-          But the résumé isn’t the point. The point is how he got it: buying his first
-          properties at the bottom of the recession as a broke BYU student, framing houses
-          he’d later learn to underwrite, and building a reputation one straight answer at
-          a time. A church mission taught him people; construction taught him buildings;
-          the recession taught him price.
-        </p>
-        <p data-reveal>
-          Off the clock you’ll find him on a river with a fly rod, or home with Lauren,
-          Heidi, and Liam — the portfolio he actually brags about.
-        </p>
-      </div>
+  <section class="tl sec wrap" aria-labelledby="tl-h">
+    <h2 class="h" id="tl-h" data-rv>Fifteen years in Utah real estate</h2>
+    <ol role="list" class="tl-list">
+      {timeline.map((t, i) => (
+        <li data-rv style={`--i:${i}`}>
+          <p class="tl-y num">{t.y}</p>
+          <h3 class="tl-t">{t.t}</h3>
+          <p class="tl-s">{t.s}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="be dark sec wrap" id="builders-eye" aria-labelledby="be-h">
+    <div class="be-t">
+      <h2 class="h" id="be-h" data-rv>The builder’s eye</h2>
+      <p class="lead" data-rv style="--i:1">Sam studied construction management at BYU, and he still frames houses with his friend Oscar at <a class="link" href={FRAMING.url} rel="noopener" target="_blank">{FRAMING.name}</a>, from Park City to the Provo Riverbottoms. It is why he looks past the paint.</p>
+      <figure class="be-q" data-rv style="--i:2">
+        <blockquote class="statement"><p>“{FRAMING_QUOTE.text}”</p></blockquote>
+        <figcaption>{FRAMING_QUOTE.name}, {FRAMING_QUOTE.role}</figcaption>
+      </figure>
+      <figure class="be-q2" data-rv style="--i:3">
+        <blockquote><p>“{scott.excerpts.builder}”</p></blockquote>
+        <figcaption class="small">{scott.name}, {reviewDate(scott.date)}, on Zillow</figcaption>
+      </figure>
+    </div>
+    <div class="be-pics">
+      <Pic class="be-1" src={img('photos/framing-custom-home.jpg')} alt="A three-storey custom home framed by A Framing Company" sizes="(max-width: 767px) 90vw, 36vw" ratio="r43" />
+      <Pic class="be-2" src={img('photos/framing-park-city-sam.jpg')} alt="Sam on a 6,000 square foot framing job in Park City" sizes="(max-width: 767px) 44vw, 14vw" ratio="r45" pos="50% 30%" i={1} />
+      <Pic class="be-3" src={img('photos/framing-provo-sam.jpg')} alt="Sam in front of a custom home being framed in the Provo Riverbottoms" sizes="(max-width: 767px) 44vw, 14vw" ratio="r45" pos="50% 30%" i={2} />
     </div>
   </section>
 
-  <!-- Quote band #1 -->
-  <section class="quoteband grain">
-    <div class="container">
-      <blockquote class="display quoteband-text" data-reveal="scale">
-        “{QUOTES[0]}”
-      </blockquote>
-      <span class="quoteband-source" data-reveal>— Sam Newell</span>
-    </div>
+  <section class="fam sec wrap" id="family" aria-labelledby="fam-h">
+    <h2 class="sr-only" id="fam-h">Family</h2>
+    <figure class="fam-q" data-rv>
+      <blockquote class="statement"><p>“{SAM_SAYS.dad.text}”</p></blockquote>
+      <figcaption>Sam, on {SAM_SAYS.dad.where}, {SAM_SAYS.dad.date}</figcaption>
+    </figure>
+    <Pic class="fam-1" src={img('photos/family-kenai-sockeye.jpg')} alt="Sam and Liam in waders with Liam's first sockeye on the Kenai River, Alaska" sizes="(max-width: 767px) 90vw, 44vw" ratio="r1610" pos="50% 40%" />
+    <Pic class="fam-2" src={img('photos/family-easter.jpg')} alt="Sam with Heidi and Liam holding stuffed animals" sizes="(max-width: 767px) 44vw, 20vw" ratio="r45" pos="50% 35%" i={1} />
+    <Pic class="fam-3" src={img('photos/family-river.jpg')} alt="Sam with Heidi and Liam by a river in red-rock country" sizes="(max-width: 767px) 44vw, 24vw" ratio="r11" pos="50% 45%" i={2} />
+    <p class="fam-t" data-rv style="--i:2">Most of Sam’s Instagram is Heidi and Liam: the aspens at Brighton in the fall, the Kenai River in July, and a lot of fish.</p>
   </section>
-
-  <!-- Timeline -->
-  <section class="section tl">
-    <div class="container">
-      <span class="kicker" data-reveal>The long way here</span>
-      <h2 class="display tl-title" data-reveal>Fifteen years, <em>no shortcuts</em></h2>
-      <ol class="tl-list">
-        {timeline.map((t) => (
-          <li class="tl-item" data-reveal>
-            <span class="tl-year display">{t.year}</span>
-            <div class="tl-body">
-              <h3 class="tl-item-title">{t.title}</h3>
-              <p>{t.body}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
-
-  <!-- Family -->
-  <section class="section family">
-    <div class="container family-grid">
-      <div class="family-copy">
-        <span class="kicker" data-reveal>The why</span>
-        <h2 class="display family-title" data-reveal>
-          Wealth is what’s <em>waiting at home</em>
-        </h2>
-        <p data-reveal>
-          Every unit, every close, every 6 a.m. walkthrough points at the same thing:
-          a strong home for Lauren, Heidi, and Liam — and the free Saturdays to fill it.
-          That’s the growth Sam is actually after, and it’s the lens he brings to yours.
-        </p>
-        <blockquote class="family-quote" data-reveal>
-          “{QUOTES[1]}”
-        </blockquote>
-      </div>
-      <div class="family-media" data-reveal="left">
-        <img src="/images/sam-family.jpg" alt="Sam Newell with his family" loading="lazy" data-parallax="0.1" />
-      </div>
-    </div>
-  </section>
-
-  <CtaBand title="Hear the rest" em="in person." copy="The story’s better over a call — and so is the advice. Tell Sam where you’re headed." />
-  <Newsletter />
 </Base>
-
 <style>
-  .story-grid {
-    display: grid;
-    grid-template-columns: 0.85fr 1.15fr;
-    gap: clamp(2.5rem, 6vw, 5.5rem);
-    align-items: center;
+  .tl .h {
+    margin-bottom: 64px;
+    max-width: 16ch;
   }
-
-  /* The portrait PNG has a baked-in fade at the bottom — it only looks
-     right on a dark panel, where the fade melts into the background */
-  .story-arch {
-    position: relative;
-    border-radius: 1.25rem;
-    background: linear-gradient(180deg, var(--navy-soft) 0%, var(--ink) 100%);
-    border: 1px solid rgba(217, 217, 217, 0.22);
-    padding: 2.75rem 2rem 0;
-    overflow: clip;
-    box-shadow: 0 40px 70px -30px rgba(19, 19, 19, 0.5);
-  }
-
-  .story-arch img {
-    display: block;
-    margin-inline: auto;
-    width: min(20rem, 100%);
-    filter: drop-shadow(0 24px 32px rgba(0, 0, 0, 0.4));
-  }
-
-  .story-title {
-    font-size: var(--step-3);
-    margin-block: 1.25rem 1.5rem;
-  }
-
-  .story-copy p {
-    margin-bottom: 1.25rem;
-    color: rgba(19, 19, 19, 0.75);
-  }
-
-  .quoteband {
-    background:
-      linear-gradient(rgba(19, 19, 19, 0.85), rgba(19, 19, 19, 0.9)),
-      url('/images/wasatch.jpg') center / cover no-repeat;
-    color: var(--cream);
-    padding-block: clamp(4.5rem, 9vw, 7rem);
-    text-align: center;
-    position: relative;
-    overflow: clip;
-  }
-
-  .quoteband-text {
-    font-size: var(--step-3);
-    max-width: 24ch;
-    margin-inline: auto;
-  }
-
-  .quoteband-source {
-    display: block;
-    margin-top: 1.75rem;
-    font-size: var(--text-sm);
-    font-weight: 600;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--brass-bright);
-  }
-
-  .tl {
-    background: var(--cream-2);
-  }
-
-  .tl-title {
-    font-size: var(--step-3);
-    margin-block: 1.25rem 0;
-  }
-
   .tl-list {
-    list-style: none;
-    margin-top: clamp(2.5rem, 5vw, 4rem);
     display: grid;
-    gap: 0;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 40px var(--gap);
   }
-
-  .tl-item {
-    display: grid;
-    grid-template-columns: 10rem 1fr;
-    gap: 2rem;
-    padding-block: 2rem;
-    border-top: 1px solid rgba(19, 19, 19, 0.12);
-  }
-
-  .tl-year {
-    font-size: var(--step-2);
-    color: var(--brass);
-  }
-
-  .tl-item-title {
-    font-family: var(--font-display);
-    font-size: var(--title-card);
+  .tl-y {
+    font-family: var(--display);
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    font-size: clamp(44px, 4.4vw, 72px);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 18px;
   }
-
-  .tl-body p {
-    color: rgba(19, 19, 19, 0.7);
-    max-width: 60ch;
+  .tl-t {
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
   }
-
-  .family {
-    background: var(--cream);
+  .be {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 5vw;
+    align-items: start;
   }
-
-  .family-grid {
+  .be-t .h {
+    margin-bottom: 24px;
+  }
+  .be-t .link {
+    font-weight: 600;
+  }
+  .be-q {
+    margin-top: 56px;
+  }
+  .be-q .statement {
+    max-width: 24ch;
+  }
+  .be-q figcaption,
+  .be-q2 figcaption {
+    margin-top: 14px;
+  }
+  .be-q2 {
+    margin-top: 48px;
+    max-width: 48ch;
+  }
+  .be-pics {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: clamp(2.5rem, 6vw, 5rem);
-    align-items: center;
+    gap: var(--gap);
   }
-
-  .family-title {
-    font-size: var(--step-3);
-    margin-block: 1.25rem 1.5rem;
+  .be-pics :global(.be-1) {
+    grid-column: 1 / -1;
   }
-
-  .family-copy p {
-    color: rgba(19, 19, 19, 0.75);
+  .be-pics :global(.be-3) {
+    margin-top: 80px;
   }
-
-  .family-quote {
-    margin-top: 2rem;
-    padding-left: 1.5rem;
-    border-left: 3px solid var(--brass);
-    font-family: var(--font-display);
-    font-size: var(--step-1);
-    color: var(--ink);
+  .fam {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 40px var(--gap);
+    align-items: start;
   }
-
-  .family-media img {
-    border-radius: 1.25rem;
-    box-shadow: 0 40px 70px -30px rgba(19, 19, 19, 0.35);
+  .fam-q {
+    grid-column: 1 / 8;
   }
-
-  @media (max-width: 900px) {
-    .story-grid,
-    .family-grid {
+  .fam-q figcaption {
+    margin-top: 14px;
+  }
+  .fam :global(.fam-1) {
+    grid-column: 1 / 8;
+  }
+  .fam :global(.fam-2) {
+    grid-column: 9 / 12;
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+  .fam :global(.fam-3) {
+    grid-column: 8 / 11;
+  }
+  .fam-t {
+    grid-column: 2 / 7;
+  }
+  @media (max-width: 1023px) {
+    .tl-list {
+      grid-template-columns: 1fr 1fr;
+    }
+    .be {
       grid-template-columns: 1fr;
     }
-
-    .tl-item {
-      grid-template-columns: 1fr;
-      gap: 0.5rem;
+  }
+  @media (max-width: 767px) {
+    .fam > *,
+    .fam :global(.fam-1),
+    .fam :global(.fam-2),
+    .fam :global(.fam-3) {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+    .fam :global(.fam-2),
+    .fam :global(.fam-3) {
+      width: 70%;
     }
   }
 </style>

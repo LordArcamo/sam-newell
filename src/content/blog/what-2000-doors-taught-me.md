@@ -3,8 +3,9 @@ title: 'What 2,000 apartment doors taught me about passive income'
 description: 'I bought my first property at the bottom of the 2010 recession as a broke BYU student. Here’s what scaling to 2,000+ doors actually taught me — and what "passive" really means.'
 date: 2026-07-05
 tag: 'Investing'
-cover: '/images/multi-invest.jpg'
-coverAlt: 'Counting rental income in cash'
+cover: '../../assets/photos/podcast-studio.jpg'
+coverAlt: 'Sam in the Get Leveraged interview room'
+draft: true
 ---
 
 I bought my first property at the bottom of the recession, in 2010, as a broke construction management student at BYU. Today, through Multifamily Investment Club, we own and manage more than 2,000 doors. Here's what the road between those two sentences actually taught me — especially the parts the passive-income influencers skip.

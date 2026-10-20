@@ -1,0 +1,55 @@
+---
+/** Process rows: a big heading on the left axis, the text on the column-5 axis, one picture in the margin. */
+import Pic from './Pic.astro';
+import type { ImageMetadata } from 'astro';
+interface Step { h: string; p: string; img?: ImageMetadata; alt?: string; pos?: string; id?: string }
+interface Props { heading: string; steps: Step[]; id?: string }
+const { heading, steps, id = 'steps' } = Astro.props;
+---
+<section class="steps sec wrap" aria-labelledby={`${id}-h`}>
+  <h2 class="h" id={`${id}-h`} data-rv>{heading}</h2>
+  <ol role="list" class="st-list">
+    {steps.map((s, i) => (
+      <li class="st" id={s.id}>
+        <h3 class="st-h" data-rv>{s.h}</h3>
+        <p class="st-p" data-rv style="--i:1" set:html={s.p} />
+        {s.img && <Pic class="st-img" src={s.img} alt={s.alt ?? ''} sizes="(max-width: 767px) 60vw, 18vw" ratio={i % 2 ? 'r11' : 'r43'} pos={s.pos} i={2} />}
+      </li>
+    ))}
+  </ol>
+</section>
+<style>
+  .steps .h {
+    margin-bottom: 56px;
+    max-width: 14ch;
+  }
+  .st-list {
+    display: grid;
+    gap: 64px;
+  }
+  .st {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(0, 3fr);
+    gap: var(--gap) 4vw;
+    align-items: start;
+  }
+  .st-h {
+    font-size: clamp(28px, 2.6vw, 40px);
+    letter-spacing: -0.025em;
+  }
+  .st-p {
+    max-width: 52ch;
+  }
+  .st :global(.st-img) {
+    width: 100%;
+    max-width: 260px;
+  }
+  @media (max-width: 900px) {
+    .st {
+      grid-template-columns: 1fr;
+    }
+    .st :global(.st-img) {
+      max-width: 60%;
+    }
+  }
+</style>

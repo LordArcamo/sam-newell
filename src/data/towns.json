@@ -1,0 +1,14 @@
+[
+  { "slug": "north-salt-lake", "name": "North Salt Lake", "county": "Davis", "lat": 40.8486, "lon": -111.9069, "review": 11 },
+  { "slug": "millcreek", "name": "Millcreek", "county": "Salt Lake", "lat": 40.6869, "lon": -111.8755, "review": 6 },
+  { "slug": "murray", "name": "Murray", "county": "Salt Lake", "lat": 40.6669, "lon": -111.888, "review": 2 },
+  { "slug": "south-jordan", "name": "South Jordan", "county": "Salt Lake", "lat": 40.5622, "lon": -111.9297, "review": 3 },
+  { "slug": "herriman", "name": "Herriman", "county": "Salt Lake", "lat": 40.5141, "lon": -112.033, "review": 10 },
+  { "slug": "lehi", "name": "Lehi", "county": "Utah", "lat": 40.3916, "lon": -111.8508, "review": 7 },
+  { "slug": "saratoga-springs", "name": "Saratoga Springs", "county": "Utah", "lat": 40.3491, "lon": -111.9047, "review": null },
+  { "slug": "eagle-mountain", "name": "Eagle Mountain", "county": "Utah", "lat": 40.3141, "lon": -112.0069, "review": 16 },
+  { "slug": "american-fork", "name": "American Fork", "county": "Utah", "lat": 40.3769, "lon": -111.7958, "review": 9 },
+  { "slug": "pleasant-grove", "name": "Pleasant Grove", "county": "Utah", "lat": 40.3641, "lon": -111.7385, "review": 20 },
+  { "slug": "orem", "name": "Orem", "county": "Utah", "lat": 40.2969, "lon": -111.6946, "review": 17 },
+  { "slug": "provo", "name": "Provo", "county": "Utah", "lat": 40.2338, "lon": -111.6585, "review": 13 }
+]

@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+import { LEGAL_UPDATED } from '../data/legal';
+interface Props { title: string; h1: string; lead: string; description: string; path: string; sections: { h: string; p: string }[] }
+const { title, h1, lead, description, path, sections } = Astro.props;
+---
+<Base title={title} description={description} crumbs={[{ name: h1, path }]}>
+  <section class="lg wrap">
+    <header class="lg-h">
+      <h1 class="h">{h1}</h1>
+      <p class="lead">{lead}</p>
+      <p class="small">Last updated {LEGAL_UPDATED}.</p>
+    </header>
+    <div class="lg-b">
+      {sections.map((s) => (
+        <div class="lg-s">
+          <h2>{s.h}</h2>
+          <p>{s.p}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+</Base>
+<style>
+  .lg {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 5vw;
+    padding-block: 120px var(--sec);
+  }
+  .lg-h {
+    position: sticky;
+    top: calc(var(--bar) + 32px);
+    align-self: start;
+    display: grid;
+    gap: 18px;
+  }
+  .lg-b {
+    display: grid;
+    gap: 40px;
+    max-width: 62ch;
+  }
+  .lg-s h2 {
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  @media (max-width: 900px) {
+    .lg {
+      grid-template-columns: 1fr;
+      padding-top: 64px;
+    }
+    .lg-h {
+      position: static;
+    }
+  }
+</style>

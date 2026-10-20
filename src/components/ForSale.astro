@@ -1,0 +1,78 @@
+---
+/** The live listings, with photos (Zillow p_h files at small sizes until Sam sends the MLS originals). */
+import Pic from './Pic.astro';
+import { FOR_SALE } from '../lib/homes';
+import { img } from '../lib/images';
+interface Props { heading?: string; calc?: string }
+const { heading = 'For sale now', calc = '/invest/' } = Astro.props;
+---
+<section class="fs sec wrap" aria-labelledby="fs-h">
+  <h2 class="h" id="fs-h" data-rv>{heading}</h2>
+  <ul role="list" class="fs-list">
+    {FOR_SALE.map((h, i) => (
+      <li class="fs-item">
+        <Pic src={img(`listings/${h.photo}`)} alt={`${h.address}, ${h.townName}`} sizes="(max-width: 767px) 90vw, 30vw" ratio="r32" widths={[360, 550]} i={i} />
+        <div class="fs-t" data-rv style={`--i:${i + 1}`}>
+          <h3>{h.address}, {h.townName}</h3>
+          <p class="fs-price num">{h.detail}</p>
+          <p class="small">{h.facts}</p>
+          <p class="fs-links">
+            <a class="more" href={h.zillow} rel="noopener" target="_blank">See it on Zillow <span aria-hidden="true">→</span></a>
+            <a class="more" href={`${calc}?price=${h.price}#calc`}>Run the numbers <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
+      </li>
+    ))}
+  </ul>
+  <p class="small fs-note" data-rv>Prices as listed on {new Date('2026-10-21').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. Zillow has the current status.</p>
+</section>
+<style>
+  .fs .h {
+    margin-bottom: 48px;
+  }
+  .fs-list {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr;
+    gap: 40px var(--gap);
+    align-items: start;
+  }
+  .fs-item:nth-child(2) {
+    margin-top: 96px;
+  }
+  .fs-item:nth-child(3) {
+    margin-top: 40px;
+  }
+  .fs-t {
+    margin-top: 16px;
+  }
+  .fs-t h3 {
+    font-size: 24px;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .fs-price {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: -0.03em;
+    margin: 6px 0 2px;
+  }
+  .fs-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin-top: 12px;
+  }
+  .fs-note {
+    margin-top: 40px;
+    font-weight: 400;
+  }
+  @media (max-width: 900px) {
+    .fs-list {
+      grid-template-columns: 1fr;
+    }
+    .fs-item:nth-child(n) {
+      margin-top: 0;
+    }
+  }
+</style>

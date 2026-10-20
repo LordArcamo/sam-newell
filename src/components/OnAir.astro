@@ -1,0 +1,61 @@
+---
+/** The on-air bar. Hidden until an episode is played. */
+---
+<div class="onair dark" role="region" aria-label="Now playing" tabindex="0" hidden data-onair>
+  <p class="oa-label small">Get Leveraged</p>
+  <p class="oa-title" data-onair-title></p>
+  <p class="oa-time small num" data-onair-time>0:00</p>
+  <button type="button" class="btn light oa-btn" data-onair-toggle>Pause</button>
+</div>
+<style>
+  .onair {
+    position: fixed;
+    left: var(--m);
+    right: var(--m);
+    bottom: 16px;
+    z-index: 60;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 10px 10px 20px;
+    max-width: 920px;
+    margin-inline: auto;
+  }
+  .onair[hidden] {
+    display: none;
+  }
+  .onair:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .oa-label {
+    font-weight: 600;
+  }
+  .oa-title {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .oa-btn {
+    min-height: 44px;
+    min-width: 96px;
+  }
+  @media (max-width: 767px) {
+    .onair {
+      grid-template-columns: 1fr auto;
+      gap: 4px 12px;
+    }
+    .oa-label {
+      display: none;
+    }
+    .oa-time {
+      grid-row: 2;
+    }
+    .oa-btn {
+      grid-row: 1 / 3;
+      grid-column: 2;
+    }
+  }
+</style>

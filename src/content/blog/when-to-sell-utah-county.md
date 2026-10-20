@@ -3,7 +3,7 @@ title: 'Should you wait for spring to sell? The honest answer for Utah County'
 description: 'The “list in spring” rule is half-true. Here’s how to actually decide when to sell your Wasatch Front home — and when the calendar matters less than your situation.'
 date: 2026-07-02
 tag: 'Selling'
-cover: '/images/listings/orem-1600.webp'
+cover: '../../assets/listings/past-orem-1600.jpg'
 coverAlt: 'A snow-covered Orem home in winter'
 ---
 

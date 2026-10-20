@@ -1,0 +1,212 @@
+---
+import Logo from './Logo.astro';
+import { NAV, CONTACT } from '../data/site';
+const path = Astro.url.pathname;
+const active = (href: string) => path === href || (href !== '/' && path.startsWith(href));
+---
+<header class="bar" data-bar>
+  <a class="brand" href="/" aria-label="Sam Newell, home">
+    <Logo variant="caps" class="brand-logo" title="Sam Newell" />
+  </a>
+  <nav class="links" aria-label="Main">
+    <ul role="list">
+      {NAV.map((n) => (
+        <li><a href={n.href} aria-current={active(n.href) ? 'page' : undefined}>{n.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+  <a class="btn bar-cta" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call</a>
+  <button class="burger" type="button" aria-expanded="false" aria-controls="menu" data-menu-open>
+    <span class="sr-only">Menu</span>
+    <span class="burger-lines" aria-hidden="true"><i></i><i></i></span>
+  </button>
+</header>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden data-menu>
+  <div class="menu-top">
+    <a class="brand" href="/" aria-label="Sam Newell, home"><Logo variant="caps" class="brand-logo" /></a>
+    <button class="menu-close" type="button" data-menu-close>Close</button>
+  </div>
+  <nav aria-label="Menu">
+    <ul role="list" class="menu-list">
+      {[...NAV, { href: '/blog/', label: 'Blog' }, { href: '/contact/', label: 'Contact' }].map((n, i) => (
+        <li style={`--i:${i}`}><a href={n.href} aria-current={active(n.href) ? 'page' : undefined}>{n.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+  <div class="menu-foot">
+    <a class="btn light" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call</a>
+    <a class="menu-phone" href={CONTACT.phoneHref}>Call or text {CONTACT.phone}</a>
+  </div>
+</div>
+
+<style>
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: var(--bar);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+    padding-inline: var(--m);
+    background: var(--paper);
+    color: var(--ink);
+    transition: transform 0.45s var(--ease-out);
+  }
+  .bar.is-hidden {
+    transform: translateY(-100%);
+  }
+  .brand {
+    display: inline-flex;
+    width: max-content;
+    color: inherit;
+  }
+  .brand :global(.brand-logo) {
+    height: 26px;
+    width: auto;
+  }
+  .links ul {
+    display: flex;
+    gap: 36px;
+  }
+  .links a {
+    font-weight: 600;
+    font-size: 17px;
+    text-decoration: none;
+    padding: 10px 2px;
+    position: relative;
+  }
+  .links a::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    bottom: 4px;
+    height: 2px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--hover) var(--ease-out);
+  }
+  .links a:hover::after,
+  .links a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+  .bar-cta {
+    justify-self: end;
+  }
+  .burger {
+    display: none;
+    justify-self: end;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+  }
+  .burger-lines {
+    display: grid;
+    gap: 7px;
+    width: 26px;
+  }
+  .burger-lines i {
+    display: block;
+    height: 3px;
+    background: currentColor;
+  }
+  @media (max-width: 900px) {
+    .bar {
+      grid-template-columns: 1fr auto;
+    }
+    .links,
+    .bar-cta {
+      display: none;
+    }
+    .burger {
+      display: inline-flex;
+    }
+    .brand :global(.brand-logo) {
+      height: 22px;
+    }
+  }
+
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--m) calc(var(--m) + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .menu[hidden] {
+    display: none;
+  }
+  .menu-top {
+    height: var(--bar);
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .menu-top :global(.brand-logo) {
+    height: 22px;
+    width: auto;
+  }
+  .menu-close {
+    min-height: 48px;
+    padding: 0 4px;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--paper);
+  }
+  .menu-list {
+    margin-top: 32px;
+    display: grid;
+    gap: 2px;
+  }
+  .menu-list a {
+    display: block;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(40px, 11vw, 64px);
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+    text-decoration: none;
+    padding: 4px 0;
+  }
+  .menu-list a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-thickness: 4px;
+    text-underline-offset: 8px;
+  }
+  .menu-foot {
+    margin-top: auto;
+    padding-top: 40px;
+    display: grid;
+    gap: 18px;
+  }
+  .menu-phone {
+    font-weight: 600;
+    text-decoration: none;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .menu.is-open .menu-list li {
+      animation: menu-in 0.5s var(--ease-out) both;
+      animation-delay: calc(var(--i) * 45ms + 60ms);
+    }
+    @keyframes menu-in {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+    }
+  }
+</style>

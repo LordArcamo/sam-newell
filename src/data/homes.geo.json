@@ -1,0 +1,96 @@
+{
+ "source": "US Census Geocoder, Public_AR_Current",
+ "fetched": "2026-10-20",
+ "points": {
+  "1056-w-stonehaven-dr-north-salt-lake": {
+   "query": "1056 W Stonehaven Dr, North Salt Lake, UT 84054",
+   "lat": 40.856901,
+   "lon": -111.937494,
+   "matched": "1056 W STONEHAVEN DR, NORTH SALT LAKE, UT, 84054"
+  },
+  "1872-s-country-ln-w-lehi": {
+   "query": "1872 S Country Ln W, Lehi, UT 84043",
+   "lat": 40.365374,
+   "lon": -111.851625,
+   "matched": "1872 S COUNTRY LN, LEHI, UT, 84043"
+  },
+  "sold-w-20-s-pleasant-grove": {
+   "query": "1209 West 20 South, Pleasant Grove, UT 84062",
+   "lat": 40.363883,
+   "lon": -111.758103,
+   "matched": "1209 W 20 S, PLEASANT GROVE, UT, 84062"
+  },
+  "sold-cresthaven-ln-lehi": {
+   "query": "4205 N Cresthaven Ln, Lehi, UT 84043",
+   "lat": 40.440125,
+   "lon": -111.886067,
+   "matched": "4205 CRESTHAVEN LN, LEHI, UT, 84048"
+  },
+  "past-cedar-view-saratoga-springs": {
+   "query": "758 W Cedar View Dr, Saratoga Springs, UT 84045",
+   "lat": 40.336505,
+   "lon": -111.9335,
+   "matched": "758 CEDAR VIEW DR, SARATOGA SPRINGS, UT, 84045"
+  },
+  "past-marrcrest-provo": {
+   "query": "2887 Marrcrest W, Provo, UT 84604",
+   "lat": 40.272036,
+   "lon": -111.659985,
+   "matched": "2887 MARRCREST W, PROVO, UT, 84604"
+  },
+  "past-w-1310-n-lehi": {
+   "query": "680 W 1310 N, Lehi, UT 84043",
+   "lat": 40.40389,
+   "lon": -111.860234,
+   "matched": "680 W 1310 N, LEHI, UT, 84043"
+  },
+  "past-n-1430-e-provo": {
+   "query": "2291 N 1430 E, Provo, UT 84604",
+   "lat": 40.264699,
+   "lon": -111.632487,
+   "matched": "2291 N 1430 E, PROVO, UT, 84604"
+  },
+  "past-e-1600-s-orem": {
+   "query": "433 E 1600 S, Orem, UT 84058",
+   "lat": 40.267938,
+   "lon": -111.684683,
+   "matched": "433 E 1600 S, OREM, UT, 84058"
+  },
+  "past-n-300-e-provo": {
+   "query": "45 N 300 E, Provo, UT 84606",
+   "lat": 40.234333,
+   "lon": -111.653497,
+   "matched": "45 N 300 E, PROVO, UT, 84606"
+  },
+  "past-s-1450-e-provo": {
+   "query": "430 S 1450 E, Provo, UT 84606",
+   "lat": 40.228136,
+   "lon": -111.633183,
+   "matched": "430 S 1450 E, PROVO, UT, 84606"
+  },
+  "past-cosmos-dr-eagle-mountain": {
+   "query": "1825 E Cosmos Dr, Eagle Mountain, UT 84005",
+   "lat": 40.303781,
+   "lon": -112.008264,
+   "matched": "1825 E COSMOS DR, EAGLE MOUNTAIN, UT, 84005"
+  },
+  "past-skyline-dr-eagle-mountain": {
+   "query": "1792 E Skyline Dr, Eagle Mountain, UT 84005",
+   "lat": 40.305453,
+   "lon": -112.0093,
+   "matched": "1792 SKYLINE DR, EAGLE MOUNTAIN, UT, 84005"
+  },
+  "past-e-900-s-orem": {
+   "query": "565 E 900 S, Orem, UT 84097",
+   "lat": 40.280611,
+   "lon": -111.681795,
+   "matched": "565 E 900 S, OREM, UT, 84097"
+  },
+  "past-w-9800-n-cedar-hills": {
+   "query": "4182 W 9800 N, Cedar Hills, UT 84062",
+   "lat": 40.410258,
+   "lon": -111.757768,
+   "matched": "4182 W 9800 N, CEDAR HILLS, UT, 84062"
+  }
+ }
+}

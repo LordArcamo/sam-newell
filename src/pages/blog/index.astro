@@ -1,155 +1,86 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
-import Newsletter from '../../components/Newsletter.astro';
+import InnerHero from '../../components/InnerHero.astro';
+import Pic from '../../components/Pic.astro';
+import TalkStrip from '../../components/TalkStrip.astro';
+import { img } from '../../lib/images';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
-
-const fmt = (d: Date) =>
-  d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const latest = posts[0];
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
-
 <Base
-  title="Blog — Real Talk on Utah Real Estate | Sam Newell"
-  description="Straight answers on buying, selling, and investing along the Wasatch Front — from a broker with $450M+ closed and 2,000+ doors of his own."
+  title="Notes from Sam | Utah Real Estate Blog"
+  description="Short reads from Lehi broker Sam Newell on buying, selling and investing in Utah County and Salt Lake."
+  crumbs={[{ name: 'Blog', path: '/blog/' }]}
 >
-  <PageHero
-    icon="pen"
-    kicker="The blog"
-    intro="Buying, selling, investing, and the occasional hard truth — written the way Sam talks. No fluff, no recycled national headlines."
-  >
-    Real talk, <em>written down</em>
-  </PageHero>
-
-  <section class="section bl">
-    <div class="container">
-      <div class="bl-grid" data-reveal-group>
-        {posts.map((post) => (
-          <a href={`/blog/${post.id}/`} class="bl-card">
-            {post.data.cover && (
-              <span class="bl-media">
-                <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading="lazy" />
-              </span>
-            )}
-            <div class="bl-meta">
-              <span class="bl-tag">{post.data.tag}</span>
-              <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time>
-            </div>
-            <h2 class="bl-title display">{post.data.title}</h2>
-            <p class="bl-desc">{post.data.description}</p>
-            <span class="bl-more">Read the post <span class="arrow">→</span></span>
-          </a>
-        ))}
-      </div>
-      {posts.length === 0 && <p class="bl-empty">First posts landing soon — join the Friday Recap below so you don’t miss them.</p>}
-    </div>
+  <InnerHero
+    title="Notes from Sam"
+    lead="Short reads on buying, selling and investing in Utah."
+    cta={latest ? { href: `/blog/${latest.id}/`, label: 'Read the latest' } : undefined}
+    image={latest?.data.cover ?? img('photos/valley-view-utah-county.jpg')}
+    alt={latest?.data.coverAlt ?? ''}
+  />
+  <section class="posts sec wrap" aria-labelledby="posts-h">
+    <h2 class="sr-only" id="posts-h">All notes</h2>
+    <ol role="list" class="post-list">
+      {posts.map((p, i) => (
+        <li class="post">
+          {p.data.cover && <Pic src={p.data.cover} alt={p.data.coverAlt ?? ''} sizes="(max-width: 767px) 90vw, 30vw" ratio="r32" i={i} />}
+          <div class="post-t" data-rv style={`--i:${i + 1}`}>
+            <p class="small">{p.data.tag} · <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time></p>
+            <h3><a href={`/blog/${p.id}/`}>{p.data.title}</a></h3>
+            <p>{p.data.description}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
   </section>
-
-  <Newsletter />
+  <TalkStrip />
 </Base>
-
 <style>
-  .bl {
-    background: var(--cream);
-  }
-
-  .bl-grid {
+  .post-list {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: clamp(1.25rem, 3vw, 2rem);
+    gap: 72px;
   }
-
-  .bl-card {
-    display: flex;
-    flex-direction: column;
-    background: var(--white);
-    border: 1px solid rgba(19, 19, 19, 0.08);
-    border-radius: 1.25rem;
-    overflow: clip;
-    padding: 2rem;
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
-  }
-
-  .bl-media {
-    display: block;
-    aspect-ratio: 16 / 9;
-    margin: -2rem -2rem 1.5rem;
-    overflow: clip;
-  }
-
-  .bl-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.8s var(--ease-out-expo);
-  }
-
-  .bl-card:hover .bl-media img {
-    transform: scale(1.05);
-  }
-
-  .bl-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 35px 60px -25px rgba(19, 19, 19, 0.25);
-  }
-
-  .bl-meta {
-    display: flex;
+  .post {
+    display: grid;
+    grid-template-columns: 30vw minmax(0, 1fr);
+    gap: 4vw;
     align-items: center;
-    gap: 1rem;
-    font-size: var(--text-xs);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--brass);
-    margin-bottom: 1.1rem;
   }
-
-  .bl-tag {
-    border: 1px solid rgba(19, 19, 19, 0.18);
-    border-radius: 999px;
-    padding: 0.3rem 0.85rem;
-    font-weight: 600;
-    color: var(--ink);
+  .post:nth-child(even) {
+    grid-template-columns: minmax(0, 1fr) 30vw;
   }
-
-  .bl-title {
-    font-size: var(--title-card);
-    line-height: 1.25;
-    margin-bottom: 0.85rem;
+  .post:nth-child(even) :global(.ph) {
+    order: 2;
   }
-
-  .bl-desc {
-    font-size: var(--text-md);
-    color: rgba(19, 19, 19, 0.68);
-    line-height: 1.65;
-    flex: 1;
+  .post h3 {
+    font-size: clamp(28px, 2.6vw, 40px);
+    letter-spacing: -0.025em;
+    margin: 8px 0 12px;
+    max-width: 24ch;
   }
-
-  .bl-more {
-    margin-top: 1.5rem;
-    font-size: var(--text-xs);
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--ink);
+  .post h3 a {
+    text-decoration: none;
   }
-
-  .bl-card:hover .bl-more {
-    color: var(--brass);
+  .post h3 a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 6px;
   }
-
-  .bl-empty {
-    color: rgba(19, 19, 19, 0.6);
+  .post-t > p:last-child {
+    max-width: 60ch;
   }
-
-  @media (max-width: 960px) {
-    .bl-grid {
+  @media (max-width: 767px) {
+    .post,
+    .post:nth-child(even) {
       grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .post:nth-child(even) :global(.ph) {
+      order: 0;
     }
   }
 </style>

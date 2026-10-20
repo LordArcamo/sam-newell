@@ -1,0 +1,515 @@
+---
+/**
+ * The map — the live thing. Works today in its no-GPU mode: an SVG contour relief built from the same USGS DEM
+ * as the model, 12 town buttons (toolbar, roving tabindex), pins as real buttons, a card per town, deep links
+ * (/?town=slug#map) and the calculator sheet. GL MOUNT POINT: [data-relief-mount="map"]; when mountRelief()
+ * returns a handle, map-ui.ts forwards the same selections to handle.fly() and positions pins via handle.project().
+ */
+import Pic from '../Pic.astro';
+import Logo from '../Logo.astro';
+import Calc from '../Calc.astro';
+import { TOWNS, HOMES } from '../../lib/homes';
+import { REVIEWS, reviewDate } from '../../data/reviews';
+import { img } from '../../lib/images';
+import { ZILLOW } from '../../data/site';
+
+const DEFAULT = 'lehi';
+const cards = TOWNS.map((t) => {
+  const homes = HOMES.filter((h) => h.group === t.slug).sort((a, b) => ['for-sale', 'sold', 'past'].indexOf(a.status) - ['for-sale', 'sold', 'past'].indexOf(b.status));
+  const n = (s: string) => homes.filter((h) => h.status === s).length;
+  const parts = [n('for-sale') && `${n('for-sale')} for sale`, n('sold') && `${n('sold')} sold lately`, n('past') && `${n('past')} past ${n('past') > 1 ? 'listings' : 'listing'}`].filter(Boolean);
+  const lead = homes.find((h) => h.photo);
+  const rv = t.review ? REVIEWS.find((r) => r.n === t.review) : null;
+  return { ...t, homes, count: parts.join(' · '), lead, rv };
+});
+const pins = HOMES.filter((h) => h.xy).sort((a, b) => b.xy!.north - a.xy!.north);
+const lehi = TOWNS.find((t) => t.slug === 'lehi')!;
+const mapData = {
+  towns: TOWNS.map((t) => ({ slug: t.slug, x: t.x, y: -t.north })),
+  pins: pins.map((h) => ({ id: h.id, town: h.group, x: h.xy!.x, y: -h.xy!.north })),
+  sn: { x: lehi.x, y: -lehi.north },
+};
+---
+<section class="map" id="map" aria-labelledby="map-h" data-map>
+  <div class="stage" data-relief-mount="map" data-stage>
+    <svg class="relief" viewBox="-30 -56 64 40" preserveAspectRatio="none" data-ui data-map-svg role="img" aria-label="Contour map of the Wasatch Front from North Salt Lake to Provo, with Utah Lake and the Great Salt Lake">
+      <use href="#relief-geo" />
+    </svg>
+    <div class="overlay" aria-hidden="true" data-labels>
+      {TOWNS.map((t) => <span class="tl small" data-label={t.slug}>{t.name}</span>)}
+      <span class="sn" data-sn><Logo variant="mark" title="" /></span>
+    </div>
+    <ul class="pins" role="list" aria-label="Sam's homes on the map" data-pins>
+      {pins.map((h) => (
+        <li>
+          <button type="button" class:list={['pin', h.status]} data-pin={h.id} data-town={h.group} aria-label={h.label}>
+            <i aria-hidden="true"></i>
+            <span class="tag small" aria-hidden="true">{h.shown}, {h.townName}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="panel" data-towns>
+    <h2 class="panel-h" id="map-h">Pick your town</h2>
+    <div class="town-list" role="toolbar" aria-label="Towns" aria-orientation="vertical" data-toolbar>
+      {TOWNS.map((t) => (
+        <button type="button" class="town" data-town={t.slug} aria-pressed={t.slug === DEFAULT ? 'true' : 'false'} tabindex={t.slug === DEFAULT ? 0 : -1} aria-controls="map-card">
+          {t.name}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <div class="card dark" id="map-card" data-cards>
+    <p class="sr-only" aria-live="polite" data-announce></p>
+    {cards.map((c) => (
+      <article class:list={['tc', { on: c.slug === DEFAULT }]} data-card={c.slug} aria-labelledby={`tc-${c.slug}`}>
+        {c.lead?.photo ? (
+          <Pic src={img(`listings/${c.lead.photo}`)} alt={`${c.lead.shown}, ${c.lead.townName}`} sizes="380px" ratio="r32" rv={false} widths={[380, 550, 760]} />
+        ) : (
+          <div class="macro r32" aria-hidden="true">
+            <svg viewBox={`${c.x - 4} ${-c.north - 2.67} 8 5.33`} preserveAspectRatio="xMidYMid slice"><use href="#relief-geo" /></svg>
+            {c.homes.filter((h) => h.xy).map((h) => (
+              <i style={`left:${((h.xy!.x - (c.x - 4)) / 8) * 100}%;top:${((-h.xy!.north - (-c.north - 2.67)) / 5.33) * 100}%`}></i>
+            ))}
+          </div>
+        )}
+        <div class="tc-body">
+          <h3 class="tc-town" id={`tc-${c.slug}`}>{c.name}</h3>
+          <p class="small">{c.count || 'No homes shown here yet.'}</p>
+          {c.homes.length > 0 ? (
+            <ul role="list" class="tc-homes">
+              {c.homes.map((h) => (
+                <li data-home={h.id}>
+                  <a href={h.zillow} rel="noopener" target="_blank">
+                    <span class="addr">{h.shown}</span>
+                    <span class="det num">{h.detail}</span>
+                  </a>
+                  {h.status === 'for-sale' && <button type="button" class="run small" data-run={h.price}>Run the numbers</button>}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="empty">Ask Sam about {c.name}.</p>
+          )}
+          {c.rv && (
+            <blockquote class="tc-q small">
+              <p>“{c.rv.excerpts.town}”</p>
+              <footer>{c.rv.name}, {reviewDate(c.rv.date)}, on Zillow</footer>
+            </blockquote>
+          )}
+          <div class="tc-act">
+            <button type="button" class="btn light" data-run={c.homes.find((h) => h.status === 'for-sale')?.price ?? ''}>Run the numbers</button>
+            <a class="btn ghost" href={ZILLOW.profile} rel="noopener" target="_blank">See on Zillow</a>
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <dialog class="sheet" aria-labelledby="sheet-h" data-sheet>
+    <div class="sheet-top">
+      <h2 class="sheet-h" id="sheet-h">Underwrite it like Sam</h2>
+      <button type="button" class="sheet-x" data-sheet-close>Close</button>
+    </div>
+    <p class="sheet-note small" data-sheet-note>Example numbers. Change any of them.</p>
+    <Calc id="calc-map" mode="invest" compact />
+  </dialog>
+
+  <script type="application/json" data-map-json set:html={JSON.stringify(mapData)} />
+</section>
+
+<style>
+  .map {
+    position: relative;
+    height: 100svh;
+    min-height: 760px;
+    overflow: hidden;
+    background: var(--paper);
+  }
+  .stage {
+    position: absolute;
+    inset: 0;
+  }
+  .relief {
+    width: 100%;
+    height: 100%;
+  }
+  .overlay,
+  .pins {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .tl {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 2px 6px;
+    background: var(--paper);
+    transform: translate(10px, -50%);
+    transition: background-color var(--hover), color var(--hover);
+  }
+  .tl.on {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .sn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 30px;
+    transform: translate(-50%, -100%);
+  }
+  .sn :global(svg) {
+    width: 30px;
+    height: auto;
+  }
+  .pin {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+    display: grid;
+    place-items: center;
+    pointer-events: auto;
+  }
+  .pin i {
+    display: block;
+    width: 12px;
+    height: 12px;
+    background: var(--ink);
+    border-radius: 50%;
+    outline: 2px solid var(--paper);
+    transition: transform var(--hover) var(--ease-out);
+  }
+  .pin.for-sale i {
+    border-radius: 0;
+    width: 13px;
+    height: 13px;
+  }
+  .pin:hover i,
+  .pin:focus-visible i,
+  .pin.on i {
+    transform: scale(1.4);
+  }
+  .pin:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: -6px;
+    border-radius: 50%;
+  }
+  .tag {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% - 4px);
+    transform: translate(-50%, 4px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 4px 8px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--hover), transform var(--hover) var(--ease-out);
+  }
+  .pin:hover .tag,
+  .pin:focus-visible .tag,
+  .pin.on .tag {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  .no-js-hide {
+    display: none;
+  }
+
+  .panel {
+    position: absolute;
+    top: var(--m);
+    left: var(--m);
+    bottom: var(--m);
+    width: 250px;
+    background: var(--paper);
+    padding: 24px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+  }
+  .panel-h {
+    font-size: 26px;
+    letter-spacing: -0.025em;
+    margin: 0 8px 14px;
+  }
+  .town-list {
+    display: grid;
+    gap: 2px;
+    overflow-y: auto;
+  }
+  .town {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 17px;
+    font-weight: 500;
+    min-height: 40px;
+    transition: background-color var(--hover), color var(--hover), padding var(--hover) var(--ease-out);
+  }
+  .town:hover {
+    background: var(--tone);
+    padding-left: 14px;
+  }
+  .town[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .town:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .card {
+    position: absolute;
+    left: calc(var(--m) + 266px);
+    bottom: var(--m);
+    width: 390px;
+    max-height: calc(100% - 2 * var(--m));
+    overflow-y: auto;
+    z-index: 2;
+  }
+  .js .tc {
+    display: none;
+  }
+  .js .tc.on {
+    display: block;
+    animation: card-in 0.15s ease-out;
+  }
+  @keyframes card-in {
+    from {
+      opacity: 0;
+    }
+  }
+  .macro {
+    position: relative;
+    background: var(--paper);
+    overflow: hidden;
+  }
+  .macro svg {
+    width: 100%;
+    height: 100%;
+  }
+  .macro i {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    background: var(--ink);
+    border-radius: 50%;
+    outline: 2px solid var(--paper);
+  }
+  .tc-body {
+    padding: 20px 22px 22px;
+  }
+  .tc-town {
+    font-size: 30px;
+    letter-spacing: -0.025em;
+  }
+  .tc-homes {
+    margin: 14px 0 0;
+    display: grid;
+    gap: 4px;
+  }
+  .tc-homes li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 6px 8px;
+    margin: 0 -8px;
+    transition: background-color var(--hover);
+  }
+  .tc-homes li.on {
+    background: #262626;
+  }
+  .tc-homes a {
+    text-decoration: none;
+    display: grid;
+  }
+  .tc-homes a:hover .addr {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+  .addr {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .det {
+    font-size: 15px;
+  }
+  .run {
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    color: var(--paper);
+    min-height: 44px;
+  }
+  .empty {
+    margin-top: 12px;
+  }
+  .tc-q {
+    margin-top: 16px;
+  }
+  .tc-q footer {
+    margin-top: 6px;
+    font-weight: 400;
+  }
+  .tc-act {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .tc-act .btn {
+    min-height: 48px;
+    padding: 0 16px;
+    font-size: 16px;
+  }
+  .btn.ghost {
+    background: #262626;
+    color: var(--paper);
+  }
+  .btn.ghost:hover {
+    background: #3a3a3a;
+  }
+
+  .sheet {
+    margin: auto 0 auto auto;
+    height: 100dvh;
+    max-height: 100dvh;
+    width: min(760px, 100vw);
+    max-width: 100vw;
+    border: 0;
+    padding: 28px var(--m) 40px;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-y: auto;
+  }
+  .sheet::backdrop {
+    background: rgb(10 10 10 / 0.55);
+  }
+  .sheet[open] {
+    animation: sheet-in 0.35s var(--ease-out);
+  }
+  @keyframes sheet-in {
+    from {
+      transform: translateX(40px);
+      opacity: 0;
+    }
+  }
+  .sheet-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .sheet-h {
+    font-size: clamp(30px, 3vw, 44px);
+  }
+  .sheet-x {
+    font-weight: 600;
+    min-height: 48px;
+    padding: 0 6px;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+  .sheet-note {
+    margin: 8px 0 24px;
+  }
+
+  /* No JS: a plain list of towns → homes → reviews, readable top to bottom. */
+  :global(html:not(.js)) .map {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  :global(html:not(.js)) .stage,
+  :global(html:not(.js)) .panel {
+    display: none;
+  }
+  :global(html:not(.js)) .card {
+    position: static;
+    width: auto;
+    max-height: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sheet[open],
+    .js .tc.on {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .map {
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel {
+      position: static;
+      width: auto;
+      padding: 24px var(--m) 12px;
+      order: 1;
+    }
+    .panel-h {
+      margin: 0 0 12px;
+    }
+    .town-list {
+      display: flex;
+      overflow-x: auto;
+      gap: 6px;
+      padding-bottom: 6px;
+      scrollbar-width: none;
+    }
+    .town {
+      flex: none;
+      background: var(--tone);
+      white-space: nowrap;
+      min-height: 44px;
+    }
+    .stage {
+      position: relative;
+      order: 2;
+      height: 62svh;
+      min-height: 420px;
+    }
+    .card {
+      position: static;
+      order: 3;
+      width: auto;
+      max-height: none;
+      overflow: visible;
+    }
+    .card :global(.ph) {
+      max-height: 260px;
+    }
+    .sheet {
+      margin: auto 0 0 0;
+      width: 100vw;
+      height: 92dvh;
+    }
+  }
+</style>

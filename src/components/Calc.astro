@@ -1,0 +1,257 @@
+---
+/**
+ * Underwrite it like Sam (brief §9). The SSR values are the worked example (the no-JS table);
+ * src/calc/calc.ts recomputes on input with the same pure functions (src/lib/underwrite.ts).
+ */
+import { underwrite, EXAMPLE_INVEST, EXAMPLE_PAYMENT, type UnderwriteInput } from '../lib/underwrite';
+import { usd, usdSigned, pct } from '../lib/format';
+import { BROKERAGE, SITE } from '../data/site';
+
+interface Props {
+  mode?: 'invest' | 'payment';
+  id: string;
+  price?: number;
+  compact?: boolean;
+}
+const { mode = 'invest', id, price, compact = false } = Astro.props;
+const base: UnderwriteInput = { ...(mode === 'invest' ? EXAMPLE_INVEST : EXAMPLE_PAYMENT) };
+if (price) {
+  base.price = price;
+  base.taxYear = Math.round(price * 0.006);
+}
+const r = underwrite(base);
+
+type Field = { name: keyof UnderwriteInput; label: string; unit: '$' | '%' | 'yr'; value: number; step: number; auto?: number; help?: string };
+const money = (n: number) => Math.round(n);
+const invest: Field[] = [
+  { name: 'price', label: 'Price', unit: '$', value: money(base.price), step: 1000 },
+  { name: 'down', label: 'Down payment', unit: '%', value: base.down * 100, step: 1 },
+  { name: 'apr', label: 'Interest rate', unit: '%', value: base.apr * 100, step: 0.125 },
+  { name: 'termYears', label: 'Loan term', unit: 'yr', value: base.termYears, step: 1 },
+  { name: 'rent', label: 'Monthly rent', unit: '$', value: base.rent, step: 25 },
+  { name: 'vacancy', label: 'Vacancy', unit: '%', value: base.vacancy * 100, step: 1 },
+  { name: 'taxYear', label: 'Property tax a year', unit: '$', value: money(base.taxYear), step: 50, auto: 0.006, help: '0.6% of the price until you change it' },
+  { name: 'insuranceYear', label: 'Insurance a year', unit: '$', value: base.insuranceYear, step: 50 },
+  { name: 'hoaMonth', label: 'HOA a month', unit: '$', value: base.hoaMonth, step: 10 },
+  { name: 'maintenance', label: 'Maintenance, % of rent', unit: '%', value: base.maintenance * 100, step: 1 },
+  { name: 'management', label: 'Management, % of rent collected', unit: '%', value: base.management * 100, step: 1 },
+  { name: 'closing', label: 'Closing costs, % of price', unit: '%', value: base.closing * 100, step: 0.5 },
+];
+const payment: Field[] = [
+  invest[0], invest[1], invest[2], invest[3], invest[6], invest[7], invest[8],
+  { name: 'pmi', label: 'Mortgage insurance a year (under 20% down)', unit: '%', value: base.pmi * 100, step: 0.05 },
+];
+const fields = mode === 'invest' ? invest : payment;
+const hidden = mode === 'invest' ? [{ name: 'pmi', value: base.pmi * 100 }] : [
+  { name: 'rent', value: 0 }, { name: 'vacancy', value: 0 }, { name: 'maintenance', value: 0 }, { name: 'management', value: 0 }, { name: 'closing', value: 3 },
+];
+const outs =
+  mode === 'invest'
+    ? [
+        { k: 'cashFlowMonth', label: 'Cash flow a month', v: usdSigned(r.cashFlowMonth), f: 'NOI − mortgage, ÷ 12', line: 'What is left after the mortgage and running costs.' },
+        { k: 'capRate', label: 'Cap rate', v: pct(r.capRate, 2), f: 'NOI ÷ price', line: 'The return on the price as if you paid cash.' },
+        { k: 'cashOnCash', label: 'Cash-on-cash', v: pct(r.cashOnCash, 2), f: 'yearly cash flow ÷ cash in', line: 'What your own money earns each year.' },
+        { k: 'dscr', label: 'Debt coverage (DSCR)', v: r.dscr.toFixed(2), f: 'NOI ÷ yearly mortgage', line: 'Over 1.0 means the rent carries the loan.' },
+        { k: 'noi', label: 'Net operating income a year', v: usd(r.noi), f: 'rent after vacancy − running costs', line: 'Income before the mortgage.' },
+        { k: 'payment', label: 'Mortgage a month (P&I)', v: usd(r.payment), f: 'standard amortisation', line: 'Principal and interest only.' },
+        { k: 'cashIn', label: 'Cash in', v: usd(r.cashIn), f: 'down payment + closing costs', line: 'What it takes to close.' },
+        { k: 'principalPaid5y', label: 'Loan paid down in 5 years', v: usd(r.principalPaid5y), f: 'loan − balance after 60 payments', line: 'Equity the tenant’s rent pays for. No appreciation assumed.' },
+      ]
+    : [
+        { k: 'piti', label: 'Payment a month', v: usd(r.piti), f: 'P&I + tax + insurance + HOA + PMI', line: 'The number to shop by, not the price.' },
+        { k: 'payment', label: 'Principal and interest', v: usd(r.payment), f: 'standard amortisation', line: 'The loan itself.' },
+        { k: 'loan', label: 'Loan amount', v: usd(r.loan), f: 'price − down payment', line: 'What you borrow.' },
+        { k: 'cashIn', label: 'Cash to close (about)', v: usd(r.cashIn), f: 'down payment + 3% closing', line: 'Ask a lender for the real figure.' },
+      ];
+const lead = outs[0];
+const rest = outs.slice(1);
+const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a month, cap rate ${pct(r.capRate, 2)}` : `About ${usd(r.piti)} a month`;
+---
+<form class:list={['calc', { compact }]} data-calc={mode} id={id} aria-label={mode === 'invest' ? 'Underwrite it like Sam' : 'Payment calculator'} onsubmit="return false">
+  <fieldset class="inputs">
+    <legend class="sr-only">Your numbers (examples to start)</legend>
+    {fields.map((f) => (
+      <label class="field">
+        <span class="fl">{f.label}</span>
+        <span class:list={['in', f.unit]}>
+          {f.unit === '$' && <span class="u" aria-hidden="true">$</span>}
+          <input
+            name={f.name}
+            type="number"
+            inputmode="decimal"
+            min="0"
+            step={f.step}
+            value={+f.value.toFixed(3)}
+            data-auto={f.auto}
+            aria-describedby={f.help ? `${id}-${f.name}-h` : undefined}
+          />
+          {f.unit !== '$' && <span class="u" aria-hidden="true">{f.unit === '%' ? '%' : 'years'}</span>}
+        </span>
+        {f.help && <span class="help small" id={`${id}-${f.name}-h`}>{f.help}</span>}
+      </label>
+    ))}
+    {hidden.map((h) => <input type="hidden" name={h.name} value={h.value} />)}
+  </fieldset>
+  <div class="outputs">
+    <p class="sr-only" aria-live="polite" data-summary>{summary}</p>
+    <div class="lead-out">
+      <p class="ol">{lead.label}</p>
+      <p class="big num" data-out={lead.k}>{lead.v}</p>
+      <p class="small">{lead.line} <span class="f">{lead.f}</span></p>
+    </div>
+    <dl class="rest">
+      {rest.map((o) => (
+        <div>
+          <dt>{o.label}</dt>
+          <dd class="num" data-out={o.k}>{o.v}</dd>
+          <dd class="small">{o.line} <span class="f">{o.f}</span></dd>
+        </div>
+      ))}
+    </dl>
+    <p class="fine small">
+      This is an example to help you think, not a loan estimate, an appraisal, or tax, legal or investment advice.
+      Rates, taxes, insurance, HOA dues and rents vary. Ask a licensed lender for a loan estimate. Sam Newell is a
+      Utah {SITE.title.toLowerCase()} with {BROKERAGE.name}.
+    </p>
+  </div>
+</form>
+
+<style>
+  .calc {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 48px;
+    align-items: start;
+  }
+  .inputs {
+    border: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 20px;
+  }
+  .field {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  .fl {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .in {
+    display: flex;
+    align-items: center;
+    background: var(--tone);
+    min-height: 52px;
+    padding: 0 14px;
+    gap: 6px;
+    transition: background-color var(--hover);
+  }
+  .in:focus-within {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .in input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    font-size: 18px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    padding: 12px 0;
+    -moz-appearance: textfield;
+  }
+  .in input:focus {
+    outline: none;
+  }
+  .in input::-webkit-outer-spin-button,
+  .in input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+  .u {
+    font-weight: 500;
+  }
+  .help {
+    font-weight: 400;
+  }
+  .outputs {
+    position: sticky;
+    top: calc(var(--bar) + 24px);
+  }
+  .lead-out {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 28px 28px 24px;
+  }
+  .ol {
+    font-weight: 600;
+  }
+  .big {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(56px, 6vw, 96px);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin: 6px 0 12px;
+    transition: opacity 0.15s;
+  }
+  .f {
+    display: block;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  .rest {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px 28px;
+    margin-top: 28px;
+  }
+  .rest dt {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .rest dd.num {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 34px;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 4px 0 4px;
+  }
+  .fine {
+    margin-top: 32px;
+    font-weight: 400;
+    max-width: 62ch;
+  }
+  .calc.is-busy [data-out] {
+    opacity: 0.55;
+  }
+  .compact {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .compact .outputs {
+    position: static;
+  }
+  @media (max-width: 1023px) {
+    .calc {
+      grid-template-columns: 1fr;
+    }
+    .outputs {
+      position: static;
+    }
+  }
+  @media (max-width: 520px) {
+    .inputs,
+    .rest {
+      grid-template-columns: 1fr;
+    }
+    .inputs {
+      grid-template-columns: 1fr 1fr;
+    }
+    .rest dd.num {
+      font-size: 30px;
+    }
+  }
+</style>

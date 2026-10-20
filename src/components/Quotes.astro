@@ -1,0 +1,53 @@
+---
+/** Two verbatim reviews: one large, one offset. Never a row of identical cards. */
+import type { Review } from '../data/reviews';
+import { reviewDate } from '../data/reviews';
+import { ZILLOW } from '../data/site';
+interface Props { a: { r: Review; key: string }; b: { r: Review; key: string }; heading: string; dark?: boolean }
+const { a, b, heading, dark = false } = Astro.props;
+---
+<section class:list={['qs sec wrap', { dark }]} aria-labelledby={`qs-${a.r.n}`}>
+  <h2 class="h qs-h" id={`qs-${a.r.n}`} data-rv>{heading}</h2>
+  <figure class="qa" data-rv style="--i:1">
+    <blockquote class="statement"><p>“{a.r.excerpts[a.key]}”</p></blockquote>
+    <figcaption>{a.r.name}, {a.r.what.toLowerCase()}, {reviewDate(a.r.date)}, on Zillow</figcaption>
+  </figure>
+  <figure class="qb" data-rv style="--i:2">
+    <blockquote class="lead"><p>“{b.r.excerpts[b.key]}”</p></blockquote>
+    <figcaption>{b.r.name}, {b.r.what.toLowerCase()}, {reviewDate(b.r.date)}, on Zillow</figcaption>
+  </figure>
+  <p class="qs-more small" data-rv style="--i:3"><a class="link" href={ZILLOW.profile} rel="noopener" target="_blank">All {ZILLOW.reviews} reviews on Zillow</a></p>
+</section>
+<style>
+  .qs {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 40px var(--gap);
+  }
+  .qs-h {
+    grid-column: 1 / 8;
+  }
+  .qa {
+    grid-column: 1 / 8;
+  }
+  .qa .statement {
+    max-width: 26ch;
+  }
+  .qb {
+    grid-column: 8 / 13;
+    align-self: end;
+  }
+  figcaption {
+    margin-top: 18px;
+  }
+  .qs-more {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 900px) {
+    .qs-h,
+    .qa,
+    .qb {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

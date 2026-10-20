@@ -1,41 +1,66 @@
 ---
 import Base from '../layouts/Base.astro';
+import Pic from '../components/Pic.astro';
+import { img } from '../lib/images';
+import { CONTACT } from '../data/site';
+// TODO(model): swap the TEMP poster for the C-OVERVIEW poster from blender/.
 ---
-
-<Base title="Page not found — Sam Newell" description="This page doesn't exist. Head back to samnewellrealestate.com.">
-  <section class="nf-page grain">
-    <div class="container">
-      <span class="kicker" data-reveal>404</span>
-      <h1 class="display nf-title" data-reveal>This lot is <em>vacant.</em></h1>
-      <p class="nf-copy" data-reveal>
-        The page you’re after isn’t on the market — but plenty of good ones are.
+<Base title="Page Not Found | Sam Newell" description="This page moved or never existed. Head home or book a call with Sam." robots="noindex, follow" noCanonical>
+  <section class="nf">
+    <div class="nf-t wrap">
+      <h1 class="h nf-h">Not on the map</h1>
+      <p class="lead">This page moved or never existed.</p>
+      <p class="nf-a">
+        <a class="btn" href="/">Home</a>
+        <a class="btn light-o" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call</a>
       </p>
-      <div data-reveal>
-        <a href="/" class="btn btn--brass">Back to home <span class="arrow">→</span></a>
-      </div>
+    </div>
+    <div class="nf-p">
+      <Pic src={img('posters/TEMP-concept-hero-blue-grey.jpg')} alt="The Wasatch Front as a white relief model, seen from above Utah Lake" sizes="100vw" pos="40% 60%" eager />
     </div>
   </section>
 </Base>
-
 <style>
-  .nf-page {
-    min-height: 90svh;
-    display: flex;
-    align-items: center;
-    background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
-    color: var(--cream);
+  .nf {
     position: relative;
-    overflow: clip;
+    min-height: calc(100svh - var(--bar));
+    display: grid;
   }
-
-  .nf-title {
-    font-size: var(--step-5);
-    margin-block: 1.5rem 1.25rem;
+  .nf-p {
+    position: absolute;
+    inset: 0;
   }
-
-  .nf-copy {
-    color: var(--cream-60);
-    margin-bottom: 2.25rem;
-    font-size: var(--step-1);
+  .nf-p :global(.ph) {
+    height: 100%;
+  }
+  .nf-t {
+    position: relative;
+    z-index: 1;
+    align-self: end;
+    justify-self: start;
+    background: var(--paper);
+    margin: 0 0 var(--m) var(--m);
+    padding: 32px;
+    display: grid;
+    gap: 16px;
+    max-width: 560px;
+  }
+  .nf-a {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .light-o {
+    background: var(--tone);
+    color: var(--ink);
+  }
+  .light-o:hover {
+    background: #c4c4c4;
+  }
+  @media (max-width: 767px) {
+    .nf-t {
+      margin: 0 12px 12px;
+      padding: 24px;
+    }
   }
 </style>

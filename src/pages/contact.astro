@@ -1,178 +1,191 @@
 ---
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
-import ContactForm from '../components/ContactForm';
-import IconSketch from '../components/IconSketch.astro';
-import Newsletter from '../components/Newsletter.astro';
-import { CONTACT, SOCIALS, PODCAST } from '../data/site';
+import InnerHero from '../components/InnerHero.astro';
+import Pic from '../components/Pic.astro';
+import { img } from '../lib/images';
+import { CONTACT, BROKERAGE } from '../data/site';
 ---
-
 <Base
-  title="Contact Sam Newell — Utah Real Estate & Investing"
-  description="Get in touch with Sam Newell — Utah real estate broker and multifamily investor. Call (801) 995-2220, book a call, or send a message."
+  title="Contact Sam Newell | Call or Text (801) 995-2220"
+  description="Talk to Lehi broker Sam Newell: call or text (801) 995-2220, book a time online, or send a message. English and Spanish."
+  crumbs={[{ name: 'Contact', path: '/contact/' }]}
 >
-  <PageHero
-    icon="phone"
-    kicker="Get in touch"
-    intro="Buying, selling, investing, framing, or just a hard question about any of them — start here. Straight answers, usually same-day."
-  >
-    Say the thing <em>out loud</em>
-    <Fragment slot="actions">
-      <a href={CONTACT.phoneHref} class="btn btn--brass">{CONTACT.phone}</a>
-      <a href={CONTACT.calendly} target="_blank" rel="noopener" class="btn btn--ghost-light">Book a call</a>
-    </Fragment>
-  </PageHero>
+  <InnerHero
+    title="Talk to Sam"
+    lead={`Call or text ${CONTACT.phone}, or book a time that suits you.`}
+    cta={{ href: CONTACT.calendly, label: 'Book a call', external: true }}
+    image={img('photos/sam-portrait-2026-10.jpg')}
+    alt="Sam Newell in a light-blue polo in a staged living room"
+    pos="50% 25%"
+    tone
+  />
 
-  <section class="section ct">
-    <div class="container ct-grid">
-      <div class="ct-form" data-reveal>
-        <h2 class="display ct-form-title">Send a <em>message</em></h2>
-        <ContactForm client:visible />
-      </div>
-
-      <aside class="ct-side">
-        <div class="ct-card" data-reveal>
-          <span class="ct-card-icon"><IconSketch name="phone" size={24} /></span>
-          <h3 class="ct-card-title">Direct line</h3>
-          <a href={CONTACT.phoneHref} class="ct-phone display">{CONTACT.phone}</a>
-          <p class="ct-card-note">Based in {CONTACT.base} · Serving {CONTACT.serving}</p>
-          <a href={CONTACT.calendly} target="_blank" rel="noopener" class="btn btn--ink ct-cal">
-            Book on Calendly <span class="arrow">→</span>
-          </a>
-        </div>
-
-        <div class="ct-card" data-reveal>
-          <span class="ct-card-icon"><IconSketch name="mic" size={24} /></span>
-          <h3 class="ct-card-title">While you wait</h3>
-          <p class="ct-card-note">
-            {PODCAST.episodes} of {PODCAST.name} — Sam’s take on multifamily, money,
-            and doing both honestly.
-          </p>
-          <div class="ct-pod-links">
-            <a href={PODCAST.spotify} target="_blank" rel="noopener">Spotify</a>
-            <a href={PODCAST.apple} target="_blank" rel="noopener">Apple Podcasts</a>
-          </div>
-        </div>
-
-        <div class="ct-card" data-reveal>
-          <span class="ct-card-icon"><IconSketch name="compass" size={24} /></span>
-          <h3 class="ct-card-title">Find Sam elsewhere</h3>
-          <div class="ct-socials">
-            {SOCIALS.map((s) => (
-              <a href={s.href} target="_blank" rel="noopener">{s.label}</a>
-            ))}
-          </div>
-        </div>
-      </aside>
+  <section class="ct sec wrap" aria-labelledby="ct-h">
+    <div class="ct-side">
+      <h2 class="h" id="ct-h" data-rv>Send a message</h2>
+      <p class="lead" data-rv style="--i:1">Sam answers the same day. For anything urgent, call or text.</p>
+      <dl class="ct-facts" data-rv style="--i:2">
+        <div><dt>Call or text</dt><dd><a href={CONTACT.phoneHref}>{CONTACT.phone}</a></dd></div>
+        <div><dt>Book a time</dt><dd><a href={CONTACT.calendly} rel="noopener" target="_blank">calendly.com/sam_newell_real_estate</a></dd></div>
+        <div><dt>Brokerage</dt><dd>{BROKERAGE.name}<br />{BROKERAGE.street}<br />{BROKERAGE.city}, {BROKERAGE.region} {BROKERAGE.zip}</dd></div>
+        <div><dt>Speaks</dt><dd>English and Spanish</dd></div>
+      </dl>
     </div>
+    <form class="form" action="/api/contact" method="post" data-contact>
+      <label class="f"><span class="fl">Name</span><input name="name" autocomplete="name" required /></label>
+      <label class="f"><span class="fl">Email</span><input name="email" type="email" autocomplete="email" required /></label>
+      <label class="f"><span class="fl">Phone (optional)</span><input name="phone" type="tel" autocomplete="tel" /></label>
+      <label class="f"><span class="fl">I want to</span>
+        <select name="subject">
+          <option>Buy a home</option>
+          <option>Sell a home</option>
+          <option>Buy a rental</option>
+          <option>Something else</option>
+        </select>
+      </label>
+      <label class="f wide"><span class="fl">Message</span><textarea name="message" rows="6" required></textarea></label>
+      <div class="hp" aria-hidden="true"><label for="ct-co">Company</label><input id="ct-co" name="company" tabindex="-1" autocomplete="off" /></div>
+      <div class="wide send">
+        <button class="btn" type="submit">Send to Sam</button>
+        <p class="msg" tabindex="-1" data-contact-msg></p>
+      </div>
+    </form>
   </section>
 
-  <Newsletter />
+  <section class="where dark sec wrap" aria-labelledby="where-h">
+    <h2 class="h" id="where-h" data-rv>Where Sam works</h2>
+    <div class="where-grid">
+      <figure>
+        <Pic src={img('photos/estate-lots-jordan-river.jpg')} alt="Estate lots above the Jordan River, Lehi" sizes="(max-width: 767px) 90vw, 24vw" ratio="r45" pos="50% 40%" />
+        <figcaption class="small">Lehi, home base</figcaption>
+      </figure>
+      <figure>
+        <Pic src={img('listings/1056-w-stonehaven-dr-nsl.jpg')} alt="1056 W Stonehaven Dr, North Salt Lake" sizes="(max-width: 767px) 90vw, 30vw" ratio="r32" i={1} widths={[360, 550]} />
+        <figcaption class="small">North Salt Lake, listed now</figcaption>
+      </figure>
+      <figure>
+        <Pic src={img('photos/valley-view-utah-county.jpg')} alt="A Utah County valley from a new home" sizes="(max-width: 767px) 90vw, 20vw" ratio="r11" pos="50% 60%" i={2} />
+        <figcaption class="small">Utah County</figcaption>
+      </figure>
+    </div>
+  </section>
 </Base>
-
+<script>
+  import { initContact } from '../scripts/forms';
+  initContact();
+</script>
 <style>
   .ct {
-    background: var(--cream);
-  }
-
-  .ct-grid {
     display: grid;
-    grid-template-columns: 1.4fr 0.8fr;
-    gap: clamp(2.5rem, 6vw, 5rem);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 5vw;
     align-items: start;
   }
-
-  .ct-form-title {
-    font-size: var(--step-3);
-    margin-bottom: 2rem;
+  .ct-side .h {
+    margin-bottom: 16px;
   }
-
-  .ct-side {
+  .ct-side .lead {
+    margin-bottom: 40px;
+  }
+  .ct-facts {
     display: grid;
-    gap: 1.25rem;
+    gap: 20px;
   }
-
-  .ct-card {
-    background: var(--white);
-    border: 1px solid rgba(19, 19, 19, 0.08);
-    border-radius: 1.1rem;
-    padding: 1.9rem;
+  .ct-facts dt {
+    font-size: 15px;
+    font-weight: 500;
   }
-
-  .ct-card-icon {
-    display: inline-grid;
-    place-items: center;
-    width: 2.9rem;
-    height: 2.9rem;
-    color: var(--ink);
-    border: 1.5px solid rgba(19, 19, 19, 0.2);
-    border-radius: 50%;
-    margin-bottom: 0.9rem;
-  }
-
-  .ct-card-title {
-    font-size: var(--text-xs);
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--brass);
-    margin-bottom: 0.9rem;
-  }
-
-  .ct-phone {
-    display: inline-block;
-    font-size: var(--step-2);
+  .ct-facts dd {
     font-weight: 600;
-    text-decoration: none;
-    color: var(--ink);
   }
-
-  .ct-phone:hover {
-    color: var(--navy-soft);
+  .ct-facts a {
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    overflow-wrap: anywhere;
   }
-
-  .ct-card-note {
-    margin-top: 0.6rem;
-    font-size: var(--text-md);
-    color: rgba(19, 19, 19, 0.6);
-    line-height: 1.6;
+  .form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
   }
-
-  .ct-cal {
-    margin-top: 1.25rem;
+  .f {
+    display: grid;
+    gap: 6px;
   }
-
-  .ct-pod-links,
-  .ct-socials {
+  .f.wide,
+  .wide {
+    grid-column: 1 / -1;
+  }
+  .fl {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .f input,
+  .f select,
+  .f textarea {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 14px;
+    background: var(--tone);
+    border: 0;
+    border-radius: 0;
+    font-size: 18px;
+    appearance: none;
+  }
+  .f textarea {
+    resize: vertical;
+  }
+  .f input:focus-visible,
+  .f select:focus-visible,
+  .f textarea:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .send {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 1rem;
+    align-items: center;
+    gap: 16px 24px;
   }
-
-  .ct-pod-links a,
-  .ct-socials a {
-    font-size: var(--text-sm);
+  .msg {
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--ink);
-    border: 1px solid rgba(19, 19, 19, 0.15);
-    border-radius: 999px;
-    padding: 0.5rem 1.05rem;
-    transition: border-color 0.25s ease, color 0.25s ease, transform 0.3s var(--ease-out-expo);
   }
-
-  .ct-pod-links a:hover,
-  .ct-socials a:hover {
-    border-color: var(--brass);
-    color: var(--brass);
-    transform: translateY(-2px);
+  .msg:focus {
+    outline: none;
   }
-
+  .hp {
+    position: absolute;
+    left: -9999px;
+  }
+  .where .h {
+    margin-bottom: 48px;
+  }
+  .where-grid {
+    display: grid;
+    grid-template-columns: 24vw 30vw 20vw;
+    justify-content: space-between;
+    align-items: start;
+  }
+  .where-grid figure:nth-child(2) {
+    margin-top: 120px;
+  }
+  .where-grid figcaption {
+    margin-top: 10px;
+  }
   @media (max-width: 900px) {
-    .ct-grid {
+    .ct {
+      grid-template-columns: 1fr;
+    }
+    .where-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .where-grid figure:nth-child(2) {
+      margin-top: 0;
+    }
+  }
+  @media (max-width: 520px) {
+    .form {
       grid-template-columns: 1fr;
     }
   }

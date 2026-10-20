@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import InnerHero from '../components/InnerHero.astro';
+import Steps from '../components/Steps.astro';
+import Calc from '../components/Calc.astro';
+import Quotes from '../components/Quotes.astro';
+import ForSale from '../components/ForSale.astro';
+import { img } from '../lib/images';
+import { review } from '../data/reviews';
+import { CONTACT } from '../data/site';
+import { FOR_SALE } from '../lib/homes';
+
+// [SAM TO CONFIRM the four process lines]
+const steps = [
+  { h: 'Payment first', p: 'Before the tours, find the monthly number you are comfortable with and shop by payment, not price. The calculator below gives you a starting figure; a licensed lender gives you the real one.' },
+  { h: 'Tours that fit your week', p: 'Sam books showings fast, often the same day or the next, and he answers at night and on weekends. His clients say so on Zillow.', img: img('photos/sam-portrait-2026-10.jpg'), alt: 'Sam Newell', pos: '50% 25%' },
+  { h: 'The walkthrough', p: 'Sam studied construction management at BYU and still works on framing jobs. At each house he shows you the good, the bad and the ugly: the roof, the frame, the systems and what a fix really costs.', img: img('photos/framing-provo-sam.jpg'), alt: 'Sam on a framing job in the Provo Riverbottoms', pos: '50% 35%' },
+  { h: 'The offer', p: 'Sam writes the offer from recent sales nearby, negotiates repairs, and stays on it through inspection and closing, with lenders, inspectors and even roofers he trusts.' },
+];
+const jsonld = [
+  {
+    '@type': 'ItemList',
+    name: 'Homes for sale with Sam Newell',
+    itemListElement: FOR_SALE.map((h, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: h.zillow,
+      name: `${h.address}, ${h.townName}, UT ${h.zip}`,
+    })),
+  },
+];
+---
+<Base
+  title="Buy a Home in Utah County and Salt Lake | Sam Newell"
+  description="Buy on the Wasatch Front with Lehi broker Sam Newell: honest feedback at every house, a builder's eye on the walkthrough, and the payment worked out first."
+  crumbs={[{ name: 'Buy', path: '/buy/' }]}
+  jsonld={jsonld}
+>
+  <InnerHero
+    title="Know what you’re buying"
+    lead="Honest feedback at every house, from the roof to the frame."
+    cta={{ href: CONTACT.calendly, label: 'Book a call', external: true }}
+    image={img('photos/framing-custom-home.jpg')}
+    alt="A three-storey custom home in timber framing under a blue Utah sky"
+    pos="50% 60%"
+  />
+  <Steps heading="How buying with Sam works" steps={steps} id="buy" />
+  <section class="calc-sec sec wrap dark-band" id="calc" aria-labelledby="calc-h">
+    <h2 class="h" id="calc-h" data-rv>What it costs a month</h2>
+    <p class="lead calc-lead" data-rv style="--i:1">Start with the payment. Every number is an example; change any of them.</p>
+    <Calc id="calc-buy" mode="payment" />
+  </section>
+  <Quotes heading="In buyers’ words" a={{ r: review(5), key: 'buy' }} b={{ r: review(8), key: 'builder' }} />
+  <ForSale calc="/buy/" />
+</Base>
+<script>
+  import { initCalcs, setPrice } from '../calc/calc';
+  initCalcs();
+  const p = Number(new URLSearchParams(location.search).get('price'));
+  const f = document.querySelector<HTMLFormElement>('form[data-calc]');
+  if (p > 0 && f) setPrice(f, p);
+</script>
+<style>
+  .calc-sec .h {
+    margin-bottom: 12px;
+  }
+  .calc-lead {
+    margin-bottom: 48px;
+    max-width: 40ch;
+  }
+  .dark-band {
+    background: var(--tone);
+  }
+  .dark-band :global(.in) {
+    background: var(--paper);
+  }
+</style>

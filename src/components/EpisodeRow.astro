@@ -1,0 +1,81 @@
+---
+import type { Episode } from '../lib/podcast';
+import { dur } from '../lib/format';
+interface Props { e: Episode; showNumber?: boolean; filter?: string }
+const { e, showNumber = false, filter } = Astro.props;
+const guest = e.guest ? (e.number === 77 ? `Guest: ${e.guest}` : e.guest) : '';
+const label = `${e.title}${guest ? `, ${guest}` : ''}`;
+---
+<li class="ep" data-text={filter !== undefined ? `${e.title} ${e.guest ?? ''}`.toLowerCase() : undefined} data-group={filter}>
+  <button
+    type="button"
+    class="ep-btn"
+    aria-pressed="false"
+    data-ep={e.enclosure}
+    data-title={label}
+    data-duration={e.duration}
+    data-image={e.image ?? undefined}
+  >
+    <span class="ep-play" aria-hidden="true"><i></i></span>
+    <span class="ep-text">
+      <span class="ep-title">{e.title}</span>
+      {guest && <span class="ep-guest"> · {guest}</span>}
+      {showNumber && e.number && <span class="ep-guest"> · Episode {e.number}, {new Date(e.date + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })}</span>}
+    </span>
+    <span class="ep-dur num">{dur(e.duration)}</span>
+    <span class="sr-only" data-state>Play</span>
+  </button>
+</li>
+<style>
+  .ep-btn {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 30px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    text-align: left;
+    padding: 8px 8px;
+    margin: 0 -8px;
+    font-size: 17px;
+    line-height: 1.35;
+    min-height: 48px;
+    transition: background-color var(--hover);
+  }
+  .ep-btn:hover {
+    background: var(--tone);
+  }
+  .ep-play {
+    width: 30px;
+    height: 30px;
+    background: var(--ink);
+    display: grid;
+    place-items: center;
+    transition: transform var(--hover) var(--ease-out);
+  }
+  .ep-btn:active .ep-play {
+    transform: scale(0.9);
+  }
+  .ep-play i {
+    width: 0;
+    height: 0;
+    border-left: 9px solid var(--paper);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    margin-left: 2px;
+  }
+  .ep-btn[aria-pressed='true'] .ep-play i {
+    width: 10px;
+    height: 11px;
+    border: 0;
+    margin: 0;
+    border-left: 3px solid var(--paper);
+    border-right: 3px solid var(--paper);
+  }
+  .ep-title {
+    font-weight: 600;
+  }
+  .ep-dur {
+    font-size: 15px;
+    font-weight: 500;
+  }
+</style>

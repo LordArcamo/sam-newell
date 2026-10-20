@@ -1,229 +1,178 @@
 ---
-import '@fontsource/poppins/400.css';
-import '@fontsource/poppins/500.css';
-import '@fontsource/poppins/600.css';
-import '@fontsource/poppins/700.css';
-import '@fontsource/poppins/800.css';
-import '@fontsource-variable/inter/index.css';
 import '../styles/global.css';
-import SiteHeader from '../components/SiteHeader';
+import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { SITE, BROKERAGE, SOCIALS, ZILLOW } from '../data/site';
+import towns from '../data/towns.json';
 
+interface Crumb { name: string; path: string }
 interface Props {
   title: string;
   description: string;
-  /** 'dark' when the page opens with a dark hero (header starts light-on-dark) */
-  headerTheme?: 'dark' | 'light';
-  /** Per-page social share image (path); defaults to Sam's portrait */
-  ogImage?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  robots?: string;
+  noCanonical?: boolean;
+  crumbs?: Crumb[];
+  jsonld?: Record<string, unknown>[];
+  published?: Date;
+  modified?: Date;
 }
+const {
+  title,
+  description,
+  image = '/og/home.jpg',
+  imageAlt = 'Sam Newell, real estate in Lehi, Utah',
+  type = 'website',
+  robots = 'index, follow',
+  noCanonical = false,
+  crumbs,
+  jsonld = [],
+  published,
+  modified,
+} = Astro.props;
 
-const { title, description, headerTheme = 'dark', ogImage: ogImageProp } = Astro.props;
+const site = SITE.url;
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL(image, site).href;
 
-const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL(ogImageProp ?? '/images/sam-stats.png', Astro.site);
-
-// BreadcrumbList for internal pages (Home → Page)
-const CRUMB_NAMES: Record<string, string> = {
-  'real-estate': 'Utah Real Estate',
-  'multi-investments': 'Multifamily Investments',
-  framing: 'Framing',
-  parenting: 'Parenting & Family',
-  services: 'Services',
-  blog: 'Blog',
-  about: 'About Sam',
-  contact: 'Contact',
-  terms: 'Terms & Conditions',
-  privacy: 'Privacy Policy',
-};
-const slug = Astro.url.pathname.replaceAll('/', '');
-const breadcrumbs =
-  slug && CRUMB_NAMES[slug]
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.toString() },
-          { '@type': 'ListItem', position: 2, name: CRUMB_NAMES[slug], item: canonical.toString() },
-        ],
-      }
-    : null;
-
-const schema = {
-  '@context': 'https://schema.org',
-  '@type': 'RealEstateAgent',
-  name: 'Sam Newell',
-  url: Astro.site?.toString(),
-  telephone: '+1-801-995-2220',
-  image: ogImage.toString(),
-  address: { '@type': 'PostalAddress', addressLocality: 'Lehi', addressRegion: 'UT', addressCountry: 'US' },
-  areaServed: ['Salt Lake County, UT', 'Utah County, UT'],
-  memberOf: { '@type': 'Organization', name: 'KW Salt Lake City' },
-  founder: { '@type': 'Organization', name: 'Multifamily Investment Club', url: 'https://www.mficlub.com/' },
-  sameAs: [
-    'https://www.zillow.com/profile/Sam-Newell/',
-    'https://www.instagram.com/samnewellrealestate/',
-    'https://www.tiktok.com/@samnewellinvests',
-    'https://www.linkedin.com/in/sam-newell-70336642/',
-    'https://www.facebook.com/SamNewellRealtor/',
-    'https://www.youtube.com/channel/UCClcLF9jO5jqJb8LDK7VDlw',
-  ],
-};
+const graph: Record<string, unknown>[] = [
+  {
+    '@type': 'Person',
+    '@id': `${site}/#sam`,
+    name: 'Sam Newell',
+    jobTitle: SITE.title,
+    url: `${site}/`,
+    telephone: '+1-801-995-2220',
+    knowsLanguage: ['en', 'es'],
+    worksFor: { '@id': `${site}/#brokerage` },
+    sameAs: SOCIALS.map((s) => s.href),
+    image: `${site}/og/home.jpg`,
+  },
+  {
+    '@type': 'RealEstateAgent',
+    '@id': `${site}/#agent`,
+    name: 'Sam Newell',
+    url: `${site}/`,
+    logo: `${site}/brand/sam-newell-stacked-black.png`,
+    image: `${site}/og/home.jpg`,
+    telephone: '+1-801-995-2220',
+    priceRange: '$$',
+    address: { '@type': 'PostalAddress', streetAddress: BROKERAGE.street, addressLocality: BROKERAGE.city, addressRegion: BROKERAGE.region, postalCode: BROKERAGE.zip, addressCountry: 'US' },
+    areaServed: towns.map((t) => ({ '@type': 'City', name: `${t.name}, Utah` })),
+    employee: { '@id': `${site}/#sam` },
+    parentOrganization: { '@id': `${site}/#brokerage` },
+  },
+  {
+    '@type': 'Organization',
+    '@id': `${site}/#brokerage`,
+    name: BROKERAGE.name,
+    telephone: '+1-801-326-8800',
+    address: { '@type': 'PostalAddress', streetAddress: BROKERAGE.street, addressLocality: BROKERAGE.city, addressRegion: BROKERAGE.region, postalCode: BROKERAGE.zip, addressCountry: 'US' },
+  },
+  { '@type': 'WebSite', '@id': `${site}/#website`, url: `${site}/`, name: 'Sam Newell', publisher: { '@id': `${site}/#sam` }, inLanguage: 'en-US' },
+];
+if (crumbs?.length) {
+  graph.push({
+    '@type': 'BreadcrumbList',
+    itemListElement: [{ name: 'Home', path: '/' }, ...crumbs].map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: new URL(c.path, site).href })),
+  });
+}
+graph.push(...jsonld);
+const ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
+void ZILLOW;
 ---
-
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#131313" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={canonical} />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    {!noCanonical && <link rel="canonical" href={canonical} />}
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/GeneralSans-Semibold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content="Sam Newell" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonical} />
+    {!noCanonical && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImage} />
-    <meta property="og:image:alt" content="Sam Newell, Utah real estate broker" />
-    <meta property="og:site_name" content="Sam Newell — Real Estate & Growth" />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
-    {breadcrumbs && <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbs)} />}
+    {published && <meta property="article:published_time" content={published.toISOString()} />}
+    {modified && <meta property="article:modified_time" content={modified.toISOString()} />}
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <script is:inline>
-      document.documentElement.classList.add('js');
+      // Boot (≤1KB): .js flag, the real sun over Lehi now → html[data-sun] (SunCalc 1.9 subset, BSD-2).
+      (function (d) {
+        var h = d.documentElement, q = location.search;
+        h.classList.add('js');
+        var t = Date.now(), m = /[?&]t=([^&]+)/.exec(q);
+        if (m) { var p = Date.parse(decodeURIComponent(m[1])); if (!isNaN(p)) t = p; }
+        var r = Math.PI / 180, D = t / 864e5 - 0.5 + 2440588 - 2451545,
+          M = r * (357.5291 + 0.98560028 * D),
+          L = M + r * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + r * 102.9372 + Math.PI,
+          e = r * 23.4397, dec = Math.asin(Math.sin(e) * Math.sin(L)),
+          ra = Math.atan2(Math.sin(L) * Math.cos(e), Math.cos(L)),
+          H = r * (280.16 + 360.9856235 * D) - r * 111.8508 - ra, f = r * 40.3916,
+          alt = Math.asin(Math.sin(f) * Math.sin(dec) + Math.cos(f) * Math.cos(dec) * Math.cos(H)) / r,
+          az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(f) - Math.tan(dec) * Math.cos(f));
+        h.dataset.sun = alt < -6 ? 'night' : alt < 0 ? 'blue' : alt <= 10 ? (az < 0 ? 'dawn' : 'golden') : 'noon';
+        h.dataset.t = String(t);
+        if (/[?&]gl=off/.test(q)) h.dataset.gl = 'off';
+      })(document);
     </script>
+    <slot name="head" />
+    <script type="application/ld+json" set:html={ld} />
   </head>
   <body>
-    <SiteHeader client:load theme={headerTheme} pathname={Astro.url.pathname} />
-    <main>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <Footer />
-
     <script>
-      import gsap from 'gsap';
-      import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-      gsap.registerPlugin(ScrollTrigger);
-
-      const mm = gsap.matchMedia();
-
-      mm.add(
-        {
-          motionOK: '(prefers-reduced-motion: no-preference)',
-          reduceMotion: '(prefers-reduced-motion: reduce)',
-        },
-        (context) => {
-          const { reduceMotion } = context.conditions!;
-
-          if (reduceMotion) {
-            gsap.set('[data-reveal], [data-reveal-group] > *', {
-              opacity: 1,
-              clearProps: 'all',
-            });
-            return;
-          }
-
-          // Single elements — fromTo, because the .js CSS pre-hides these
-          // at opacity: 0 (a from() tween would animate 0 → 0).
-          gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
-            const dir = el.dataset.reveal || 'up';
-            const from: gsap.TweenVars = { autoAlpha: 0 };
-            if (dir === 'up') from.y = 48;
-            if (dir === 'down') from.y = -48;
-            if (dir === 'left') from.x = 64;
-            if (dir === 'right') from.x = -64;
-            if (dir === 'scale') from.scale = 0.92;
-
-            gsap.fromTo(el, from, {
-              autoAlpha: 1,
-              x: 0,
-              y: 0,
-              scale: 1,
-              duration: 1.1,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: el,
-                start: 'top 86%',
-                toggleActions: 'play none none none',
-              },
-            });
-          });
-
-          // Staggered groups
-          gsap.utils.toArray<HTMLElement>('[data-reveal-group]').forEach((group) => {
-            if (!group.children.length) return;
-            gsap.fromTo(
-              group.children,
-              { autoAlpha: 0, y: 40 },
-              {
-                autoAlpha: 1,
-                y: 0,
-                duration: 0.9,
-                ease: 'power3.out',
-                stagger: 0.12,
-                scrollTrigger: {
-                  trigger: group,
-                  start: 'top 84%',
-                  toggleActions: 'play none none none',
-                },
-              }
-            );
-          });
-
-          // Animated SVG strokes: <path data-draw> draws itself in when
-          // its <svg> scrolls into view. data-draw-delay / data-draw-duration
-          // tune the timing per path.
-          gsap.utils.toArray<SVGGeometryElement>('svg [data-draw]').forEach((path) => {
-            if (typeof path.getTotalLength !== 'function') return;
-            const len = path.getTotalLength();
-            if (!len) return;
-            gsap.fromTo(
-              path,
-              { strokeDasharray: len, strokeDashoffset: len },
-              {
-                strokeDashoffset: 0,
-                duration: parseFloat(path.dataset.drawDuration || '1.4'),
-                delay: parseFloat(path.dataset.drawDelay || '0'),
-                ease: 'power2.inOut',
-                scrollTrigger: {
-                  trigger: path.closest('svg'),
-                  start: 'top 88%',
-                  toggleActions: 'play none none none',
-                },
-              }
-            );
-          });
-
-          // Parallax images: data-parallax="0.15" (drift amount)
-          gsap.utils.toArray<HTMLElement>('[data-parallax]').forEach((el) => {
-            const amount = parseFloat(el.dataset.parallax || '0.15');
-            gsap.fromTo(
-              el,
-              { yPercent: amount * 100 * -0.5 },
-              {
-                yPercent: amount * 100 * 0.5,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: el.parentElement,
-                  start: 'top bottom',
-                  end: 'bottom top',
-                  scrub: true,
-                },
-              }
-            );
-          });
-        }
-      );
-
-      window.addEventListener('load', () => ScrollTrigger.refresh());
+      import { initMenu } from '../scripts/menu';
+      import { initReveals } from '../scripts/reveal';
+      import { initBar } from '../scripts/bar';
+      import { initNewsletter } from '../scripts/forms';
+      initMenu();
+      initReveals();
+      initBar();
+      initNewsletter();
+      const idle = (fn: () => void) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 600));
+      const go = () => idle(() => import('../scripts/motion').then((m) => m.initMotion()));
+      if (document.readyState === 'complete') go();
+      else addEventListener('load', go, { once: true });
     </script>
   </body>
 </html>
+
+<style is:global>
+  .skip {
+    position: fixed;
+    left: var(--m);
+    top: 12px;
+    z-index: 200;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 20px;
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-160%);
+  }
+  .skip:focus {
+    transform: none;
+  }
+  main:focus {
+    outline: none;
+  }
+</style>

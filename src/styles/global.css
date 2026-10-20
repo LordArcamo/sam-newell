@@ -1,244 +1,348 @@
-/* ============================================
-   SAM NEWELL — Modern Personal Brand
-   Deep ink navy · warm bone cream · brass
-   Poppins (display) · Inter (body)
-   ============================================ */
+/* Sam Newell — "From the Point" · Gallery white (colour option 1) · General Sans + Switzer (type option B)
+   Fonts: original Fontshare WOFF2 files, unmodified (ITF Free Font License). */
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/Switzer-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/Switzer-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/Switzer-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+/* Metric fallbacks so the swap barely moves the page */
+@font-face {
+  font-family: 'General Sans Fallback';
+  src: local('Arial');
+  size-adjust: 98%;
+  ascent-override: 98%;
+  descent-override: 24%;
+}
+@font-face {
+  font-family: 'Switzer Fallback';
+  src: local('Arial');
+  size-adjust: 97%;
+  ascent-override: 97%;
+  descent-override: 25%;
+}
 
 :root {
-  /* Palette — original site: #131313 / #FFFFFF / #D9D9D9 monochrome */
-  --ink: #131313;
-  --ink-2: #1b1b1b;
-  --navy: #232323;
-  --navy-soft: #2e2e2e;
-  --cream: #ffffff;
-  --cream-2: #f4f4f4;
-  --bone: #d9d9d9;
-  --brass: #757575;
-  --brass-bright: #d9d9d9;
-  --brick: #131313;
-  --white: #ffffff;
-  --ink-40: rgba(19, 19, 19, 0.4);
-  --cream-60: rgba(255, 255, 255, 0.65);
-  --cream-20: rgba(255, 255, 255, 0.2);
-  --cream-08: rgba(255, 255, 255, 0.07);
+  --ink: #0a0a0a;
+  --paper: #ffffff;
+  --tone: #d9d9d9; /* a surface tone only, never text on paper */
 
-  /* Type */
-  --font-display: 'Poppins', 'Helvetica Neue', sans-serif;
-  --font-body: 'Inter Variable', 'Helvetica Neue', sans-serif;
+  --display: 'General Sans', 'General Sans Fallback', system-ui, sans-serif;
+  --text: 'Switzer', 'Switzer Fallback', system-ui, sans-serif;
 
-  /* Scale */
-  --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.94rem);
-  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.4rem);
-  --step-2: clamp(1.5rem, 1.35rem + 0.9vw, 2rem);
-  --step-3: clamp(1.9rem, 1.6rem + 1.7vw, 2.8rem);
-  --step-4: clamp(2.4rem, 1.9rem + 2.8vw, 4rem);
-  --step-5: clamp(2.8rem, 2rem + 4.2vw, 5.4rem);
+  /* five sizes */
+  --t-title: clamp(88px, 15.2vw, 240px);
+  --t-head: clamp(40px, 4.4vw, 72px);
+  --t-lead: 24px;
+  --t-body: 18px;
+  --t-small: 15px;
 
-  /* Fixed type tokens — every non-heading font size on the site
-     maps to one of these four. */
-  --text-xs: 0.72rem; /* micro labels, legal, footer meta */
-  --text-sm: 0.8rem; /* buttons, kickers, nav, chips */
-  --text-md: 0.93rem; /* card body copy */
-  --text-lg: 1.08rem; /* emphasized body, small numerals */
-  --title-card: 1.35rem; /* card/list titles */
+  --m: 32px;
+  --gap: 24px;
+  --sec: 160px;
+  --bar: 76px;
 
-  /* Layout */
-  --container: 76rem;
-  --gutter: clamp(1.25rem, 4vw, 3rem);
-  --section-pad: clamp(4.5rem, 10vw, 8.5rem);
-
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --hover: 0.18s;
+}
+@media (max-width: 767px) {
+  :root {
+    --m: 20px;
+    --sec: 96px;
+    --t-lead: 20px;
+    --t-body: 17px;
+    --bar: 64px;
+  }
 }
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+}
+* {
   margin: 0;
   padding: 0;
 }
-
 html {
-  scroll-behavior: smooth;
-  /* Dark so iOS rubber-band overscroll matches the header/hero, not white */
-  background: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--bar) + 16px);
 }
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-
-body {
-  font-family: var(--font-body);
-  font-size: var(--step-0);
-  line-height: 1.65;
-  color: var(--ink);
-  background: var(--cream);
-  -webkit-font-smoothing: antialiased;
-  overflow-x: clip;
-}
-
-img,
-svg,
-video {
-  display: block;
-  max-width: 100%;
-  /* height:auto so width/height attributes (CLS hints) never distort
-     images when CSS scales their width */
+html.lenis,
+html.lenis body {
   height: auto;
 }
-
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--text);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-kerning: normal;
+}
+img,
+svg,
+video,
+canvas,
+picture {
+  display: block;
+  max-width: 100%;
+}
+img {
+  height: auto;
+}
 a {
   color: inherit;
 }
-
-button {
+button,
+input,
+select,
+textarea {
   font: inherit;
+  color: inherit;
+}
+button {
+  background: none;
+  border: 0;
   cursor: pointer;
 }
-
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
 ::selection {
-  background: var(--bone);
+  background: var(--ink);
+  color: var(--paper);
+}
+.dark ::selection {
+  background: var(--paper);
   color: var(--ink);
 }
 
-/* ---------- Utilities ---------- */
-
-.container {
-  width: min(var(--container), 100% - var(--gutter) * 2);
-  margin-inline: auto;
-}
-
-.section {
-  padding-block: var(--section-pad);
-  position: relative;
-}
-
-.kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: var(--text-sm);
+/* ——— roles ——— */
+.title {
+  font-family: var(--display);
   font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: inherit;
-  opacity: 0.72;
+  font-size: var(--t-title);
+  line-height: 0.84;
+  letter-spacing: -0.055em;
 }
-
-.kicker::before {
-  content: '';
-  width: 2.25rem;
-  height: 1px;
-  background: currentColor;
+.h {
+  font-size: var(--t-head);
 }
-
-.display {
-  font-family: var(--font-display);
-  font-weight: 700;
+.lead {
+  font-size: var(--t-lead);
+  line-height: 1.4;
+  font-weight: 500;
+}
+.small {
+  font-size: var(--t-small);
+  line-height: 1.45;
+  font-weight: 500;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.statement {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(28px, 2.5vw, 36px);
+  letter-spacing: -0.025em;
   line-height: 1.12;
-  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.dark {
+  background: var(--ink);
+  color: var(--paper);
+}
+.wrap {
+  padding-inline: var(--m);
+}
+.sec {
+  padding-block: var(--sec);
+}
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.display em,
-.display .accent {
-  font-style: normal;
-  color: var(--brass);
-}
-
-/* ---------- Buttons ---------- */
-
+/* ——— buttons and links ——— */
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.95rem 1.9rem;
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 24px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--text);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1;
   text-decoration: none;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  transition: transform 0.35s var(--ease-out-expo), background-color 0.25s ease,
-    color 0.25s ease, border-color 0.25s ease;
+  white-space: nowrap;
+  transition: transform var(--hover) var(--ease-out), background-color var(--hover);
 }
-
 .btn:hover {
-  transform: translateY(-2px);
+  background: #262626;
 }
-
+.btn:active {
+  transform: scale(0.97);
+}
 .btn .arrow {
-  transition: transform 0.35s var(--ease-out-expo);
+  transition: transform var(--hover) var(--ease-out);
 }
-
 .btn:hover .arrow {
   transform: translateX(4px);
 }
-
-.btn--brass {
-  background: var(--bone);
+.dark .btn,
+.btn.light {
+  background: var(--paper);
   color: var(--ink);
 }
-
-.btn--brass:hover {
-  background: #c9c9c9;
+.dark .btn:hover,
+.btn.light:hover {
+  background: var(--tone);
+}
+@media (max-width: 767px) {
+  .btn {
+    min-height: 56px;
+  }
+}
+.link {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  transition: text-underline-offset var(--hover) var(--ease-out);
+}
+.link:hover {
+  text-underline-offset: 8px;
+}
+.more {
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.more span {
+  transition: transform var(--hover) var(--ease-out);
+}
+.more:hover span {
+  transform: translateX(5px);
+}
+.more:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
 }
 
-.btn--ink {
-  background: var(--ink);
-  color: var(--cream);
+/* ——— media ——— */
+.ph {
+  overflow: hidden;
+  background: var(--tone);
 }
-
-.btn--ink:hover {
-  background: var(--navy);
+.ph img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
+.r45 { aspect-ratio: 4 / 5; }
+.r1610 { aspect-ratio: 16 / 10; }
+.r11 { aspect-ratio: 1; }
+.r32 { aspect-ratio: 3 / 2; }
+.r43 { aspect-ratio: 4 / 3; }
 
-.btn--ghost-light {
-  border-color: var(--cream-20);
-  color: var(--cream);
-  background: transparent;
-}
-
-.btn--ghost-light:hover {
-  border-color: var(--brass);
-  color: var(--brass-bright);
-}
-
-.btn--ghost-dark {
-  border-color: var(--ink-40);
-  color: var(--ink);
-  background: transparent;
-}
-
-.btn--ghost-dark:hover {
-  border-color: var(--ink);
-}
-
-/* ---------- Reveal (GSAP hooks) ---------- */
-
-[data-reveal],
-[data-reveal-group] > * {
-  will-change: transform, opacity;
-}
-
-/* Pre-hide only when JS is available (set on <html> inline) */
-.js [data-reveal],
-.js [data-reveal-group] > * {
-  opacity: 0;
-}
-
-/* ---------- Texture ---------- */
-
-.grain::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.5;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+/* ——— reveal (motion layer). Pre-hide only with JS + no reduced motion; never visibility. ——— */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-rv] {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  .js [data-rv].in {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 75ms);
+  }
+  .js [data-rv-img] {
+    clip-path: inset(0 0 100% 0);
+  }
+  .js [data-rv-img].in {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1s var(--ease-io);
+    transition-delay: calc(var(--i, 0) * 75ms);
+  }
+  .js [data-rv-img] img {
+    transform: scale(1.08);
+  }
+  .js [data-rv-img].in img {
+    transform: none;
+    transition: transform 1.4s var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 75ms);
+  }
 }

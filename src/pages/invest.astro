@@ -1,0 +1,144 @@
+---
+import Base from '../layouts/Base.astro';
+import InnerHero from '../components/InnerHero.astro';
+import Calc from '../components/Calc.astro';
+import Quotes from '../components/Quotes.astro';
+import Pic from '../components/Pic.astro';
+import { img } from '../lib/images';
+import { review } from '../data/reviews';
+import { SAM_SAYS, MFI } from '../data/site';
+import { CONFIRM } from '../data/confirm';
+---
+<Base
+  title="Underwrite a Utah Rental Like Sam | Sam Newell"
+  description="Run a Utah rental the way Lehi broker Sam Newell does: cap rate, cash flow, DSCR and cash-on-cash from your own numbers, before you make an offer."
+  crumbs={[{ name: 'Invest', path: '/invest/' }]}
+>
+  <InnerHero
+    title="Underwrite it like Sam"
+    lead="Rentals are Sam’s specialty. Run the numbers the way he does before you make an offer."
+    cta={{ href: '#calc', label: 'Run the numbers' }}
+    image={img('photos/valley-view-utah-county.jpg')}
+    alt="Utah County from a new home: a road, a golden field and the valley running to the mountains"
+    pos="50% 62%"
+  />
+
+  <section class="calc-sec sec wrap" id="calc" aria-labelledby="calc-h">
+    <h2 class="h" id="calc-h" data-rv>Your rental, in Sam’s numbers</h2>
+    <p class="lead calc-lead" data-rv style="--i:1">The example starts at $450,000 with 25% down. Put in the house you are looking at.</p>
+    <Calc id="calc-invest" mode="invest" />
+  </section>
+
+  <section class="now dark sec wrap" aria-labelledby="now-h">
+    <h2 class="h" id="now-h" data-rv>What Sam’s buying now</h2>
+    <div class="now-grid">
+      <figure class="now-q1" data-rv style="--i:1">
+        <blockquote class="statement"><p>“{SAM_SAYS.townhomes.text}”</p></blockquote>
+        <figcaption>Sam, on {SAM_SAYS.townhomes.where}, {SAM_SAYS.townhomes.date}</figcaption>
+      </figure>
+      <Pic class="now-p1" src={img('photos/estate-lots-jordan-river.jpg')} alt="Estate lots above the Jordan River in Lehi, with the Wasatch behind" sizes="(max-width: 767px) 70vw, 20vw" ratio="r45" pos="50% 40%" />
+      <Pic class="now-p2" src={img('photos/listing-kitchen-2026-05.jpg')} alt="A new townhome kitchen in Lehi" sizes="(max-width: 767px) 90vw, 30vw" ratio="r1610" pos="50% 60%" i={1} />
+      <figure class="now-q2" data-rv style="--i:2">
+        <blockquote class="lead"><p>“{SAM_SAYS.smallMulti.text}”</p></blockquote>
+        <figcaption>Sam, on {SAM_SAYS.smallMulti.where}, {SAM_SAYS.smallMulti.date}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <Quotes heading="In investors’ words" a={{ r: review(20), key: 'invest' }} b={{ r: review(16), key: 'invest' }} />
+
+  {CONFIRM.mfiClub && (
+    <section class="mfi sec wrap" id="mfi-club" aria-labelledby="mfi-h">
+      <Pic class="mfi-p" src={img('photos/sam-office-2026-02.jpg')} alt="Sam at his desk" sizes="(max-width: 767px) 60vw, 18vw" ratio="r45" pos="50% 30%" />
+      <div class="mfi-t">
+        <h2 class="h" id="mfi-h" data-rv>Invest alongside MFI Club</h2>
+        <p class="lead" data-rv style="--i:1">
+          Sam founded {MFI.name} in Lehi in {MFI.founded}. It buys and runs larger apartment buildings across the country{CONFIRM.doors2000 ? ', with more than 2,000 doors owned and managed' : ''}.
+        </p>
+        <p class="mfi-fine" data-rv style="--i:2">
+          {MFI.name} is a separate company. Any offering is made only through its own documents to eligible investors.
+          Nothing on this site is an offer to sell, or a solicitation of an offer to buy, any security.
+        </p>
+        <a class="btn" href={MFI.url} rel="noopener" target="_blank">Visit mficlub.com <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+    </section>
+  )}
+</Base>
+<script>
+  import { initCalcs, setPrice } from '../calc/calc';
+  initCalcs();
+  const p = Number(new URLSearchParams(location.search).get('price'));
+  const f = document.querySelector<HTMLFormElement>('form[data-calc]');
+  if (p > 0 && f) setPrice(f, p);
+</script>
+<style>
+  .calc-sec .h {
+    margin-bottom: 12px;
+  }
+  .calc-lead {
+    margin-bottom: 48px;
+    max-width: 44ch;
+  }
+  .now .h {
+    margin-bottom: 56px;
+  }
+  .now-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 48px var(--gap);
+    align-items: end;
+  }
+  .now-q1 {
+    grid-column: 1 / 8;
+  }
+  .now-q1 .statement {
+    max-width: 22ch;
+  }
+  .now-grid :global(.now-p1) {
+    grid-column: 9 / 12;
+  }
+  .now-grid :global(.now-p2) {
+    grid-column: 2 / 7;
+  }
+  .now-q2 {
+    grid-column: 8 / 13;
+    align-self: center;
+  }
+  figcaption {
+    margin-top: 16px;
+  }
+  .mfi {
+    display: grid;
+    grid-template-columns: 18vw minmax(0, 1fr);
+    gap: 5vw;
+    align-items: center;
+  }
+  .mfi-t {
+    max-width: 62ch;
+  }
+  .mfi-t .h {
+    margin-bottom: 20px;
+  }
+  .mfi-t .lead {
+    margin-bottom: 18px;
+  }
+  .mfi-fine {
+    margin-bottom: 28px;
+  }
+  @media (max-width: 900px) {
+    .now-grid > *,
+    .now-grid :global(.now-p1),
+    .now-grid :global(.now-p2) {
+      grid-column: 1 / -1;
+    }
+    .now-grid :global(.now-p1) {
+      width: 60%;
+    }
+    .mfi {
+      grid-template-columns: 1fr;
+    }
+    .mfi :global(.mfi-p) {
+      width: 50%;
+    }
+  }
+</style>

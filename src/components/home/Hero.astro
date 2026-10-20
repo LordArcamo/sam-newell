@@ -1,0 +1,225 @@
+---
+/**
+ * Hero, frame 0 (SSR, no JS needed): poster <img> = LCP, never hidden or animated in.
+ * GL MOUNT POINT: [data-relief-mount="hero"] — mountRelief() (src/relief/mount.ts) puts the canvas over the
+ * poster frame with the identical cover crop once the model ships.
+ *
+ * TODO(model): the posters below are TEMPORARY — the concept renders (inspo/concept-mockup/hero-*.png)
+ * converted to neutral greyscale and named TEMP-*. Replace with blender/ posters
+ * (/posters/hero-{state}-{rig}-{w}.avif, 5 states × 3 rigs) when the model check passes. Their pins are
+ * baked in; the real posters carry no pins (pins become DOM markers).
+ */
+import { getImage } from 'astro:assets';
+import Logo from '../Logo.astro';
+import { CONTACT, ZILLOW } from '../../data/site';
+import golden from '../../assets/posters/TEMP-concept-hero-golden-grey.jpg';
+import blue from '../../assets/posters/TEMP-concept-hero-blue-grey.jpg';
+
+const widths = [780, 1170, 1600, 2000, 2560];
+const make = async (src: ImageMetadata, format: 'avif' | 'webp' | 'jpg') =>
+  (await Promise.all(widths.map(async (w) => `${(await getImage({ src, width: w, format, quality: format === 'avif' ? 55 : 70 })).src} ${w}w`))).join(', ');
+const sets = {
+  golden: { avif: await make(golden, 'avif'), webp: await make(golden, 'webp') },
+  blue: { avif: await make(blue, 'avif'), webp: await make(blue, 'webp') },
+};
+const fallback = (await getImage({ src: golden, width: 1600, format: 'jpg', quality: 72 })).src;
+const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
+---
+<section class="hero" data-hero aria-labelledby="hero-title">
+  <div class="hero-media" data-relief-mount="hero">
+    <div class="frame" data-hero-frame>
+      <picture data-hero-poster>
+        <source type="image/avif" srcset={sets.golden.avif} sizes={sizes} />
+        <source type="image/webp" srcset={sets.golden.webp} sizes={sizes} />
+        <img
+          src={fallback}
+          width="2560"
+          height="1448"
+          alt="A white plaster relief model of the Wasatch Front seen from above Utah Lake, with Sam's homes pinned and the SN mark standing at Lehi"
+          fetchpriority="high"
+          loading="eager"
+          decoding="sync"
+        />
+      </picture>
+      <script is:inline define:vars={{ sets }}>
+        // Bucket poster by the real sun (html[data-sun], set in <head>). TEMP: two concept posters only.
+        (function () {
+          var s = document.documentElement.dataset.sun, k = s === 'blue' || s === 'night' ? 'blue' : 'golden';
+          if (k === 'golden') return;
+          var p = document.currentScript.previousElementSibling, src = p.querySelectorAll('source');
+          src[0].srcset = sets[k].avif; src[1].srcset = sets[k].webp; p.querySelector('img').srcset = sets[k].webp;
+        })();
+      </script>
+      <p class="pin-tag small" aria-hidden="true"><Logo variant="mark" class="pin-mark" title="" /> Lehi · home base</p>
+    </div>
+  </div>
+  <p class="caption small" data-caption>Lehi, Utah</p>
+  <script is:inline>
+    (function () {
+      var t = +document.documentElement.dataset.t || Date.now();
+      var s = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Denver', hour: 'numeric', minute: '2-digit' }).format(t)
+        .replace(/\s?AM$/i, ' a.m.').replace(/\s?PM$/i, ' p.m.');
+      document.currentScript.previousElementSibling.textContent = 'Lehi now, ' + s;
+    })();
+  </script>
+  <div class="hero-foot">
+    <h1 class="title" id="hero-title">Sam<br /> Newell</h1>
+    <div class="side">
+      <p class="sentence">Real estate broker in Lehi, Utah. Buying, selling and investing on the Wasatch Front, with straight answers.</p>
+      <p class="proof num"><b>{ZILLOW.rating}</b> from {ZILLOW.reviews} Zillow reviews <b>{ZILLOW.sold}</b> homes sold</p>
+      <a class="btn" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call with Sam <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    height: calc(100svh - var(--bar));
+    min-height: 620px;
+    max-height: 1100px;
+    overflow: hidden;
+    background: var(--tone);
+  }
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    container-type: size;
+    --r: 1.768; /* poster aspect 2560 / 1448 */
+    --px: 0.5;
+  }
+  /* The poster frame reproduces object-fit: cover with object-position (px, 60%), so DOM markers and the
+     future GL view offset share one crop. */
+  .frame {
+    position: absolute;
+    width: max(100cqw, 100cqh * var(--r));
+    height: max(100cqh, 100cqw / var(--r));
+    left: clamp(100cqw - max(100cqw, 100cqh * var(--r)), 50cqw - var(--px) * max(100cqw, 100cqh * var(--r)), 0px);
+    top: calc((100cqh - max(100cqh, 100cqw / var(--r))) * 0.6);
+    transform-origin: 50% 60%;
+  }
+  .frame img {
+    width: 100%;
+    height: 100%;
+  }
+  .pin-tag {
+    position: absolute;
+    left: 53%;
+    top: 57%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--paper);
+    padding: 6px 10px 6px 8px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pin-tag :global(.pin-mark) {
+    width: 18px;
+    height: auto;
+  }
+  :global([data-sun='blue']) .pin-tag,
+  :global([data-sun='night']) .pin-tag {
+    left: 40.6%;
+    top: 51.5%;
+  }
+  :global([data-sun='blue']) .hero-media,
+  :global([data-sun='night']) .hero-media {
+    --px: 0.42;
+  }
+  .caption {
+    position: absolute;
+    top: 20px;
+    right: var(--m);
+    background: var(--paper);
+    padding: 6px 10px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-foot {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 0 var(--m) 28px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 40px;
+    pointer-events: none;
+  }
+  .hero-foot > * {
+    pointer-events: auto;
+  }
+  .title {
+    color: var(--ink);
+  }
+  .side {
+    width: min(420px, 34vw);
+    background: var(--paper);
+    padding: 24px 24px 24px;
+    margin-bottom: 4px;
+  }
+  .sentence {
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .proof {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  .proof b {
+    font-weight: 600;
+  }
+  .proof b + * {
+    margin-right: 8px;
+  }
+  .side .btn {
+    width: 100%;
+  }
+  @media (max-width: 1023px) {
+    .side {
+      width: 360px;
+    }
+  }
+  @media (max-width: 767px) {
+    .hero {
+      height: auto;
+      min-height: 0;
+      max-height: none;
+      overflow: visible;
+      background: var(--paper);
+    }
+    .hero {
+      --hh: max(68svh, 440px);
+    }
+    .hero-media {
+      position: relative;
+      height: var(--hh);
+      --px: 0.53;
+    }
+    .pin-tag {
+      display: none;
+    }
+    .caption {
+      top: 14px;
+    }
+    .hero-foot {
+      position: static;
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding: 0;
+    }
+    .title {
+      position: absolute;
+      left: var(--m);
+      top: calc(var(--hh) - 14px);
+      transform: translateY(-100%);
+      font-size: min(25vw, 140px);
+    }
+    .side {
+      width: auto;
+      padding: 24px var(--m) 8px;
+      margin: 0;
+    }
+  }
+</style>

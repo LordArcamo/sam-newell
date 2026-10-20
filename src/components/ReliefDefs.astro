@@ -1,0 +1,41 @@
+---
+/** The contour relief geometry, defined once per page and reused with <use href="#relief-geo">. */
+import geo from '../data/map-geo.json';
+---
+<svg class="relief-defs" aria-hidden="true" focusable="false" width="0" height="0">
+  <defs>
+    <g id="relief-geo">
+      <path d={geo.lakes['great-salt-lake']} class="rg-lake" />
+      <path d={geo.lakes['utah-lake']} class="rg-lake" />
+      <path d={geo.minor} class="rg-minor" />
+      <path d={geo.index} class="rg-index" />
+    </g>
+  </defs>
+</svg>
+<style is:global>
+  .relief-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+  .rg-lake {
+    fill: var(--tone);
+    stroke: none;
+  }
+  .rg-minor,
+  .rg-index {
+    fill: none;
+    stroke: var(--ink);
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+  }
+  .rg-minor {
+    stroke-width: 1px;
+    stroke-opacity: 0.32;
+  }
+  .rg-index {
+    stroke-width: 1.6px;
+    stroke-opacity: 0.6;
+  }
+</style>

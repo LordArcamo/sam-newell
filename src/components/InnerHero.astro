@@ -1,0 +1,82 @@
+---
+/** Inner-page hero: ≤80svh, two halves. Left: H1 (≤2 lines), one lead sentence, one square button.
+    Right: one picture, edge to edge. H1 and picture are never hidden or animated in (LCP). */
+import Pic from './Pic.astro';
+import type { ImageMetadata } from 'astro';
+interface Props {
+  title: string;
+  lead: string;
+  cta?: { href: string; label: string; external?: boolean };
+  image: ImageMetadata;
+  alt: string;
+  pos?: string;
+  tone?: boolean;
+}
+const { title, lead, cta, image, alt, pos = '50% 50%', tone = false } = Astro.props;
+---
+<section class="ih" aria-labelledby="ih-h">
+  <div class="ih-t">
+    <h1 class="h ih-h" id="ih-h" set:html={title} />
+    <p class="lead ih-lead">{lead}</p>
+    {cta && (
+      <a class="btn" href={cta.href} rel={cta.external ? 'noopener' : undefined} target={cta.external ? '_blank' : undefined}>
+        {cta.label} <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    )}
+    <slot />
+  </div>
+  <div class:list={['ih-p', { tone }]}>
+    <Pic src={image} alt={alt} sizes="(max-width: 767px) 100vw, 50vw" pos={pos} eager />
+  </div>
+</section>
+<style>
+  .ih {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: min(80svh, 820px);
+  }
+  .ih-t {
+    padding: 72px var(--m) 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 22px;
+    align-items: flex-start;
+  }
+  .ih-h {
+    font-size: clamp(48px, 5.6vw, 92px);
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+    max-width: 11ch;
+  }
+  .ih-lead {
+    max-width: 30ch;
+  }
+  .ih-p {
+    position: relative;
+    min-height: 420px;
+  }
+  .ih-p :global(.ph) {
+    position: absolute;
+    inset: 0;
+  }
+  .ih-p.tone :global(.ph) {
+    background: var(--tone);
+  }
+  @media (max-width: 767px) {
+    .ih {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .ih-t {
+      padding: 40px var(--m) 36px;
+    }
+    .ih-h {
+      font-size: clamp(42px, 12vw, 60px);
+    }
+    .ih-p {
+      min-height: 0;
+      aspect-ratio: 4 / 3.4;
+    }
+  }
+</style>

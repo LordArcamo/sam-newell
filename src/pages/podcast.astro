@@ -1,0 +1,219 @@
+---
+import Base from '../layouts/Base.astro';
+import InnerHero from '../components/InnerHero.astro';
+import Pic from '../components/Pic.astro';
+import EpisodeRow from '../components/EpisodeRow.astro';
+import OnAir from '../components/OnAir.astro';
+import { img } from '../lib/images';
+import { EPISODES, GROUPS } from '../lib/podcast';
+import { PODCAST, SITE } from '../data/site';
+import { PODCAST_REVIEWS, reviewDate } from '../data/reviews';
+
+const groupOf = (n: number | null) => GROUPS.find((g) => n !== null && g.eps.includes(n))?.name ?? '';
+const first = EPISODES[EPISODES.length - 1];
+const jsonld = [
+  {
+    '@type': 'PodcastSeries',
+    '@id': `${SITE.url}/podcast/#series`,
+    name: PODCAST.name,
+    url: `${SITE.url}/podcast/`,
+    webFeed: PODCAST.rss,
+    author: { '@id': `${SITE.url}/#sam` },
+    sameAs: [PODCAST.apple, PODCAST.spotify],
+  },
+];
+---
+<Base
+  title="Get Leveraged Podcast Archive | Sam Newell"
+  description="Get Leveraged with Sam Newell: an archive of 104 conversations on investing, money and family, 2020 to 2025. 4.8 out of 5 on Apple from 60 ratings."
+  crumbs={[{ name: 'Podcast', path: '/podcast/' }]}
+  jsonld={jsonld}
+>
+  <InnerHero
+    title="Get Leveraged"
+    lead={`An archive of ${PODCAST.episodes} conversations on investing, money and family, recorded 2020 to 2025.`}
+    cta={{ href: PODCAST.apple, label: 'Listen on Apple', external: true }}
+    image={img('photos/get-leveraged-cover.jpg')}
+    alt="Get Leveraged with Sam Newell: the show's cover, Sam laughing in the studio"
+    pos="50% 30%"
+  >
+    <p class="small">{PODCAST.rating} out of 5 on Apple from {PODCAST.ratings} ratings. Also on <a class="link" href={PODCAST.spotify} rel="noopener" target="_blank">Spotify</a>.</p>
+  </InnerHero>
+
+  <section class="arch sec wrap" aria-labelledby="arch-h">
+    <div class="arch-side">
+      <h2 class="h" id="arch-h" data-rv>The running order</h2>
+      <p data-rv style="--i:1">Every episode in the feed, newest first. Press play to listen here; nothing loads until you do.</p>
+      <div class="tools" data-tools>
+        <label class="search">
+          <span class="fl">Search titles and guests</span>
+          <input type="search" data-q placeholder="For example, flipping" autocomplete="off" />
+        </label>
+        <div class="filters" role="group" aria-label="Show a group">
+          <button type="button" class="chip" aria-pressed="true" data-g="">All</button>
+          {GROUPS.map((g) => <button type="button" class="chip" aria-pressed="false" data-g={g.name}>{g.name}</button>)}
+        </div>
+        <p class="small" aria-live="polite" data-count>{EPISODES.length} episodes</p>
+      </div>
+      <Pic class="arch-p" src={img('photos/podcast-studio.jpg')} alt="Sam on a leather sofa in the Get Leveraged interview room" sizes="(max-width: 767px) 70vw, 26vw" ratio="r45" pos="50% 40%" />
+    </div>
+    <ul role="list" class="eps" data-eps>
+      {EPISODES.map((e) => (
+        <EpisodeRow e={e} showNumber filter={groupOf(e.number)} />
+      ))}
+    </ul>
+  </section>
+
+  <section class="story dark sec wrap" aria-labelledby="story-h">
+    <Pic class="story-p" src={img('photos/recession-proof-cover.jpg')} alt="The show's first cover art, Recession Proof: buying and selling in any economy" sizes="(max-width: 767px) 60vw, 22vw" ratio="r11" />
+    <div class="story-t">
+      <h2 class="h" id="story-h" data-rv>It began as Recession Proof</h2>
+      <p class="lead" data-rv style="--i:1">The first episodes went out in {new Date(first.date + 'T12:00:00Z').getUTCFullYear()} under the name Recession Proof. The feed still carries it, and so do the early covers.</p>
+      <div class="ar">
+        {PODCAST_REVIEWS.map((r, i) => (
+          <figure data-rv style={`--i:${i + 2}`}>
+            <blockquote><p>“{r.text}”</p></blockquote>
+            <figcaption class="small">{r.name}, {reviewDate(r.date)}, on Apple Podcasts</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+    <Pic class="story-p2" src={img('photos/sam-office-2026-02.jpg')} alt="Sam at his desk recording a market update" sizes="(max-width: 767px) 50vw, 14vw" ratio="r45" pos="50% 30%" />
+  </section>
+  <OnAir />
+</Base>
+<script>
+  import { initPlayer } from '../podcast/player';
+  initPlayer();
+  const q = document.querySelector<HTMLInputElement>('[data-q]')!;
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-g]')];
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-text]')];
+  const count = document.querySelector<HTMLElement>('[data-count]')!;
+  let group = '';
+  const run = () => {
+    const s = q.value.trim().toLowerCase();
+    let n = 0;
+    rows.forEach((r) => {
+      const ok = (!s || r.dataset.text!.includes(s)) && (!group || r.dataset.group === group);
+      r.hidden = !ok;
+      if (ok) n++;
+    });
+    count.textContent = `${n} episode${n === 1 ? '' : 's'}`;
+  };
+  q.addEventListener('input', run);
+  chips.forEach((c) =>
+    c.addEventListener('click', () => {
+      group = c.dataset.g!;
+      chips.forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+      run();
+    }),
+  );
+</script>
+<style>
+  .arch {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 5vw;
+    align-items: start;
+  }
+  .arch-side {
+    position: sticky;
+    top: calc(var(--bar) + 24px);
+    display: grid;
+    gap: 20px;
+  }
+  .tools {
+    display: grid;
+    gap: 16px;
+  }
+  .search {
+    display: grid;
+    gap: 6px;
+  }
+  .fl {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .search input {
+    min-height: 52px;
+    padding: 0 14px;
+    background: var(--tone);
+    border: 0;
+    border-radius: 0;
+    font-size: 18px;
+  }
+  .search input:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    min-height: 44px;
+    padding: 0 14px;
+    background: var(--tone);
+    font-weight: 500;
+    font-size: 16px;
+    transition: background-color var(--hover), color var(--hover);
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .arch-side :global(.arch-p) {
+    width: 60%;
+  }
+  .eps {
+    display: grid;
+    gap: 2px;
+  }
+  .story {
+    display: grid;
+    grid-template-columns: 22vw minmax(0, 1fr) 14vw;
+    gap: 4vw;
+    align-items: start;
+  }
+  .story-t .h {
+    margin-bottom: 20px;
+  }
+  .ar {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .ar blockquote {
+    font-weight: 500;
+    font-size: 19px;
+  }
+  .ar figcaption {
+    margin-top: 10px;
+  }
+  .story :global(.story-p2) {
+    margin-top: 160px;
+  }
+  @media (max-width: 1023px) {
+    .arch,
+    .story {
+      grid-template-columns: 1fr;
+    }
+    .arch-side {
+      position: static;
+    }
+    .arch-side :global(.arch-p) {
+      display: none;
+    }
+    .story :global(.story-p) {
+      width: 60%;
+    }
+    .story :global(.story-p2) {
+      display: none;
+    }
+    .ar {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

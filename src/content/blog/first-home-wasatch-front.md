@@ -3,8 +3,8 @@ title: 'Buying your first home on the Wasatch Front: the five numbers that matte
 description: 'Everyone stares at the listing price. Fifteen years of Utah deals say these five numbers decide whether a first home is a win.'
 date: 2026-07-07
 tag: 'Buying'
-cover: '/images/listings/skyline.webp'
-coverAlt: 'A home in Eagle Mountain, Utah with mountain views'
+cover: '../../assets/listings/past-skyline.jpg'
+coverAlt: 'A living room in an Eagle Mountain home'
 ---
 
 Everyone walks into their first showing staring at one number: the price. After fifteen years of Utah deals — and a construction management degree that taught me to see through drywall — I can tell you the price is the *fifth* most important number on the sheet. Here are the five that matter more, in order.
