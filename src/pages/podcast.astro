@@ -62,6 +62,7 @@ const jsonld = [
         <EpisodeRow e={e} showNumber filter={groupOf(e.number)} />
       ))}
     </ul>
+    <p class="more-eps"><button type="button" class="btn" data-all hidden>Show all {EPISODES.length} episodes</button></p>
   </section>
 
   <section class="story dark sec wrap" aria-labelledby="story-h">
@@ -90,16 +91,27 @@ const jsonld = [
   const rows = [...document.querySelectorAll<HTMLElement>('[data-text]')];
   const count = document.querySelector<HTMLElement>('[data-count]')!;
   let group = '';
+  let all = false;
+  const LIMIT = 20;
+  const allBtn = document.querySelector<HTMLButtonElement>('[data-all]')!;
   const run = () => {
     const s = q.value.trim().toLowerCase();
     let n = 0;
+    const filtering = !!s || !!group;
     rows.forEach((r) => {
       const ok = (!s || r.dataset.text!.includes(s)) && (!group || r.dataset.group === group);
-      r.hidden = !ok;
+      r.hidden = !ok || (!all && !filtering && n >= LIMIT);
       if (ok) n++;
     });
+    allBtn.hidden = all || filtering || n <= LIMIT;
     count.textContent = `${n} episode${n === 1 ? '' : 's'}`;
   };
+  allBtn.addEventListener('click', () => {
+    all = true;
+    run();
+    rows[LIMIT]?.querySelector('button')?.focus();
+  });
+  run();
   q.addEventListener('input', run);
   chips.forEach((c) =>
     c.addEventListener('click', () => {
@@ -169,6 +181,15 @@ const jsonld = [
   .eps {
     display: grid;
     gap: 2px;
+  }
+  .more-eps {
+    grid-column: 2;
+    margin-top: 24px;
+  }
+  @media (max-width: 1023px) {
+    .more-eps {
+      grid-column: 1;
+    }
   }
   .story {
     display: grid;

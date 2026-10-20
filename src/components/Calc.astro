@@ -73,7 +73,7 @@ const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a m
     {fields.map((f) => (
       <label class="field">
         <span class="fl">{f.label}</span>
-        <span class:list={['in', f.unit]}>
+        <span class:list={['inp', f.unit]}>
           {f.unit === '$' && <span class="u" aria-hidden="true">$</span>}
           <input
             name={f.name}
@@ -138,7 +138,7 @@ const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a m
     font-size: 16px;
     font-weight: 600;
   }
-  .in {
+  .inp {
     display: flex;
     align-items: center;
     background: var(--tone);
@@ -147,11 +147,11 @@ const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a m
     gap: 6px;
     transition: background-color var(--hover);
   }
-  .in:focus-within {
+  .inp:focus-within {
     outline: 3px solid var(--ink);
     outline-offset: 2px;
   }
-  .in input {
+  .inp input {
     flex: 1;
     min-width: 0;
     background: transparent;
@@ -162,11 +162,11 @@ const summary = mode === 'invest' ? `Cash flow ${usdSigned(r.cashFlowMonth)} a m
     padding: 12px 0;
     -moz-appearance: textfield;
   }
-  .in input:focus {
+  .inp input:focus {
     outline: none;
   }
-  .in input::-webkit-outer-spin-button,
-  .in input::-webkit-inner-spin-button {
+  .inp input::-webkit-outer-spin-button,
+  .inp input::-webkit-inner-spin-button {
     -webkit-appearance: none;
   }
   .u {
