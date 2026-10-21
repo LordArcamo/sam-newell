@@ -565,6 +565,22 @@ const jsonld = [
     }
   }
 
+  /* odometer figures (motion.ts): each digit window is 1.15em with tabular figures, so a frame mid-roll shows
+     one digit and a clean gap, never two halves */
+  .fig :global(.odo-on),
+  .subfigs :global(.odo-on) {
+    line-height: 1.15 !important;
+    font-variant-numeric: tabular-nums;
+  }
+  .fig :global(.odo-on > [aria-hidden]),
+  .subfigs :global(.odo-on > [aria-hidden]) {
+    height: 1.15em;
+  }
+  .fig :global(.odo::before),
+  .subfigs :global(.odo::before) {
+    line-height: 1.15;
+  }
+
   /* 6 · 235 */
   .fig {
     position: relative;

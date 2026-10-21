@@ -116,10 +116,17 @@ export function initMotion() {
     // nodes fill as the line passes them: along a horizontal rule by progress, down a vertical one by position
     const nodes = [...host.querySelectorAll<HTMLElement>('[data-node]')];
     if (svg.dataset.axis === 'x') {
-      tl.eventCallback('onUpdate', () => {
+      // each node's place along the rule, measured on refresh (never during scroll)
+      let at: number[] = [];
+      const measure = () => {
         const r = svg.getBoundingClientRect();
-        const at = r.left + r.width * tl.progress();
-        nodes.forEach((n) => n.classList.toggle('lit', n.getBoundingClientRect().left <= at + 1));
+        at = nodes.map((n) => (n.getBoundingClientRect().left - r.left) / Math.max(1, r.width));
+      };
+      measure();
+      ScrollTrigger.addEventListener('refresh', measure);
+      tl.eventCallback('onUpdate', () => {
+        const p = tl.progress();
+        nodes.forEach((n, k) => n.classList.toggle('lit', at[k] <= p + 0.002));
       });
     } else {
       nodes.forEach((n) => {
