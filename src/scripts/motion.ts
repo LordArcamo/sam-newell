@@ -39,6 +39,8 @@ export function initMotion() {
       const items = [...scene.querySelectorAll<HTMLElement>('[data-step]')];
       const slides = [...scene.querySelectorAll<HTMLElement>('[data-slide]')];
       scene.classList.add('live');
+      // the next pictures are clipped away until their cut, so the browser would wait to load them: ask now
+      slides.forEach((f) => f.querySelectorAll('img').forEach((i) => (i.loading = 'eager')));
       let last = -1;
       ScrollTrigger.create({
         trigger: scene,

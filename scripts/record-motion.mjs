@@ -23,13 +23,26 @@ await p.send('Page.navigate', { url: 'about:blank' });
 await sleep(300);
 await p.send('Page.startScreencast', { format: 'jpeg', quality: 82, maxWidth: W, maxHeight: H, everyNthFrame: 1 });
 await p.send('Page.navigate', { url: base + '/' });
-await sleep(5200); // the opening: mark → letterbox → name → swatches, then the film settles
-await p.wheel(H * 2.2, { step: 60, pauseMs: 26 }); // into the intro (the sentence holds, the films pass)
-await sleep(1200);
-await p.wheel(H * 2.4, { step: 60, pauseMs: 26 }); // the listings
-await sleep(1200);
+await sleep(5600); // the opening: mark → letterbox → name → swatches, then the skyline draws under the name
+// V6: the swatch trace on hover
+await p.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: W - 140, y: 250 });
+await sleep(1400);
+await p.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: W / 2, y: H / 2 });
+const at = async (sel) => p.eval(`document.querySelector('${sel}').getBoundingClientRect().top + scrollY`);
+const scrollTo = async (y) => { const now = await p.eval('scrollY'); await p.wheel(Math.max(0, y - now), { step: 70, pauseMs: 24 }); };
+await scrollTo(H * 2.4); await sleep(900); // the intro
+const scene = await at('[data-scene]');
+await scrollTo(scene - H * 0.2); await sleep(600); // the listings pass
+const sceneH = await p.eval(`document.querySelector('[data-scene]').offsetHeight`);
+await p.wheel(sceneH - H * 0.6, { step: 50, pauseMs: 30 }); await sleep(800); // one scene: four statements, four cuts
+const map = await at('#map');
+await scrollTo(map - H * 0.85); await sleep(300);
+await p.wheel(H * 0.8, { step: 30, pauseMs: 40 }); // V3: the contours draw outward from Lehi
+await sleep(2600); // the model crossfades in, the pins drop
+await p.eval(`document.querySelector('.slip[data-town="provo"]')?.click()`); // V5: the line to the picked town
+await sleep(2200);
 await p.eval(`(document.querySelector('.bar .links a[href="/buy/"]') || document.querySelector('a[href="/buy/"]')).click()`);
-await sleep(3400); // curtain up, title card, the Buy page arrives
+await sleep(3600); // V1: curtain, the SN mark draws, the Buy page arrives on its picture
 await p.send('Page.stopScreencast');
 await b.close();
 
