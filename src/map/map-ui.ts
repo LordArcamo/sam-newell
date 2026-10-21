@@ -119,13 +119,13 @@ export function initMap() {
 
   function select(slug: string | null, opts: { home?: string; instant?: boolean; focus?: boolean; overview?: boolean } = {}) {
     current = slug;
+    // the town whose card is showing is always the pressed one (first load, deep link, overview, Esc)
+    const shown = slug ?? 'lehi';
     buttons.forEach((b) => {
-      const on = b.dataset.town === slug && !opts.overview; // the overview presses no town (jury P1-8)
+      const on = b.dataset.town === shown;
       b.setAttribute('aria-pressed', String(on));
-      if (slug) b.tabIndex = on ? 0 : -1;
+      b.tabIndex = on ? 0 : -1;
     });
-    if (opts.overview) buttons.forEach((b) => (b.tabIndex = b.dataset.town === slug ? 0 : -1)); // roving stop stays on Lehi
-    if (!slug) buttons.forEach((b, i) => (b.tabIndex = i === 0 ? 0 : -1));
     labels.forEach((l) => l.classList.toggle('on', l.dataset.label === slug && !opts.overview));
     root.classList.toggle('is-town', !!slug && !opts.overview);
     const show = slug ?? 'lehi';

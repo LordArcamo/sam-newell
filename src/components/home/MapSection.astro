@@ -67,9 +67,9 @@ const mapData = {
     {cards.map((c) => (
       <article class:list={['tc', { on: c.slug === DEFAULT }]} data-card={c.slug} aria-labelledby={`tc-${c.slug}`}>
         {c.lead?.photo ? (
-          <Pic src={img(`listings/${c.lead.photo}`)} alt={`${c.lead.shown}, ${c.lead.townName}`} sizes="380px" ratio="r32" rv={false} widths={[380, 550, 760]} />
+          <Pic src={img(`listings/${c.lead.photo}`)} alt={`${c.lead.shown}, ${c.lead.townName}`} sizes="390px" ratio="r169" rv={false} widths={[390, 550]} />
         ) : (
-          <div class="macro r32" aria-hidden="true">
+          <div class="macro r169" aria-hidden="true">
             <svg viewBox={`${c.x - 4} ${-c.north - 2.67} 8 5.33`} preserveAspectRatio="xMidYMid slice"><use href="/map/relief.svg#relief-geo" /></svg>
             {c.homes.filter((h) => h.xy).map((h) => (
               <i style={`left:${((h.xy!.x - (c.x - 4)) / 8) * 100}%;top:${((-h.xy!.north - (-c.north - 2.67)) / 5.33) * 100}%`}></i>
@@ -81,7 +81,7 @@ const mapData = {
           <p class="small">{c.count || 'No homes shown here yet.'}</p>
           {c.homes.length > 0 ? (
             <ul role="list" class="tc-homes">
-              {c.homes.slice(0, 4).map((h) => (
+              {c.homes.slice(0, 3).map((h) => (
                 <li data-home={h.id}>
                   <a href={h.zillow} rel="noopener" target="_blank">
                     <span class="addr">{h.shown}</span>
@@ -94,7 +94,7 @@ const mapData = {
           ) : (
             <p class="empty">Ask Sam about {c.name}.</p>
           )}
-          {c.homes.length > 4 && <p class="small tc-more">{c.homes.length - 4} more on the map and on Zillow</p>}
+          {c.homes.length > 3 && <p class="small tc-more">{c.homes.length - 3} more on the map and <a href={ZILLOW.profile} rel="noopener" target="_blank">on Zillow</a></p>}
           {c.rv && (
             <blockquote class="tc-q small">
               <p>“{c.rv.excerpts.town}”</p>
@@ -397,6 +397,19 @@ const mapData = {
     margin-top: 6px;
     font-weight: 400;
   }
+  .tc-more a {
+    font-weight: 600;
+  }
+  .card :global(.r169) {
+    aspect-ratio: 21 / 9;
+  }
+  /* short desktop screens: the card drops its picture so its text and buttons always fit */
+  @media (min-width: 1024px) and (max-height: 860px) {
+    .card :global(.ph),
+    .card .macro {
+      display: none;
+    }
+  }
   .tc-q {
     margin-top: 16px;
   }
@@ -407,12 +420,8 @@ const mapData = {
   .tc-act {
     display: flex;
     gap: 8px;
-    margin: 18px -22px -22px;
-    padding: 14px 22px 22px;
+    margin-top: 18px;
     flex-wrap: wrap;
-    position: sticky;
-    bottom: 0;
-    background: var(--ink);
   }
   .tc-act .btn {
     min-height: 48px;
@@ -568,9 +577,7 @@ const mapData = {
       font-size: 20px;
     }
     .tc-act {
-      position: static;
-      margin: 14px 0 0;
-      padding: 0;
+      margin-top: 14px;
     }
     .sheet {
       margin: auto 0 0 0;
