@@ -13,7 +13,7 @@
    "baths": 3,
    "sqft": 2296,
    "photo": "1714-n-3870-w-lehi.jpg",
-   "zillow": "https://www.zillow.com/profile/Sam-Newell/",
+   "zillow": "https://www.zillow.com/profile/Sam%20Newell",
    "showAddress": true,
    "source": "Zillow profile, For sale tab",
    "checked": "2026-10-21",
@@ -49,7 +49,7 @@
    "baths": 6,
    "sqft": 6385,
    "photo": "1872-s-country-ln-w-lehi.jpg",
-   "zillow": "https://www.zillow.com/profile/Sam-Newell/",
+   "zillow": "https://www.zillow.com/profile/Sam%20Newell",
    "showAddress": true,
    "source": "Zillow profile, For sale tab",
    "checked": "2026-10-21",
@@ -64,7 +64,7 @@
    "status": "sold",
    "side": "buyer",
    "date": "2026-04-03",
-   "zillow": "https://www.zillow.com/profile/Sam-Newell/",
+   "zillow": "https://www.zillow.com/profile/Sam%20Newell",
    "showAddress": false,
    "source": "Zillow profile, recent sales",
    "checked": "2026-10-21"
@@ -78,7 +78,7 @@
    "status": "sold",
    "side": "buyer",
    "date": "2026-03-23",
-   "zillow": "https://www.zillow.com/profile/Sam-Newell/",
+   "zillow": "https://www.zillow.com/profile/Sam%20Newell",
    "showAddress": false,
    "source": "Zillow profile, recent sales",
    "checked": "2026-10-21"
@@ -92,7 +92,7 @@
    "status": "sold",
    "side": "both",
    "date": "2026-03-03",
-   "zillow": "https://www.zillow.com/profile/Sam-Newell/",
+   "zillow": "https://www.zillow.com/profile/Sam%20Newell",
    "showAddress": false,
    "source": "Zillow profile, recent sales",
    "checked": "2026-10-21"
@@ -106,7 +106,7 @@
    "status": "sold",
    "side": "buyer",
    "date": "2025-12-23",
-   "zillow": "https://www.zillow.com/profile/Sam-Newell/",
+   "zillow": "https://www.zillow.com/profile/Sam%20Newell",
    "showAddress": false,
    "source": "Zillow profile, recent sales",
    "checked": "2026-10-21"

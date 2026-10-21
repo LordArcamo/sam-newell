@@ -241,7 +241,8 @@ export class Engine {
   }
 
   async load() {
-    const lod = this.opts.tier === 'T1' ? 'hi' : 'lo';
+    // tablets (>= 768 px, DPR <= 2) get the hi mesh too: the tight tablet crop shows the lo mesh's facets
+    const lod = this.opts.tier === 'T1' || (this.opts.tier === 'T2' && innerWidth >= 768 && devicePixelRatio <= 2) ? 'hi' : 'lo';
     const loader = new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
     const [gl, pins, home, grad, cavity, grain] = await Promise.all([
