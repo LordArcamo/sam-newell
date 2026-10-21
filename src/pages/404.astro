@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Pic from '../components/Pic.astro';
 import { img } from '../lib/images';
-import { CONTACT } from '../data/site';
+import { BOOKING_URL, CONTACT, bookingAttrs } from '../data/site';
 // The overview poster, captured from the live renderer (scripts/capture-posters.mjs).
 ---
 <Base title="Page Not Found | Sam Newell" description="This page moved or never existed. Head home or book a call with Sam." robots="noindex, follow" noCanonical>
@@ -12,7 +12,8 @@ import { CONTACT } from '../data/site';
       <p class="lead">This page moved or never existed.</p>
       <p class="nf-a">
         <a class="btn" href="/">Home</a>
-        <a class="btn light-o" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call</a>
+        <a class="btn light-o" href={BOOKING_URL} {...bookingAttrs}>Book a call</a>
+        <a class="btn light-o" href={CONTACT.phoneHref}>Call {CONTACT.phone}</a>
       </p>
     </div>
     <div class="nf-p">

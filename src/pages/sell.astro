@@ -6,7 +6,7 @@ import Quotes from '../components/Quotes.astro';
 import Pic from '../components/Pic.astro';
 import { img } from '../lib/images';
 import { review } from '../data/reviews';
-import { CONTACT, ZILLOW } from '../data/site';
+import { ZILLOW, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site';
 import { SOLD, FOR_SALE } from '../lib/homes';
 
 // [SAM TO CONFIRM the four process lines]
@@ -26,7 +26,7 @@ const recent = SOLD.slice(0, 4);
   <InnerHero
     title="Priced on numbers"
     lead="Pricing is a science; the story is an art."
-    cta={{ href: CONTACT.calendly, label: 'Book a call', external: true }}
+    cta={{ href: BOOKING_URL, label: 'Book a call', external: BOOKING_EXTERNAL }}
     image={img('photos/listing-kitchen-2026-05.jpg')}
     alt="A bright kitchen with a quartz island and pendant lights in a home Sam listed in Lehi"
     pos="50% 62%"

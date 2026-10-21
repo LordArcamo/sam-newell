@@ -4,7 +4,7 @@ import InnerHero from '../components/InnerHero.astro';
 import Pic from '../components/Pic.astro';
 import { img } from '../lib/images';
 import { review, reviewDate } from '../data/reviews';
-import { CONTACT, SAM_SAYS, FRAMING, FRAMING_QUOTE, ZILLOW, PODCAST, MFI, BROKERAGE, SITE } from '../data/site';
+import { SAM_SAYS, FRAMING, FRAMING_QUOTE, ZILLOW, PODCAST, MFI, BROKERAGE, SITE, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site';
 import { CONFIRM } from '../data/confirm';
 import { EPISODES } from '../lib/podcast';
 
@@ -28,7 +28,7 @@ const timeline = [
   <InnerHero
     title={`Dad, ${SITE.title.split(' ').pop()}, fly fisherman`}
     lead="Sam sells homes on the Wasatch Front, frames houses with his friend Oscar and fly-fishes whenever he can."
-    cta={{ href: CONTACT.calendly, label: 'Book a call', external: true }}
+    cta={{ href: BOOKING_URL, label: 'Book a call', external: BOOKING_EXTERNAL }}
     image={img('photos/family-brighton-2026-10.jpg')}
     alt="Sam with his kids, Heidi and Liam, among autumn aspens at Brighton"
     pos="50% 30%"

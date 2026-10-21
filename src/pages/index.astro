@@ -9,7 +9,7 @@ import OnAir from '../components/OnAir.astro';
 import { img } from '../lib/images';
 import { FOR_SALE, SOLD, TOWNS } from '../lib/homes';
 import { review, reviewDate } from '../data/reviews';
-import { ZILLOW, PODCAST, CONTACT, BROKERAGE, SITE, MFI } from '../data/site';
+import { ZILLOW, PODCAST, CONTACT, BROKERAGE, SITE, MFI, BOOKING_URL, bookingAttrs } from '../data/site';
 import { CONFIRM } from '../data/confirm';
 import { ep, HOME_GROUPS } from '../lib/podcast';
 
@@ -201,7 +201,7 @@ const jsonld = [
       <p>Lehi, Utah. Serving Salt Lake and Utah County.</p>
       <p class="visit-call"><a href={CONTACT.phoneHref}>Call or text {CONTACT.phone}</a></p>
       <p>English and Spanish</p>
-      <a class="btn" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="btn" href={BOOKING_URL} {...bookingAttrs}>Book a call <span class="arrow" aria-hidden="true">→</span></a>
       <a class="more visit-more" href="/contact/">Or send a message <span aria-hidden="true">→</span></a>
     </div>
   </section>

@@ -1,6 +1,6 @@
 ---
 import Logo from './Logo.astro';
-import { NAV, CONTACT } from '../data/site';
+import { NAV, CONTACT, BOOKING_URL, bookingAttrs } from '../data/site';
 const path = Astro.url.pathname;
 const active = (href: string) => path === href || (href !== '/' && path.startsWith(href));
 ---
@@ -15,7 +15,7 @@ const active = (href: string) => path === href || (href !== '/' && path.startsWi
       ))}
     </ul>
   </nav>
-  <a class="btn bar-cta" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call</a>
+  <a class="btn bar-cta" href={BOOKING_URL} {...bookingAttrs}>Book a call</a>
   <button class="burger" type="button" aria-expanded="false" aria-controls="menu" data-menu-open>
     <span class="sr-only">Menu</span>
     <span class="burger-lines" aria-hidden="true"><i></i><i></i></span>
@@ -35,7 +35,7 @@ const active = (href: string) => path === href || (href !== '/' && path.startsWi
     </ul>
   </nav>
   <div class="menu-foot">
-    <a class="btn light" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call</a>
+    <a class="btn light" href={BOOKING_URL} {...bookingAttrs}>Book a call</a>
     <a class="menu-phone" href={CONTACT.phoneHref}>Call or text {CONTACT.phone}</a>
   </div>
 </div>

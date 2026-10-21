@@ -2,6 +2,7 @@
 /** Inner-page hero: ≤80svh, two halves. Left: H1 (≤2 lines), one lead sentence, one square button.
     Right: one picture, edge to edge. H1 and picture are never hidden or animated in (LCP). */
 import Pic from './Pic.astro';
+import { CONTACT } from '../data/site';
 import type { ImageMetadata } from 'astro';
 interface Props {
   title: string;
@@ -19,9 +20,12 @@ const { title, lead, cta, image, alt, pos = '50% 50%', tone = false } = Astro.pr
     <h1 class="h ih-h" id="ih-h" set:html={title} />
     <p class="lead ih-lead">{lead}</p>
     {cta && (
-      <a class="btn" href={cta.href} rel={cta.external ? 'noopener' : undefined} target={cta.external ? '_blank' : undefined}>
-        {cta.label} <span class="arrow" aria-hidden="true">→</span>
-      </a>
+      <p class="ih-act">
+        <a class="btn" href={cta.href} rel={cta.external ? 'noopener' : undefined} target={cta.external ? '_blank' : undefined}>
+          {cta.label} <span class="arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="ih-tel" href={CONTACT.phoneHref}>or call {CONTACT.phone}</a>
+      </p>
     )}
     <slot />
   </div>
@@ -51,6 +55,21 @@ const { title, lead, cta, image, alt, pos = '50% 50%', tone = false } = Astro.pr
   }
   .ih-lead {
     max-width: 30ch;
+  }
+  .ih-act {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 22px;
+  }
+  .ih-tel {
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
   }
   .ih-p {
     position: relative;

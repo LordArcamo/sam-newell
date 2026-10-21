@@ -19,8 +19,18 @@ export const CONTACT = {
   phoneHref: 'tel:+18019952220',
   smsHref: 'sms:+18019952220',
   email: 'samnewellrealestate@gmail.com',
-  calendly: 'https://calendly.com/sam_newell_real_estate',
+  /** 404 as of 2026-10-21 — not linked anywhere; see BOOKING_URL. */
+  calendlyDead: 'https://calendly.com/sam_newell_real_estate',
 };
+
+/**
+ * THE booking link — one line to swap. [SAM: working Calendly/booking link]
+ * calendly.com/sam_newell_real_estate returns 404 (checked 2026-10-21), so every "Book a call" goes to the
+ * contact form, with the phone number alongside, until Sam sends a link that works.
+ */
+export const BOOKING_URL: string = '/contact/#message';
+export const BOOKING_EXTERNAL = /^https?:/.test(BOOKING_URL);
+export const bookingAttrs: Record<string, string> = BOOKING_EXTERNAL ? { rel: 'noopener', target: '_blank' } : {};
 
 export const BROKERAGE = {
   name: 'KW Utah Realtors Keller Williams (Brickyard)',

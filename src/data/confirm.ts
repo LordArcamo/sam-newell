@@ -20,6 +20,8 @@ export const CONFIRM = {
   top1: false,
   /** "Investing since 2010 / bought at the bottom of the recession as a BYU student". [SAM TO CONFIRM] */
   since2010: false,
+  /** [SAM: working Calendly/booking link] — set BOOKING_URL in src/data/site.ts; until then CTAs go to /contact/#message. */
+  bookingLink: false,
   /** BYU construction-management degree. Kept: it is in Sam's own long-standing bio. [SAM TO CONFIRM wording] */
   byu: true,
 } as const;

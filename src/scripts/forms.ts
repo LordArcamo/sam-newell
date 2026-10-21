@@ -29,7 +29,7 @@ export function initNewsletter() {
       const btn = f.querySelector('button')!;
       btn.disabled = true;
       try {
-        const r = await post('/api/newsletter', { email, company });
+        const r = await post('/api/newsletter/', { email, company });
         if (r.ok) { msg.textContent = 'You’re on the list. Thank you.'; f.reset(); msg.setAttribute('role', 'status'); }
         else { msg.innerHTML = linkPhone(r.error || 'Could not sign you up right now. Try again later.'); msg.setAttribute('role', 'alert'); }
       } catch {
@@ -57,7 +57,7 @@ export function initContact() {
     btn.disabled = true;
     btn.textContent = 'Sending…';
     try {
-      const r = await post('/api/contact', data);
+      const r = await post('/api/contact/', data);
       if (r.ok) {
         msg.textContent = 'Thanks. Sam will get back to you today.';
         msg.setAttribute('role', 'status');

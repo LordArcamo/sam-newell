@@ -1,14 +1,14 @@
 ---
 import Pic from './Pic.astro';
 import { img } from '../lib/images';
-import { CONTACT } from '../data/site';
+import { CONTACT, BOOKING_URL, bookingAttrs } from '../data/site';
 ---
 <section class="ts dark sec wrap" aria-labelledby="ts-h">
   <Pic src={img('photos/sam-office-2026-02.jpg')} alt="Sam at his desk" sizes="(max-width: 767px) 50vw, 16vw" ratio="r45" pos="50% 30%" />
   <div class="ts-t">
     <h2 class="h" id="ts-h" data-rv>Questions about your move?</h2>
     <p class="lead" data-rv style="--i:1">Call or text Sam at <a href={CONTACT.phoneHref}>{CONTACT.phone}</a>. He answers the same day.</p>
-    <a class="btn" href={CONTACT.calendly} rel="noopener" target="_blank">Book a call <span class="arrow" aria-hidden="true">→</span></a>
+    <a class="btn" href={BOOKING_URL} {...bookingAttrs}>Book a call <span class="arrow" aria-hidden="true">→</span></a>
   </div>
 </section>
 <style>

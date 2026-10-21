@@ -7,7 +7,7 @@ import Quotes from '../components/Quotes.astro';
 import ForSale from '../components/ForSale.astro';
 import { img } from '../lib/images';
 import { review } from '../data/reviews';
-import { CONTACT } from '../data/site';
+import { BOOKING_URL, BOOKING_EXTERNAL } from '../data/site';
 import { FOR_SALE } from '../lib/homes';
 
 // [SAM TO CONFIRM the four process lines]
@@ -39,7 +39,7 @@ const jsonld = [
   <InnerHero
     title="Know what you’re buying"
     lead="Honest feedback at every house, from the roof to the frame."
-    cta={{ href: CONTACT.calendly, label: 'Book a call', external: true }}
+    cta={{ href: BOOKING_URL, label: 'Book a call', external: BOOKING_EXTERNAL }}
     image={img('photos/framing-custom-home.jpg')}
     alt="A three-storey custom home in timber framing under a blue Utah sky"
     pos="50% 60%"
