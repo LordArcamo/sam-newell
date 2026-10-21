@@ -374,7 +374,8 @@ export class Engine {
     this.mapRole = on;
     const want = on;
     this.reading = want;
-    if (want) this.applyLight(-20 * deg, 0, { ...LOOKS.night, sky: 0.16, exposure: 2.3, voidc: 0x0a0a0a });
+    // the map is dark at every hour: a low raking light from the south-west draws the ridges, the ground stays deep
+    if (want) this.applyLight(24 * deg, -2.4, { ...LOOKS.night, key: 1.1, sky: 0.07, exposure: 1.35, voidc: 0x0a0a0a });
     else this.applyLight(this.sunAlt, this.sunAz, lookFor(this.sunAlt / deg, this.sunAz));
     if (on) {
       for (const m of this.pinMats) {
@@ -572,6 +573,13 @@ export class Engine {
   }
 
   project(id: string, W: number, H: number) {
+    // 'town:<slug>' projects the town's ground point (route lines, V5)
+    if (id.startsWith('town:')) {
+      const t = this.townTarget(id.slice(5));
+      if (!t) return null;
+      const p = t.project(this.camera);
+      return { x: ((p.x + 1) / 2) * W, y: ((1 - p.y) / 2) * H, visible: p.z < 1 };
+    }
     const g = id === 'sn' ? this.snPin : this.pinRoots.get(id);
     if (!g) return null;
     const head = g.position.clone().add(new Vector3(0, id === 'sn' ? 2 : 1.05, 0));

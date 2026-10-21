@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import InnerHero from '../components/InnerHero.astro';
+import StudWall from '../components/StudWall.astro';
 import Pic from '../components/Pic.astro';
 import { img } from '../lib/images';
 import { review, reviewDate } from '../data/reviews';
@@ -34,11 +35,13 @@ const timeline = [
     pos="50% 42%"
   />
 
-  <section class="tl sec wrap" aria-labelledby="tl-h">
+  <section class="tl sec wrap" aria-labelledby="tl-h" data-rule-host>
     <h2 class="h" id="tl-h" data-rv>Fifteen years in Utah real estate</h2>
+    <svg class="line-art tl-rule" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true" focusable="false" data-draw="rule" data-axis="x" data-start="top 80%" data-end="top 35%"><line x1="0" y1="1" x2="100" y2="1" /></svg>
     <ol role="list" class="tl-list">
       {timeline.map((t, i) => (
         <li data-rv style={`--i:${i}`}>
+          <span class="tl-n" data-node aria-hidden="true"></span>
           <p class="tl-y num">{t.y}</p>
           <h3 class="tl-t">{t.t}</h3>
           <p class="tl-s">{t.s}</p>
@@ -61,6 +64,7 @@ const timeline = [
         <blockquote class="lead"><p>“{FRAMING_QUOTE.text}”</p></blockquote>
         <figcaption>{FRAMING_QUOTE.name}, {FRAMING_QUOTE.role}</figcaption>
       </figure>
+      <div class="be-wall"><StudWall /></div>
       <figure class="be-q2" data-rv style="--i:3">
         <blockquote><p>“{scott.excerpts.builder}”</p></blockquote>
         <figcaption class="small">{scott.name}, {reviewDate(scott.date)}, on Zillow</figcaption>
@@ -88,6 +92,47 @@ const timeline = [
   .tl .h {
     margin-bottom: 64px;
     max-width: 16ch;
+  }
+  /* the years ride a line that draws left to right; each year's node fills as it passes */
+  .tl-rule {
+    display: block;
+    width: 100%;
+    height: 2px;
+    margin-bottom: -6px;
+    color: var(--ink);
+  }
+  .tl-list li {
+    position: relative;
+    padding-top: 28px;
+  }
+  .tl-n {
+    position: absolute;
+    left: 0;
+    top: -5px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    transition: background-color 0.5s var(--ease-out);
+  }
+  .tl-n:global(.lit) {
+    background: var(--ink);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tl-n {
+      background: var(--ink);
+    }
+  }
+  .be-wall {
+    margin-top: 56px;
+    color: inherit;
+    max-width: 520px;
+  }
+  .be-wall :global(.wall) {
+    display: block;
+    width: 100%;
+    height: auto;
   }
   .ab-facts {
     display: grid;
@@ -190,6 +235,13 @@ const timeline = [
     grid-column: 2 / 7;
   }
   @media (max-width: 1023px) {
+    .tl-rule,
+    .tl-n {
+      display: none;
+    }
+    .tl-list li {
+      padding-top: 0;
+    }
     .tl-list {
       grid-template-columns: 1fr 1fr;
     }

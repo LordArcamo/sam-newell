@@ -12,6 +12,7 @@ import { TOWNS, HOMES } from '../../lib/homes';
 import { REVIEWS, reviewDate } from '../../data/reviews';
 import { img } from '../../lib/images';
 import { ZILLOW } from '../../data/site';
+import contours from '../../data/lines/contours.json';
 
 const DEFAULT = 'lehi';
 const cards = TOWNS.map((t) => {
@@ -35,10 +36,16 @@ const mapData = {
 ---
 <section class="map" id="map" aria-labelledby="map-h" data-map>
   <div class="stage" data-relief-mount="map" data-stage>
+    <!-- V3: the real USGS contours around Lehi (every 250 m, sorted by distance from Lehi), drawn outward as the
+         chapter arrives; the model then crossfades in over them (motion.ts [data-draw="topo"]). -->
+    <svg class="line-art topo" viewBox="-16 -26 36 38" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false" data-draw="topo">
+      {contours.map((c) => <path d={c.d} class:list={{ minor: !c.major }} />)}
+      <circle class="home" cx="0" cy="0" r="0.42" />
+    </svg>
     <svg class="relief" viewBox="-30 -56 64 40" preserveAspectRatio="none" data-ui data-map-svg role="img" aria-label="Contour map of the Wasatch Front from North Salt Lake to Provo, with Utah Lake and the Great Salt Lake">
       <use href="/map/relief-dark.svg#relief-geo" />
     </svg>
-    <div class="overlay" aria-hidden="true" data-labels>
+    <div class="overlay" aria-hidden="true" data-labels data-ui>
       {TOWNS.map((t) => <span class="tl small" data-label={t.slug}>{t.name}</span>)}
       <span class="sn" data-sn><Logo variant="mark" title="" /></span>
     </div>
@@ -140,10 +147,65 @@ const mapData = {
     position: absolute;
     inset: 0;
     overflow: hidden;
+    z-index: 0; /* its own stack: contours, canvas, route and pins stay under the copy, card and slips */
   }
   .relief {
     width: 100%;
     height: 100%;
+    transition: opacity 0.6s var(--ease-io);
+  }
+  .topo {
+    position: absolute;
+    top: 4%;
+    left: 30%;
+    right: 440px;
+    bottom: 210px;
+    z-index: 1;
+    color: #fff;
+    pointer-events: none;
+    overflow: hidden;
+    transition: opacity 0.6s var(--ease-io);
+  }
+  .topo path.minor {
+    stroke-opacity: 0.55;
+    stroke-width: 1;
+  }
+  .topo .home {
+    fill: #fff;
+    stroke: none;
+  }
+  /* until the contours have drawn, the model and the flat relief wait; after, the contours give way */
+  .map:global(.hold) .relief,
+  .map:global(.hold) :global(.relief-canvas.on),
+  .map:global(.hold) .pins,
+  .map:global(.hold) .overlay {
+    opacity: 0;
+  }
+  .map:not(:global(.hold)) .topo {
+    opacity: 0;
+  }
+  .pins,
+  .overlay {
+    transition: opacity 0.6s var(--ease-io);
+  }
+  /* V5: the line from Lehi to the picked town (map-ui.ts) */
+  .stage :global(.route) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .stage :global(.route line) {
+    stroke: #fff;
+    stroke-width: 1.25;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .map:not(:global(.is-gl)) .stage :global(.route) {
+    display: none;
   }
   .overlay,
   .pins {
@@ -538,6 +600,12 @@ const mapData = {
   }
 
   @media (max-width: 1023px) {
+    .topo {
+      top: 4%;
+      left: 4%;
+      right: 4%;
+      bottom: 4%;
+    }
     .map {
       height: auto;
       min-height: 0;

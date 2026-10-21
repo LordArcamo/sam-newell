@@ -1,4 +1,5 @@
 ---
+import Arrow from './Arrow.astro';
 import Pic from './Pic.astro';
 import { img } from '../lib/images';
 import { CONTACT, BOOKING_URL, bookingAttrs } from '../data/site';
@@ -8,7 +9,7 @@ import { CONTACT, BOOKING_URL, bookingAttrs } from '../data/site';
   <div class="ts-t">
     <h2 class="h" id="ts-h" data-rv>Questions about your move?</h2>
     <p class="lead" data-rv style="--i:1">Call or text Sam at <a href={CONTACT.phoneHref}>{CONTACT.phone}</a>. He answers the same day.</p>
-    <a class="btn" href={BOOKING_URL} {...bookingAttrs}>Book a call <span class="arrow" aria-hidden="true">→</span></a>
+    <a class="btn" href={BOOKING_URL} {...bookingAttrs}>Book a call <Arrow /></a>
   </div>
 </section>
 <style>

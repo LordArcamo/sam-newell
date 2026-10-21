@@ -1,4 +1,5 @@
 ---
+import Arrow from '../components/Arrow.astro';
 /**
  * Home — "Lehi Light" (research-premium §4.4). Mostly black; two white chapters (the quote, the footer);
  * one big picture per screen; the live 3D relief comes back at night as the town picker.
@@ -86,7 +87,7 @@ const jsonld = [
         </li>
       ))}
     </ol>
-    <p class="see-all wrap"><a class="more" href={ZILLOW.profile} rel="noopener" target="_blank">See all {ZILLOW.sold} on Zillow <span aria-hidden="true">→</span></a></p>
+    <p class="see-all wrap"><a class="more" href={ZILLOW.profile} rel="noopener" target="_blank">See all {ZILLOW.sold} on Zillow <Arrow /></a></p>
   </section>
 
   <!-- 4 · Buy, sell or invest: one scene, stepping statements -->
@@ -114,13 +115,13 @@ const jsonld = [
   <section class="fig" aria-labelledby="fig-h">
     <div class="fig-photo" data-shutter><Pic src={img('listings/full-1872-drone-wasatch.jpg')} alt="Dusk over Lehi and the Wasatch from above one of Sam's listings, 1872 S Country Ln W" sizes="100vw" pos="50% 40%" rv={false} widths={[768, 1152, 1536, 2048, 2560]} /></div>
     <div class="fig-shade" aria-hidden="true"></div>
-    <p class="fig-n num" aria-hidden="true" data-rise>{ZILLOW.sold}</p>
+    <p class="fig-n num" aria-hidden="true" data-rise data-odo>{ZILLOW.sold}</p>
     <h2 class="sr-only" id="fig-h">{ZILLOW.sold} homes sold</h2>
     <p class="fig-exp">Homes Sam has sold, as counted on his Zillow profile in {ZILLOW.asOf}.</p>
   </section>
   <dl class="subfigs wrap num">
     {figures.map((f, i) => (
-      <div data-rv style={`--i:${i}`}><dt>{f.big}</dt><dd>{f.small}</dd></div>
+      <div data-rv style={`--i:${i}`}><dt data-odo>{f.big}</dt><dd>{f.small}</dd></div>
     ))}
   </dl>
 
@@ -130,7 +131,7 @@ const jsonld = [
     <figure class="q-text" data-rv>
       <blockquote class="statement"><p>“{keaton.excerpts.home}”</p></blockquote>
       <figcaption>{keaton.name}, bought a home in 2026 · {reviewDate(keaton.date)}, on <a class="link" href={ZILLOW.profile} rel="noopener" target="_blank">Zillow</a></figcaption>
-      <p class="q-all"><a class="link" href="/reviews/">Read all the reviews <span aria-hidden="true">→</span></a></p>
+      <p class="q-all"><a class="link" href="/reviews/">Read all the reviews <Arrow /></a></p>
     </figure>
   </section>
 
@@ -183,7 +184,7 @@ const jsonld = [
       <p>Lehi, Utah. Serving Salt Lake and Utah County.</p>
       <p class="num"><a class="visit-tel" href={CONTACT.phoneHref}>Call or text {CONTACT.phone}</a></p>
       <p>English and Spanish</p>
-      <a class="btn" href={BOOKING_URL} {...bookingAttrs}>Book a call <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="btn" href={BOOKING_URL} {...bookingAttrs}>Book a call <Arrow /></a>
     </div>
   </section>
   <OnAir />

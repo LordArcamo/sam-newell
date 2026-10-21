@@ -4,6 +4,7 @@
  * No AggregateRating / Review schema: Google treats self-hosted reviews of the site owner as self-serving.
  */
 import Base from '../layouts/Base.astro';
+import Arrow from '../components/Arrow.astro';
 import InnerHero from '../components/InnerHero.astro';
 import Pic from '../components/Pic.astro';
 import TalkStrip from '../components/TalkStrip.astro';
@@ -43,7 +44,7 @@ const count = (k: ReviewKind | 'all') => (k === 'all' ? list.length : list.filte
     alt="Confetti under the Congrats sign at Sam's office as two clients close on their first home"
     pos="50% 30%"
   >
-    <p class="rv-score"><a href={ZILLOW.profile} rel="noopener" target="_blank">{ZILLOW.rating}<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.94 6.1 6.56.9-4.8 4.6 1.18 6.6L12 17.5l-5.88 3.2 1.18-6.6-4.8-4.6 6.56-.9z" /></svg><span class="sr-only"> stars</span> · {ZILLOW.reviews} reviews on Zillow <span aria-hidden="true">→</span></a></p>
+    <p class="rv-score"><a href={ZILLOW.profile} rel="noopener" target="_blank">{ZILLOW.rating}<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.94 6.1 6.56.9-4.8 4.6 1.18 6.6L12 17.5l-5.88 3.2 1.18-6.6-4.8-4.6 6.56-.9z" /></svg><span class="sr-only"> stars</span> · {ZILLOW.reviews} reviews on Zillow <Arrow /></a></p>
   </InnerHero>
 
   <section class="rv sec wrap" aria-labelledby="rv-h">

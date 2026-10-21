@@ -29,6 +29,6 @@ export function initWipe() {
     const t = document.querySelector<HTMLElement>('[data-curtain-t]');
     if (t) t.textContent = name;
     html.classList.add('leaving');
-    setTimeout(() => (location.href = url.href), 520);
+    setTimeout(() => (location.href = url.href), 700); // curtain 0.5 s, then the SN mark finishes drawing
   });
 }

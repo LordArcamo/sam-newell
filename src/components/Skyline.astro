@@ -1,0 +1,11 @@
+---
+/**
+ * V2: the real Wasatch skyline, the horizon from the Saratoga Springs shore looking east, traced from the USGS DEM
+ * (inspo/motion-demo/gen-ridge.py, Gaussian-smoothed and simplified: ridge.json). One stroke, never decoration.
+ */
+import ridge from '../data/lines/ridge.json';
+interface Props { class?: string; draw?: string }
+const { class: cls = '', draw = '' } = Astro.props;
+const [x, y, w, h] = ridge.viewBox;
+---
+<svg class:list={['line-art', cls]} viewBox={`${x} ${y} ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" focusable="false" data-draw={draw || undefined}><path d={ridge.d} /></svg>

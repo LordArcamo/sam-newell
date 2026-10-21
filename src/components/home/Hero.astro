@@ -1,4 +1,5 @@
 ---
+import Arrow from '../Arrow.astro';
 /**
  * Lehi Light hero (research-premium §4.2): a 10 px black frame, the view panel (Sam's own Wasatch view as a film
  * that follows Lehi's clock) and the swatch nav column.
@@ -8,6 +9,7 @@
  */
 import { getImage } from 'astro:assets';
 import Logo from '../Logo.astro';
+import Skyline from '../Skyline.astro';
 import { ZILLOW, CONTACT, BOOKING_URL, bookingAttrs, PODCAST } from '../../data/site';
 import { HERO_VIEWS } from './hero-views';
 
@@ -56,9 +58,12 @@ const swatches = [
     </div>
     <div class="shade" aria-hidden="true"></div>
     <a class="logo" href="/" aria-label="Sam Newell, home"><Logo variant="caps" title="Sam Newell" /></a>
-    <h1 class="title" id="hero-title"><span class="ln"><span>Sam</span></span> <span class="ln"><span>Newell</span></span></h1>
+    <div class="name">
+      <h1 class="title" id="hero-title"><span class="ln"><span>Sam</span></span> <span class="ln"><span>Newell</span></span></h1>
+      <Skyline class="sky" draw="hero" />
+    </div>
     <p class="sub">Realtor in Lehi, Utah. Buying, selling and investing on the Wasatch Front: <b class="num">{ZILLOW.sold}</b> homes sold, <b class="num">{ZILLOW.rating}</b> on <b class="num">{ZILLOW.reviews}</b> Zillow reviews.</p>
-    <a class="btn act" href={BOOKING_URL} {...bookingAttrs}>Book a call with Sam <span class="arrow" aria-hidden="true">→</span></a>
+    <a class="btn act" href={BOOKING_URL} {...bookingAttrs}>Book a call with Sam <Arrow /></a>
     <p class="clock num" data-clock>Lehi, Utah</p>
     <!-- opening sequence (html.op only) -->
     <div class="op-cover" aria-hidden="true">
@@ -72,13 +77,14 @@ const swatches = [
       <a class={`sw s${i + 1}`} href={s.href} style={`--i:${i}`}>
         <span class="sw-t">{s.t}</span>
         <span class="sw-p">{s.p}</span>
-        <span class="sw-a" aria-hidden="true">→</span>
+        <Skyline class="sw-sky" draw="hover" />
+        <span class="sw-a" aria-hidden="true"><Arrow /></span>
       </a>
     ))}
     <a class="sw s5" href={BOOKING_URL} {...bookingAttrs} style="--i:4">
       <span class="sw-t">Book a call</span>
       <span class="sw-p num">{CONTACT.phone}</span>
-      <span class="sw-a" aria-hidden="true">→</span>
+      <span class="sw-a" aria-hidden="true"><Arrow /></span>
     </a>
   </nav>
 </section>
@@ -213,14 +219,58 @@ const swatches = [
     height: 26px;
     width: auto;
   }
-  .title {
+  /* the name, and under it the real Wasatch skyline drawn as one line (V2) */
+  .name {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 50%;
     top: 14%;
     z-index: 2;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .title {
     text-align: center;
     white-space: nowrap;
+  }
+  /* a quiet signature: short, 1px, 80% white, tucked under the baseline (the real profile, squashed) */
+  .name :global(.sky) {
+    display: block;
+    width: 100%;
+    height: clamp(26px, 3.4vw, 52px);
+    margin-top: 14px;
+    color: #fff;
+  }
+  .name :global(.sky path) {
+    stroke-width: 1;
+    stroke-opacity: 0.8;
+  }
+  /* V6: hovering a swatch traces the same skyline along its foot (fine pointers only; static on keyboard focus) */
+  .sw :global(.sw-sky) {
+    display: none;
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    width: calc(100% - 70px);
+    height: 46px;
+    pointer-events: none;
+  }
+  .s5 :global(.sw-sky) {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sw :global(.sw-sky) {
+      opacity: 0;
+    }
+    .sw:focus-visible :global(.sw-sky) {
+      opacity: 1;
+    }
+  }
+  @media (pointer: fine) and (min-width: 1024px) {
+    .sw :global(.sw-sky) {
+      display: block;
+    }
   }
   .ln {
     display: inline-block;
@@ -430,11 +480,20 @@ const swatches = [
     .logo {
       display: none;
     }
-    .title {
+    .name {
       top: 9%;
+      left: 16px;
+      right: 16px;
+      transform: none;
+    }
+    .title {
       font-size: 17vw;
       white-space: normal;
       line-height: 0.95;
+    }
+    .name :global(.sky) {
+      height: 28px;
+      margin-top: 12px;
     }
     .sub {
       display: none;

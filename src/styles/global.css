@@ -288,11 +288,91 @@ p {
 .btn:active {
   transform: scale(0.97);
 }
-.btn .arrow {
+/* the drawn arrow (Arrow.astro): on hover the shaft draws, then the head, with a 4px nudge */
+.arrow {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  flex: none;
+  vertical-align: -0.05em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  overflow: visible;
   transition: transform var(--hover) var(--ease-out);
 }
-.btn:hover .arrow {
+.arrow path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+a:hover .arrow,
+a:focus-visible .arrow,
+button:hover .arrow {
   transform: translateX(4px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  a:hover .arrow .a-s,
+  button:hover .arrow .a-s {
+    animation: arrow-draw 0.18s var(--ease-out) both;
+  }
+  a:hover .arrow .a-h,
+  button:hover .arrow .a-h {
+    animation: arrow-draw 0.12s var(--ease-out) 0.16s both;
+  }
+}
+@keyframes arrow-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* ——— line work (lines.ts, motion.ts): real lines from Sam's world, drawn by stroke-dashoffset ———
+   Hidden only until their script has measured them (with a fail-safe), never with reduced motion. */
+.line-art {
+  overflow: visible;
+}
+.line-art path,
+.line-art line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-draw]:not(.drawn-ready) {
+    opacity: 0;
+    animation: draw-failsafe 0s linear 6s forwards;
+  }
+}
+/* odometer figures (motion.ts [data-odo]): each digit a 0–9 column drawn by CSS that rolls to its value */
+.odo-on {
+  line-height: 1 !important;
+  white-space: nowrap;
+}
+.odo-on > [aria-hidden] {
+  display: inline-block;
+  vertical-align: top;
+  height: 1em;
+}
+.odo-on > [data-c]::before {
+  content: attr(data-c);
+}
+.odo {
+  --y: 0%;
+  overflow: hidden;
+}
+.odo::before {
+  content: '0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9';
+  display: block;
+  white-space: pre;
+  line-height: 1;
+  transform: translateY(var(--y));
+}
+@keyframes draw-failsafe {
+  to {
+    opacity: 1;
+  }
 }
 .dark .btn,
 .btn.light {
@@ -326,12 +406,7 @@ p {
   gap: 8px;
   align-items: baseline;
 }
-.more span {
-  transition: transform var(--hover) var(--ease-out);
-}
-.more:hover span {
-  transform: translateX(5px);
-}
+
 .more:hover {
   text-decoration: underline;
   text-decoration-thickness: 2px;
@@ -434,6 +509,47 @@ p {
   place-items: center;
   pointer-events: none;
   transform: translateY(101%);
+}
+/* V1: the SN mark draws in the middle of the curtain (0.6 s), then fills (0.25 s); the page name sits under it */
+.curtain-c {
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+}
+.curtain-m {
+  width: 64px;
+  height: auto;
+  overflow: visible;
+}
+.curtain-m path {
+  fill: #fff;
+  fill-opacity: 0;
+  stroke: #fff;
+  stroke-width: 5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+html.leaving .curtain-m path {
+  animation: mark-draw 0.5s cubic-bezier(0.45, 0, 0.55, 1) 0.12s forwards, mark-fill 0.2s ease 0.52s forwards;
+}
+html.arriving .curtain-m path {
+  stroke-dashoffset: 0;
+  fill-opacity: 1;
+}
+@keyframes mark-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes mark-fill {
+  to {
+    fill-opacity: 1;
+  }
+}
+@media (max-width: 767px) {
+  .curtain-m {
+    width: 48px;
+  }
 }
 .curtain-t {
   font-family: var(--display);

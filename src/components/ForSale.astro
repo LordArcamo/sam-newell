@@ -1,4 +1,5 @@
 ---
+import Arrow from './Arrow.astro';
 /** The live listings, with photos (Zillow p_h files at small sizes until Sam sends the MLS originals). */
 import Pic from './Pic.astro';
 import { FOR_SALE } from '../lib/homes';
@@ -17,8 +18,8 @@ const { heading = 'For sale now', calc = '/invest/' } = Astro.props;
           <p class="fs-price num">{h.detail}</p>
           <p class="small">{h.facts}</p>
           <p class="fs-links">
-            <a class="more" href={h.zillow} rel="noopener" target="_blank">See it on Zillow <span aria-hidden="true">→</span></a>
-            <a class="more" href={`${calc}?price=${h.price}#calc`}>Run the numbers <span aria-hidden="true">→</span></a>
+            <a class="more" href={h.zillow} rel="noopener" target="_blank">See it on Zillow <Arrow /></a>
+            <a class="more" href={`${calc}?price=${h.price}#calc`}>Run the numbers <Arrow /></a>
           </p>
         </div>
       </li>

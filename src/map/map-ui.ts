@@ -146,6 +146,7 @@ export function initMap() {
     const overview = !slug || opts.overview;
     if (opts.overview) current = null;
     if (gl) gl.fly(overview ? 'overview' : opts.home ? { home: opts.home } : { town: slug! });
+    if (gl) drawRoute(overview ? null : slug);
     else go(overview ? OVERVIEW : boxFor(slug!), opts.instant);
     if (opts.focus) buttons.find((b) => b.dataset.town === slug)?.focus();
   }
@@ -226,8 +227,47 @@ export function initMap() {
 
   // The 3D: mount when the section nears the viewport. In GL mode the town labels and the SN mark are part of
   // the model, and the pin buttons follow the projected pin heads every rendered frame.
+  // V5: a line from Lehi, home base, to the picked town draws with the camera flight (0.9 s); the last one retracts.
+  // Straight, as the crow flies: it marks the distance from home base, it is not a road.
+  const NS = 'http://www.w3.org/2000/svg';
+  const route = document.createElementNS(NS, 'svg');
+  route.setAttribute('class', 'route');
+  route.setAttribute('aria-hidden', 'true');
+  route.dataset.ui = '';
+  const rl = document.createElementNS(NS, 'line');
+  rl.setAttribute('pathLength', '1');
+  route.appendChild(rl);
+  stage.appendChild(route);
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let routeTo: string | null = null;
+  let routeAnim: Animation | null = null;
+  const drawRoute = (slug: string | null) => {
+    const next = slug && slug !== 'lehi' ? slug : null;
+    if (next === routeTo) return;
+    routeAnim?.cancel();
+    if (!next) {
+      if (routeTo && !still) routeAnim = rl.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: 1 }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
+      else rl.style.strokeDashoffset = '1';
+      routeTo = null;
+      return;
+    }
+    routeTo = next;
+    rl.style.strokeDashoffset = '0';
+    if (!still) routeAnim = rl.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 900, delay: 120, easing: 'cubic-bezier(0.45, 0, 0.55, 1)', fill: 'backwards' });
+  };
+  const placeRoute = () => {
+    if (!gl || !routeTo) return;
+    const a = gl.project('sn'), b = gl.project(`town:${routeTo}`);
+    if (!a || !b) return;
+    rl.setAttribute('x1', a.x.toFixed(1));
+    rl.setAttribute('y1', a.y.toFixed(1));
+    rl.setAttribute('x2', b.x.toFixed(1));
+    rl.setAttribute('y2', b.y.toFixed(1));
+  };
+
   const glFrame = () => {
     if (!gl) return;
+    placeRoute();
     const fr = free();
     const minX = fr.l - 12;
     const W = Math.min(stage.clientWidth, fr.l + fr.w + 12), H = Math.min(stage.clientHeight, fr.t + fr.h + 12);

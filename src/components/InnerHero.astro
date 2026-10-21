@@ -1,4 +1,5 @@
 ---
+import Arrow from './Arrow.astro';
 /**
  * Lehi Light inner-page hero (research §4.6): a full-height dark picture panel (square corners), the title in
  * General Sans Light bottom-left (two lines), one sentence, one button and the phone. The picture is the LCP:
@@ -36,7 +37,7 @@ const nar = (image.width / image.height).toFixed(3);
     {cta && (
       <p class="ih-act">
         <a class="btn" href={cta.href} rel={cta.external ? 'noopener' : undefined} target={cta.external ? '_blank' : undefined}>
-          {cta.label} <span class="arrow" aria-hidden="true">→</span>
+          {cta.label} <Arrow />
         </a>
         <a class="ih-tel" href={CONTACT.phoneHref}>or call {CONTACT.phone}</a>
       </p>
