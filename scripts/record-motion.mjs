@@ -43,6 +43,15 @@ await p.eval(`document.querySelector('.slip[data-town="provo"]')?.click()`); // 
 await sleep(2200);
 await p.eval(`(document.querySelector('.bar .links a[href="/buy/"]') || document.querySelector('a[href="/buy/"]')).click()`);
 await sleep(3600); // V1: curtain, the SN mark draws, the Buy page arrives on its picture
+// /buy/'s moment: the walkthrough wall builds itself while the screen holds
+const walk = await p.eval(`(() => { const s = document.querySelector('[data-walk]'); return s ? [s.getBoundingClientRect().top + scrollY, s.offsetHeight - innerHeight] : null; })()`);
+if (walk) {
+  const now = await p.eval('scrollY');
+  await p.wheel(walk[0] - now, { step: 70, pauseMs: 24 });
+  await sleep(400);
+  await p.wheel(walk[1], { step: 40, pauseMs: 34 });
+  await sleep(1600);
+}
 await p.send('Page.stopScreencast');
 await b.close();
 
