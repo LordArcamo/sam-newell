@@ -90,12 +90,18 @@ if (crumbs?.length) {
 graph.push(...jsonld);
 const ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
 void ZILLOW;
+// The inner-page hero's picture preloads (InnerHero emits them beside the picture) move up into <head>, so the LCP
+// image is requested from the first bytes of the document.
+let page = await Astro.slots.render('default');
+const ihPre = page.match(/<link[^>]*\sdata-ih-pre[^>]*>/g) ?? [];
+for (const l of ihPre) page = page.replace(l, '');
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <Fragment set:html={ihPre.join('')} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
@@ -158,7 +164,7 @@ void ZILLOW;
     <a class="skip" href="#main">Skip to content</a>
     <Header home={Astro.url.pathname === '/'} />
     <main id="main" tabindex="-1">
-      <slot />
+      <Fragment set:html={page} />
     </main>
     <Footer />
     <div class="cur" aria-hidden="true" data-cur></div>

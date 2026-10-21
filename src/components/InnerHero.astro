@@ -5,7 +5,7 @@ import Arrow from './Arrow.astro';
  * General Sans Light bottom-left (two lines), one sentence, one button and the phone. The picture is the LCP:
  * eager, high priority, never hidden: under motion-allowed it settles in by its wrapper, behind a fading veil, and drifts.
  */
-import Pic from './Pic.astro';
+import { getImage } from 'astro:assets';
 import { CONTACT } from '../data/site';
 import type { ImageMetadata } from 'astro';
 interface Props {
@@ -25,10 +25,42 @@ const ar = Math.min(1.5, Math.max(0.8, image.width / image.height)).toFixed(3);
 // the right of the panel and the words sit on the black field to its left
 const portrait = image.width / image.height < 1.1;
 const nar = (image.width / image.height).toFixed(3);
+
+// The picture is the LCP, so it is built here rather than through Pic: its own `sizes` per layout (a phone must not
+// fetch a desktop file), a lighter AVIF for phones (q38: 40-100 KB at 390 px x 3; desktop q50, as Pic produced), and
+// the same AVIF sets preloaded in <head> (Base lifts the two data-ih-pre links there).
+const PHONE = '(max-width: 1023px)';
+const fit = (ws: number[]) => {
+  const out = ws.filter((w) => w <= image.width);
+  if (!out.length || (out[out.length - 1] < image.width && image.width < ws[ws.length - 1])) out.push(image.width);
+  return out;
+};
+const set = async (ws: number[], format: 'avif' | 'webp', quality: number) =>
+  (await Promise.all(ws.map(async (w) => `${(await getImage({ src: image, width: w, format, quality })).src} ${w}w`))).join(', ');
+const phoneWs = fit([360, 540, 720, 900, 1080]);
+const deskWs = fit([720, 960, 1280, 1600, 2000]);
+// phones: the panel is the full width less the 8 px margins. Desktop: the full panel (10 px margins, 1536 max); a
+// portrait photo stands at its own shape on the right, at most 62% of the panel and the panel's height (≤ 100svh).
+const phoneSizes = 'calc(100vw - 16px)';
+const deskSizes = portrait ? `min(62vw, ${(image.width / image.height * 100).toFixed(1)}vh)` : 'min(100vw - 20px, 1536px)';
+const sizes = `${PHONE} ${phoneSizes}, ${deskSizes}`;
+const phoneAvif = await set(phoneWs, 'avif', 38);
+const deskAvif = await set(deskWs, 'avif', 50);
+const webp = await set([...new Set([...phoneWs, ...deskWs])].sort((a, b) => a - b), 'webp', 58);
+const fallback = await getImage({ src: image, width: Math.min(1280, image.width), format: 'webp', quality: 58 });
 ---
+<link rel="preload" as="image" type="image/avif" media={PHONE} imagesrcset={phoneAvif} imagesizes={phoneSizes} fetchpriority="high" data-ih-pre />
+<link rel="preload" as="image" type="image/avif" media="(min-width: 1024px)" imagesrcset={deskAvif} imagesizes={deskSizes} fetchpriority="high" data-ih-pre />
 <section class:list={['ih', { portrait }]} aria-labelledby="ih-h" data-ih style={`--ar:${ar};--nar:${nar}`}>
   <div class="ih-p" data-cursor={cursor}>
-    <Pic src={image} alt={alt} sizes="(max-width: 1536px) 100vw, 1536px" pos={pos} eager />
+    <div class="ph">
+      <picture>
+        <source type="image/avif" media={PHONE} srcset={phoneAvif} sizes={phoneSizes} />
+        <source type="image/avif" srcset={deskAvif} sizes={deskSizes} />
+        <source type="image/webp" srcset={webp} sizes={sizes} />
+        <img src={fallback.src} alt={alt} width={image.width} height={image.height} loading="eager" fetchpriority="high" decoding="async" style={`object-position:${pos}`} />
+      </picture>
+    </div>
   </div>
   <div class="ih-shade" aria-hidden="true"></div>
   <div class="ih-t">
