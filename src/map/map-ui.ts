@@ -23,6 +23,58 @@ export function initMap() {
     uses.forEach((u) => u.setAttribute('href', u.dataset.href!));
   }, { rootMargin: '100% 0px' });
   lazy.observe(root);
+
+  // V3, lazily: the contour paths (26 KB) are no longer in the home HTML. They arrive with the relief poster, about a
+  // screen early, and draw outward from Lehi as the chapter scrolls in (same timing as motion-vectors.md V3); then
+  // the model (or the flat relief) crossfades in. Reduced motion never sees the drawing: the poster is shown as is.
+  const topo = root.querySelector<SVGSVGElement>('[data-topo]');
+  if (topo && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const io2 = new IntersectionObserver(async (es) => {
+      if (!es.some((e) => e.isIntersecting)) return;
+      io2.disconnect();
+      try {
+        const [{ default: lines }, { gsap }, { ScrollTrigger }, { prep }] = await Promise.all([
+          import('../data/lines/contours.json'),
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+          import('../scripts/lines'),
+        ]);
+        gsap.registerPlugin(ScrollTrigger);
+        const NS = 'http://www.w3.org/2000/svg';
+        const home = topo.querySelector('.home');
+        const paths = (lines as { d: string; major: boolean }[]).map((c) => {
+          const el = document.createElementNS(NS, 'path');
+          el.setAttribute('d', c.d);
+          if (!c.major) el.setAttribute('class', 'minor');
+          topo.insertBefore(el, home);
+          return el;
+        });
+        let done = false;
+        const land = () => {
+          if (done) return;
+          done = true;
+          root.classList.remove('hold');
+          root.classList.add('drawn');
+          root.querySelectorAll<HTMLElement>('.pin i').forEach((i, k) =>
+            i.animate([{ transform: 'translateY(-22px) scaleY(2.4)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 700, delay: 120 + k * 70, easing: 'cubic-bezier(0.19, 1, 0.22, 1)', fill: 'backwards' }),
+          );
+        };
+        // already past the chapter's opening (deep link, reload mid-page): no drawing, just the map
+        if (root.getBoundingClientRect().top < innerHeight * 0.1) return;
+        root.classList.add('hold');
+        topo.classList.add('drawn-ready');
+        const tl = gsap.timeline({ scrollTrigger: { trigger: root, start: 'top 80%', end: 'top 10%', scrub: 0.6, invalidateOnRefresh: true } });
+        if (home) tl.fromTo(home, { opacity: 0 }, { opacity: 1, duration: 0.05 }, 0);
+        paths.forEach((p, k) => tl.fromTo(p, { strokeDashoffset: () => prep(p) }, { strokeDashoffset: 0, duration: 0.35, ease: 'none' }, 0.04 + k * (0.5 / paths.length)));
+        tl.eventCallback('onUpdate', () => tl.progress() > 0.9 && land());
+        ScrollTrigger.create({ trigger: root, start: 'top 10%', once: true, onEnter: land });
+        setTimeout(() => root.getBoundingClientRect().top < innerHeight * 0.1 && land(), 0);
+      } catch {
+        root.classList.remove('hold'); // fail open: the map, without the drawing
+      }
+    }, { rootMargin: '100% 0px' });
+    io2.observe(root);
+  }
   const data: Data = JSON.parse(root.querySelector('[data-map-json]')!.textContent!);
   const stage = root.querySelector<HTMLElement>('[data-stage]')!;
   const svg = root.querySelector<SVGSVGElement>('[data-map-svg]')!;
@@ -59,13 +111,41 @@ export function initMap() {
     return { x: b.cx - (f.l + f.w / 2) / s, y: b.cy - (f.t + f.h / 2) / s, s };
   }
 
-  // Pins closer than 26 px on screen would overlap as touch targets: show the first, hide the rest (every home
-  // stays reachable through the town card's list).
+  // Pins closer than 36 px on screen would overlap as touch targets: show the first, hide the rest (every home
+  // stays reachable through the town card's list). Order of precedence: the picked or focused pin, the picked town's
+  // pins (for sale first), then the rest; so the pin someone is on is never the one that disappears.
   let placed: { x: number; y: number }[] = [];
   const collides = (x: number, y: number) => {
     if (placed.some((q) => Math.hypot(q.x - x, q.y - y) < 36)) return true; // 44 px targets, 24 px cores never overlap
     placed.push({ x, y });
     return false;
+  };
+  const RANK = { 'for-sale': 0, sold: 1, past: 2 } as Record<string, number>;
+  const status = (el: HTMLElement) => (el.classList.contains('for-sale') ? 'for-sale' : el.classList.contains('sold') ? 'sold' : 'past');
+  const ordered = () =>
+    pins
+      .map((el, i) => ({ el, i, k: (el.classList.contains('on') || el === document.activeElement ? 0 : el.dataset.town === current ? 10 : 20) + RANK[status(el)] }))
+      .sort((a, b) => a.k - b.k || a.i - b.i)
+      .map((x) => x.el);
+
+  // Tag spacing (jury r2, the Provo flight): with a town picked every pin shows its address; a tag that would overlap
+  // one already placed (same precedence as above) stays quiet until hover or focus.
+  const tagW = new Map<HTMLElement, number>();
+  const declutter = (pos: Map<HTMLElement, { x: number; y: number }>) => {
+    const boxes: [number, number, number, number][] = [];
+    const town = root.classList.contains('is-town');
+    for (const el of ordered()) {
+      const q = pos.get(el);
+      if (!q || el.style.visibility === 'hidden' || !town) { el.classList.remove('mute'); continue; }
+      const tag = el.querySelector<HTMLElement>('.tag')!;
+      let w = tagW.get(el);
+      if (!w) { w = tag.offsetWidth || 160; tagW.set(el, w); }
+      const x0 = el.classList.contains('flip') ? q.x + 12 - w : el.classList.contains('flop') ? q.x - 12 : q.x - w / 2;
+      const b: [number, number, number, number] = [x0 - 4, q.y - 48, x0 + w + 4, q.y - 16];
+      const hit = boxes.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+      el.classList.toggle('mute', hit);
+      if (!hit) boxes.push(b);
+    }
   };
 
   function apply(v: typeof vb) {
@@ -84,10 +164,14 @@ export function initMap() {
     };
     if (gl) return; // the live relief positions pins itself (glFrame)
     placed = [];
-    pins.forEach((el) => {
+    const pos = new Map<HTMLElement, { x: number; y: number }>();
+    ordered().forEach((el) => {
       const p = pinPt[el.dataset.pin!];
-      if (p) place(el, p);
+      if (!p) return;
+      place(el, p);
+      pos.set(el, { x: (p.x - v.x) * v.s, y: (p.y - v.y) * v.s });
     });
+    declutter(pos);
     labels.forEach((el) => {
       const t = townPt[el.dataset.label!];
       const px = (t.x - v.x) * v.s, py = (t.y - v.y) * v.s;
@@ -166,6 +250,14 @@ export function initMap() {
     cardBox.classList.toggle('is-cut', scrolls && cardBox.scrollHeight - cardBox.scrollTop - cardBox.clientHeight > 2);
   };
   cardBox.addEventListener('scroll', fadeCard, { passive: true });
+  // The page's smooth scroll (Lenis) skips any element marked data-lenis-prevent. The card is marked only for the
+  // wheel events it can really use (it overflows and has room in that direction); every other wheel over the rail
+  // or the card scrolls the page (jury r2: 3,000 px of wheel moved the page 400 px).
+  cardBox.addEventListener('wheel', (e) => {
+    const room = getComputedStyle(cardBox).overflowY === 'auto' && cardBox.scrollHeight - cardBox.clientHeight > 2;
+    const can = room && (e.deltaY > 0 ? cardBox.scrollHeight - cardBox.scrollTop - cardBox.clientHeight > 1 : e.deltaY < 0 ? cardBox.scrollTop > 0 : false);
+    cardBox.toggleAttribute('data-lenis-prevent', can);
+  }, { passive: true });
 
   // "Full map": back out to the whole valley; focus returns to the picked town in the list.
   fullBtn.addEventListener('click', () => {
@@ -321,14 +413,17 @@ export function initMap() {
     const minX = fr.l - 12;
     const W = Math.min(stage.clientWidth, fr.l + fr.w + 12), H = Math.min(stage.clientHeight, fr.t + fr.h + 12);
     placed = [];
-    pins.forEach((el) => {
+    const pos = new Map<HTMLElement, { x: number; y: number }>();
+    ordered().forEach((el) => {
       const p = gl!.project(el.dataset.pin!);
       if (!p) return;
       el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)`;
       el.classList.toggle('flip', p.x > W - 140);
       el.classList.toggle('flop', p.x < 140);
       el.style.visibility = !p.visible || p.x < Math.max(0, minX) || p.y < 0 || p.x > W || p.y > H || collides(p.x, p.y) ? 'hidden' : '';
+      pos.set(el, p);
     });
+    declutter(pos);
     keepStop();
   };
   // Reduced motion: the contour poster, still (no model, no flights), like the hero keeps its still instead of the film.

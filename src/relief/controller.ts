@@ -3,8 +3,8 @@
  * flights, watchdog, ?record and ?capture modes.
  */
 import { gsap } from 'gsap';
-import { Vector3, PerspectiveCamera } from 'three';
-import { Engine, RIGS, rigFor, camFromPose, type Pose as CamPose, type PinData, type TownData, type Rig } from './relief';
+import { Vector3, Vector2, PerspectiveCamera, Raycaster, Plane } from 'three';
+import { Engine, RIGS, rigFor, camFromPose, MODEL_BOX, type Pose as CamPose, type PinData, type TownData, type Rig } from './relief';
 import type { Tier } from './gpu';
 import type { Pose, ReliefHandle } from './mount';
 import posters from '../data/posters.json';
@@ -24,6 +24,9 @@ const q = new URLSearchParams(location.search);
 const RECORD = q.has('record');
 const CAPTURE = q.get('capture'); // 'hero' | 'overview' (poster capture, dev only)
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/** The map's light is fixed (dark at every hour), so its bearing is too: nearly north-up, so the frame lines up with
+ *  the model's footprint and the overview can fill the stage without showing an edge. */
+const MAP_BEARING = 188;
 
 export class Controller {
   tier: Tier;
@@ -83,11 +86,11 @@ export class Controller {
 
   overviewPose(): CamPose {
     // design review #4: an oblique close-up, plinth edges outside the frame, on the hero's bearing
-    return { tx: 1.0, ty: 0.4, tz: -6.0, dist: 92, bearing: this.engine?.bearing ?? 205, elev: 38, vfov: 19.5 };
+    return { tx: 1.0, ty: 0.4, tz: -6.0, dist: 92, bearing: MAP_BEARING, elev: 38, vfov: 19.5 };
   }
 
   townPose(target: Vector3): CamPose {
-    return { tx: target.x, ty: target.y, tz: target.z, dist: 26, bearing: this.engine.bearing, elev: 30, vfov: 16 };
+    return { tx: target.x, ty: target.y, tz: target.z, dist: 26, bearing: MAP_BEARING, elev: 30, vfov: 16 };
   }
 
   /**
@@ -97,10 +100,18 @@ export class Controller {
    */
   poseFor(goal: Pose): CamPose {
     const e = this.engine;
-    if (goal === 'overview' || goal === 'hero') return this.fit(this.overviewPose(), null, 55, 170);
+    if (goal === 'overview' || goal === 'hero') {
+      // the overview looks at the middle of Sam's homes (Utah County) and never past the model's edge: the stage's
+      // corners must land on terrain, so no cut edge and no void shows (jury r2: the wedge, the pin in the black)
+      const pts = this.framePoints(null);
+      const xs = pts.map((q) => q.p.x), zs = pts.map((q) => q.p.z);
+      const c = { x: (Math.min(...xs) + Math.max(...xs)) / 2, z: (Math.min(...zs) + Math.max(...zs)) / 2 };
+      const base = { ...this.overviewPose(), tx: c.x, tz: c.z, elev: 66 };
+      return this.fit(base, null, 40, 170, true);
+    }
     const slug = 'town' in goal ? goal.town : e.opts.pins.find((x) => x.id === goal.home)?.town;
     const f = slug ? e.townFrame(slug) : null;
-    return this.fit(this.townPose(f?.center ?? new Vector3()), slug ?? null, 18, 110);
+    return this.fit(this.townPose(f?.center ?? new Vector3()), slug ?? null, 18, 110, 'nudge');
   }
 
   /** Ground points + how tall the marker standing there is (pins scale with distance, see tick). */
@@ -126,7 +137,12 @@ export class Controller {
     return pts;
   }
 
-  fit(base: CamPose, slug: string | null, minD: number, maxD: number): CamPose {
+  /**
+   * onMesh: the stage's corners must land on terrain. true (overview): shorten the distance and slide the aim east or
+   * west until they do. 'nudge' (towns): keep the distance that frames the pins and slide the aim (up to 6 km) inward
+   * from a model edge, if a slide exists that still keeps every pin in frame (North Salt Lake sits near the edge).
+   */
+  fit(base: CamPose, slug: string | null, minD: number, maxD: number, onMesh: boolean | 'nudge' = false): CamPose {
     const v = this.views.get('map');
     const W = v?.el.clientWidth || innerWidth, H = v?.el.clientHeight || innerHeight;
     const fr = v?.free?.() ?? { l: 0, t: 0, w: W, h: H };
@@ -152,14 +168,67 @@ export class Controller {
         return true;
       });
     };
-    if (ok(minD)) return { ...base, dist: minD };
-    let lo = minD, hi = maxD;
-    if (!ok(hi)) return { ...base, dist: hi };
-    for (let i = 0; i < 18; i++) {
-      const mid = (lo + hi) / 2;
-      if (ok(mid)) hi = mid; else lo = mid;
+    let d = maxD;
+    if (ok(minD)) d = minD;
+    else if (ok(maxD)) {
+      let lo = minD, hi = maxD;
+      for (let i = 0; i < 18; i++) {
+        const mid = (lo + hi) / 2;
+        if (ok(mid)) hi = mid; else lo = mid;
+      }
+      d = hi;
     }
-    return { ...base, dist: hi };
+    if (onMesh) {
+      // the farthest distance at which all four stage corners still hit the ground 3 km inside the footprint
+      const B = MODEL_BOX, m = 0.5;
+      const ray = new Raycaster();
+      const ground = new Plane(new Vector3(0, 1, 0), 0);
+      const hit = new Vector3();
+      const inside = (dd: number, dx = 0) => {
+        camFromPose(cam, { ...base, tx: base.tx + dx, dist: dd });
+        cam.aspect = W / H;
+        cam.setViewOffset(W, H, W / 2 - (fr.l + fr.w / 2), H / 2 - (fr.t + fr.h / 2), W, H);
+        cam.updateMatrixWorld();
+        return [[-1, -1], [1, -1], [-1, 1], [1, 1]].every(([x, y]) => {
+          ray.setFromCamera(new Vector2(x, y), cam);
+          if (!ray.ray.intersectPlane(ground, hit)) return false;
+          return hit.x > B.min.x + m && hit.x < B.max.x - m && hit.z > B.min.z + m && hit.z < B.max.z - m;
+        });
+      };
+      if (onMesh === 'nudge') {
+        if (inside(d)) return { ...base, dist: d };
+        const fits = (dx: number, dz: number) => {
+          const sv = { tx: base.tx, tz: base.tz };
+          base.tx += dx; base.tz += dz;
+          const good = ok(d) && inside(d);
+          base.tx = sv.tx; base.tz = sv.tz;
+          return good;
+        };
+        let best: { dx: number; dz: number } | null = null;
+        for (let dx = -6; dx <= 6; dx += 1.5) for (let dz = -6; dz <= 6; dz += 1.5) {
+          if ((!best || Math.hypot(dx, dz) < Math.hypot(best.dx, best.dz)) && fits(dx, dz)) best = { dx, dz };
+        }
+        return best ? { ...base, tx: base.tx + best.dx, tz: base.tz + best.dz, dist: d } : { ...base, dist: d };
+      }
+      if (!inside(d)) {
+        // slide the aim east or west (up to 6 km) to wherever the footprint leaves the most room, then back off
+        const most = (dx: number) => {
+          let lo = 20, hi = d;
+          for (let i = 0; i < 14; i++) {
+            const mid = (lo + hi) / 2;
+            if (inside(mid, dx)) lo = mid; else hi = mid;
+          }
+          return lo;
+        };
+        let best = { dx: 0, d: most(0) };
+        for (let dx = -6; dx <= 6; dx += 1) {
+          const dd = most(dx);
+          if (dd > best.d + 0.01) best = { dx, d: dd };
+        }
+        return { ...base, tx: base.tx + best.dx, dist: best.d };
+      }
+    }
+    return { ...base, dist: d };
   }
 
   attach(el: HTMLElement, role: Role): ReliefHandle {

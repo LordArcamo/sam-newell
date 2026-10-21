@@ -152,7 +152,8 @@ const PLASTER_FRAG_COLOR = /* glsl */ `
   float h = yc * 500.0 + 1270.0;
   float fw = max(fwidth(h), 1e-4);
   float slopeDeg = degrees(acos(clamp(n.y, -1.0, 1.0)));
-  float mask = step(1375.0, h);
+  // the night map draws its lines on the valley floor too (the flats would otherwise read as a void)
+  float mask = max(step(1375.0, h), uNight * step(1250.0, h));
   float major = contourLine(h, 100.0, fw) * 0.20 * mix(1.0, 0.5, smoothstep(40.0, 50.0, slopeDeg));
   float index = contourLine(h, 500.0, fw) * 0.30;
   float minor = contourLine(h, 20.0, fw) * 0.08 * (1.0 - step(1600.0, h)) * (1.0 - smoothstep(25.0, 35.0, slopeDeg));
