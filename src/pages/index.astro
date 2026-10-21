@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/home/Hero.astro';
+import HeroPreload from '../components/home/HeroPreload.astro';
 import MapSection from '../components/home/MapSection.astro';
 import Pic from '../components/Pic.astro';
 import Logo from '../components/Logo.astro';
@@ -37,16 +38,15 @@ const jsonld = [
   description="Buy, sell or invest on the Wasatch Front with Lehi broker Sam Newell. 235 homes sold, 4.9 from 45 Zillow reviews. Call (801) 995-2220."
   jsonld={jsonld}
 >
+  <HeroPreload slot="head" />
   <Hero />
 
   <!-- 2 · Intro: the statement, photos pass in the side columns -->
   <section class="intro sec wrap" aria-label="Sam's promise">
-    <Pic class="i1" src={img('photos/framed-house-wasatch.jpg')} alt="A new house framed in timber below the Wasatch mountains" sizes="(max-width: 767px) 60vw, 22vw" ratio="r45" pos="58% 50%" />
     <p class="statement intro-s" data-rv><span>Honest feedback on every house.</span><br /> <span>The numbers before you offer.</span></p>
-    <div class="i-right">
-      <Pic class="i2" src={img('photos/listing-kitchen-2026-05.jpg')} alt="A bright listing kitchen with a quartz island, Lehi" sizes="(max-width: 767px) 80vw, 26vw" ratio="r1610" pos="50% 62%" i={1} />
-      <Pic class="i3" src={img('photos/family-river.jpg')} alt="Sam with Heidi and Liam by a river in red-rock country" sizes="(max-width: 767px) 50vw, 18vw" ratio="r11" pos="50% 45%" i={2} />
-    </div>
+    <Pic class="i1" src={img('photos/framed-house-wasatch.jpg')} alt="A new house framed in timber below the Wasatch mountains" sizes="(max-width: 767px) 100vw, 30vw" ratio="r45" pos="58% 50%" />
+    <Pic class="i3" src={img('photos/family-river.jpg')} alt="Sam with Heidi and Liam by a river in red-rock country" sizes="(max-width: 767px) 50vw, 22vw" ratio="r11" pos="50% 45%" i={1} />
+    <Pic class="i2" src={img('photos/listing-kitchen-2026-05.jpg')} alt="A bright listing kitchen with a quartz island, Lehi" sizes="(max-width: 767px) 50vw, 40vw" ratio="r1610" pos="50% 62%" i={2} />
   </section>
 
   <!-- 3 · Homes: big names, fixed preview -->
@@ -195,7 +195,7 @@ const jsonld = [
 
   <!-- 10 · Talk to Sam: the visit card on a photo -->
   <section class="talk" id="talk" aria-labelledby="talk-h">
-    <Pic class="talk-photo" src={img('photos/family-brighton-2026-10.jpg')} alt="Sam with his kids, Heidi and Liam, among autumn aspens at Brighton" sizes="(max-width: 767px) 100vw, 100vw" pos="50% 34%" rv={false} />
+    <Pic class="talk-photo" src={img('photos/family-brighton-2026-10.jpg')} alt="Sam with his kids, Heidi and Liam, among autumn aspens at Brighton" sizes="(max-width: 767px) 100vw, 1350px" pos="50% 34%" rv={false} />
     <div class="visit">
       <h2 class="h" id="talk-h">Talk to Sam</h2>
       <p>Lehi, Utah. Serving Salt Lake and Utah County.</p>
@@ -248,37 +248,34 @@ const jsonld = [
 </script>
 
 <style>
-  /* 2 · intro */
+  /* 2 · intro: the statement, then the pictures set large (design review: no small floating photos) */
   .intro {
     display: grid;
-    grid-template-columns: 18vw 1fr 22vw;
-    gap: 3vw;
+    grid-template-columns: 30vw 22vw minmax(0, 1fr);
+    column-gap: 2vw;
+    row-gap: 48px;
     align-items: start;
   }
   .intro-s {
-    align-self: center;
-    text-align: center;
-    font-size: 36px;
-    margin-inline: auto;
+    grid-column: 1 / -1;
+    font-size: clamp(24px, 2.5vw, 36px);
   }
-  @media (min-width: 1200px) {
+  @media (min-width: 1100px) {
     .intro-s span {
       white-space: nowrap;
     }
   }
-  @media (max-width: 1199px) {
-    .intro-s {
-      font-size: 24px;
-    }
+  .intro :global(.i1) {
+    grid-column: 1;
   }
-  .i-right :global(.i2) {
-    margin-top: 160px;
+  .intro :global(.i3) {
+    grid-column: 2;
+    align-self: end;
   }
-  .i-right :global(.i3) {
-    width: 15vw;
-    margin-top: 56px;
+  .intro :global(.i2) {
+    grid-column: 3;
+    margin-top: 140px;
   }
-
   /* 3 · homes */
   .homes {
     display: grid;
@@ -295,7 +292,6 @@ const jsonld = [
     align-items: baseline;
     padding: 12px 0;
     text-decoration: none;
-    transition: padding-left var(--hover) var(--ease-out);
   }
   .r-name {
     font-family: var(--display);
@@ -303,9 +299,6 @@ const jsonld = [
     font-size: clamp(24px, 2.5vw, 36px);
     letter-spacing: -0.025em;
     line-height: 1.1;
-  }
-  .row.on a {
-    padding-left: 12px;
   }
   .row.on .r-name {
     font-weight: 600;
@@ -465,8 +458,6 @@ const jsonld = [
 
   /* 8 · about */
   .about {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 1000px;
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
     gap: 4vw;
@@ -579,9 +570,14 @@ const jsonld = [
     overflow: hidden;
     background: var(--ink);
   }
+  /* the 1080 px original is never shown past ~1.25× native: a 1350 px frame on the ink field (jury P1-14) */
   .talk :global(.talk-photo) {
     position: absolute;
-    inset: 0;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: min(100%, 1350px);
+    transform: translateX(-50%);
   }
   .visit {
     position: absolute;
@@ -646,30 +642,24 @@ const jsonld = [
   @media (max-width: 767px) {
     .intro {
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 20px 12px;
     }
     .intro-s {
-      grid-column: 1 / -1;
-      grid-row: 1;
-      text-align: left;
-      margin: 0 0 12px;
       font-size: 24px;
     }
     .intro-s span {
       white-space: normal;
     }
     .intro :global(.i1) {
-      grid-row: 2;
+      grid-column: 1 / -1;
     }
-    .i-right {
-      grid-row: 2;
+    .intro :global(.i3) {
+      grid-column: 1;
     }
-    .i-right :global(.i2) {
+    .intro :global(.i2) {
+      grid-column: 2;
       margin-top: 0;
-    }
-    .i-right :global(.i3) {
-      width: 70%;
-      margin-top: 20px;
+      align-self: end;
     }
     .row a {
       grid-template-columns: 1fr;

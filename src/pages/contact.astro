@@ -55,15 +55,15 @@ import { CONTACT, BROKERAGE, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site'
     <h2 class="h" id="where-h" data-rv>Where Sam works</h2>
     <div class="where-grid">
       <figure>
-        <Pic src={img('photos/estate-lots-jordan-river.jpg')} alt="Estate lots above the Jordan River, Lehi" sizes="(max-width: 767px) 90vw, 24vw" ratio="r45" pos="50% 40%" />
+        <Pic src={img('photos/estate-lots-jordan-river.jpg')} alt="Estate lots above the Jordan River, Lehi" sizes="(max-width: 900px) 100vw, 28vw" ratio="r43" pos="50% 40%" />
         <figcaption class="small">Lehi, home base</figcaption>
       </figure>
       <figure>
-        <Pic src={img('listings/1056-w-stonehaven-dr-nsl.jpg')} alt="1056 W Stonehaven Dr, North Salt Lake" sizes="(max-width: 767px) 90vw, 30vw" ratio="r32" i={1} widths={[360, 550]} />
+        <Pic src={img('listings/1056-w-stonehaven-dr-nsl.jpg')} alt="1056 W Stonehaven Dr, North Salt Lake" sizes="(max-width: 900px) 100vw, 28vw" ratio="r43" i={1} widths={[360, 550]} />
         <figcaption class="small">North Salt Lake, listed now</figcaption>
       </figure>
       <figure>
-        <Pic src={img('photos/valley-view-utah-county.jpg')} alt="A Utah County valley from a new home" sizes="(max-width: 767px) 90vw, 20vw" ratio="r11" pos="50% 60%" i={2} />
+        <Pic src={img('photos/valley-view-utah-county.jpg')} alt="A Utah County valley from a new home" sizes="(max-width: 900px) 100vw, 28vw" ratio="r43" pos="50% 40%" i={2} />
         <figcaption class="small">Utah County</figcaption>
       </figure>
     </div>
@@ -161,12 +161,9 @@ import { CONTACT, BROKERAGE, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site'
   }
   .where-grid {
     display: grid;
-    grid-template-columns: 24vw 30vw 20vw;
+    grid-template-columns: repeat(3, 28vw);
     justify-content: space-between;
     align-items: start;
-  }
-  .where-grid figure:nth-child(2) {
-    margin-top: 120px;
   }
   .where-grid figcaption {
     margin-top: 10px;
@@ -179,9 +176,7 @@ import { CONTACT, BROKERAGE, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site'
       grid-template-columns: 1fr;
       gap: 32px;
     }
-    .where-grid figure:nth-child(2) {
-      margin-top: 0;
-    }
+
   }
   @media (max-width: 520px) {
     .form {

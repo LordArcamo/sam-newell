@@ -27,16 +27,17 @@ const recent = SOLD.slice(0, 4);
     title="Priced on numbers"
     lead="Pricing is a science; the story is an art."
     cta={{ href: BOOKING_URL, label: 'Book a call', external: BOOKING_EXTERNAL }}
-    image={img('photos/listing-kitchen-2026-05.jpg')}
-    alt="A bright kitchen with a quartz island and pendant lights in a home Sam listed in Lehi"
-    pos="50% 62%"
+    image={img('listings/past-skyline.jpg')}
+    alt="A bright living room with tall windows in an Eagle Mountain home"
+    pos="50% 50%"
   />
   <Steps heading="How selling with Sam works" steps={steps} id="sell" />
 
   <section class="sold dark sec wrap" aria-labelledby="sold-h">
     <div class="sold-fig">
       <p class="title sold-n num" aria-hidden="true" data-rise>{ZILLOW.sold}</p>
-      <h2 class="lead" id="sold-h"><span class="sr-only">{ZILLOW.sold} </span>homes sold, as counted on Sam’s Zillow profile in {ZILLOW.asOf}</h2>
+      <h2 class="sr-only" id="sold-h">{ZILLOW.sold} homes sold</h2>
+      <p class="sold-lead">Homes sold, as counted on Sam’s Zillow profile in {ZILLOW.asOf}.</p>
     </div>
     <div class="sold-list">
       <h3 class="sold-h3">Sold lately</h3>
@@ -70,11 +71,8 @@ const recent = SOLD.slice(0, 4);
     line-height: 0.8;
     margin-bottom: 24px;
   }
-  .sold-fig .lead {
-    max-width: 22ch;
-    font-family: var(--display);
-    font-weight: 600;
-    letter-spacing: -0.02em;
+  .sold-lead {
+    max-width: 28ch;
   }
   .sold-h3 {
     font-size: 24px;

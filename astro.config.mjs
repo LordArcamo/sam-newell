@@ -25,7 +25,7 @@ export default defineConfig({
   },
   devToolbar: { enabled: false },
   vite: {
-    build: { sourcemap: true },
+    build: { sourcemap: false }, // no public sourcemaps (jury P2-15)
     // pre-bundle the lazy chunks' deps so the dev server never re-optimises mid-session (504 Outdated Optimize Dep)
     optimizeDeps: { include: ['three', 'three/examples/jsm/loaders/GLTFLoader.js', 'three/examples/jsm/libs/meshopt_decoder.module.js', 'gsap', 'gsap/ScrollTrigger', 'lenis'] },
   },

@@ -25,6 +25,19 @@ export function initReveals() {
     if (r.top < innerHeight * 0.92 && r.bottom > 0) el.classList.add('in');
     else io.observe(el);
   });
+  // Fail-open (design review #10): whatever is on screen shows, even if the observer never fires
+  // (capture tools resizing the viewport, throttled tabs). Checked on resize and 1.2 s after load.
+  const sweep = () => {
+    for (const el of els) {
+      if (el.classList.contains('in')) continue;
+      const r = el.getBoundingClientRect();
+      if (r.top < innerHeight && r.bottom > 0) el.classList.add('in');
+    }
+  };
+  addEventListener('resize', sweep, { passive: true });
+  addEventListener('load', () => setTimeout(sweep, 1200), { once: true });
+  let st = 0;
+  addEventListener('scroll', () => { clearTimeout(st); st = window.setTimeout(sweep, 1200); }, { passive: true });
   document.addEventListener('focusin', (e) => {
     const t = (e.target as HTMLElement).closest<HTMLElement>('[data-rv],[data-rv-img]');
     t?.classList.add('in');

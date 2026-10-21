@@ -333,12 +333,12 @@ p {
 @media (prefers-reduced-motion: no-preference) {
   .js [data-rv] {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(20px);
   }
   .js [data-rv].in {
     opacity: 1;
     transform: none;
-    transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+    transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
     transition-delay: calc(var(--i, 0) * 75ms);
   }
   /* Pictures never hide: they settle from a slight scale as they enter. */

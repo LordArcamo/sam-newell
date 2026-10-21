@@ -81,7 +81,7 @@ const mapData = {
           <p class="small">{c.count || 'No homes shown here yet.'}</p>
           {c.homes.length > 0 ? (
             <ul role="list" class="tc-homes">
-              {c.homes.map((h) => (
+              {c.homes.slice(0, 4).map((h) => (
                 <li data-home={h.id}>
                   <a href={h.zillow} rel="noopener" target="_blank">
                     <span class="addr">{h.shown}</span>
@@ -94,6 +94,7 @@ const mapData = {
           ) : (
             <p class="empty">Ask Sam about {c.name}.</p>
           )}
+          {c.homes.length > 4 && <p class="small tc-more">{c.homes.length - 4} more on the map and on Zillow</p>}
           {c.rv && (
             <blockquote class="tc-q small">
               <p>“{c.rv.excerpts.town}”</p>
@@ -392,6 +393,10 @@ const mapData = {
   .empty {
     margin-top: 12px;
   }
+  .tc-more {
+    margin-top: 6px;
+    font-weight: 400;
+  }
   .tc-q {
     margin-top: 16px;
   }
@@ -542,9 +547,15 @@ const mapData = {
       right: var(--m);
       bottom: var(--m);
       width: auto;
-      max-height: 44%;
-      overflow-y: auto;
+      max-height: none;
+      overflow: visible;
       order: 3;
+    }
+    /* compact docked card: two homes, the actions; the full list and the review stay on wider screens */
+    .tc-homes li:nth-child(n + 3),
+    .tc-q,
+    .tc-more {
+      display: none;
     }
     .card :global(.ph),
     .card .macro {
@@ -553,9 +564,13 @@ const mapData = {
     .tc-body {
       padding: 16px 18px 18px;
     }
+    .addr {
+      font-size: 20px;
+    }
     .tc-act {
-      margin: 14px -18px -18px;
-      padding: 12px 18px 18px;
+      position: static;
+      margin: 14px 0 0;
+      padding: 0;
     }
     .sheet {
       margin: auto 0 0 0;

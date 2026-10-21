@@ -1,0 +1,29 @@
+---
+/**
+ * <head>: preload exactly the hero poster this visitor will see (sun bucket × rig), so the LCP image is
+ * discoverable before the body is parsed (brief §12, jury P1-11). Same transforms as Hero.astro (deduped).
+ */
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/posters/hero-*.jpg', { eager: true });
+const RIGS = { desktop: { w: [1280, 1920, 2560], sizes: 'max(100vw, 178svh)' }, tablet: { w: [768, 1152, 1536], sizes: 'max(100vw, 75svh)' }, phone: { w: [780, 1170], sizes: '100vw' } } as const;
+const pre: Record<string, Record<string, { set: string; sizes: string }>> = {};
+for (const st of ['dawn', 'noon', 'golden', 'blue', 'night']) {
+  pre[st] = {};
+  for (const [rig, r] of Object.entries(RIGS)) {
+    const src = files[`../../assets/posters/hero-${st}-${rig}.jpg`].default;
+    const set = (await Promise.all(r.w.map(async (w) => `${(await getImage({ src, width: w, format: 'avif', quality: 50 })).src} ${w}w`))).join(', ');
+    pre[st][rig] = { set, sizes: r.sizes };
+  }
+}
+---
+<script is:inline define:vars={{ pre }}>
+  (function (d) {
+    var s = d.documentElement.dataset.sun || 'noon';
+    var rig = matchMedia('(min-aspect-ratio: 6/5)').matches ? 'desktop' : matchMedia('(min-aspect-ratio: 3/4)').matches ? 'tablet' : 'phone';
+    var p = pre[s][rig], l = d.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.type = 'image/avif'; l.setAttribute('fetchpriority', 'high');
+    l.setAttribute('imagesrcset', p.set); l.setAttribute('imagesizes', p.sizes);
+    d.head.appendChild(l);
+  })(document);
+</script>
