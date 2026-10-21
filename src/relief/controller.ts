@@ -27,8 +27,8 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 /** The map's light is fixed (dark at every hour), so its bearing is too: nearly north-up, so the frame lines up with
  *  the model's footprint and the overview can fill the stage without showing an edge. */
 const MAP_BEARING = 188;
-/** Resolve in an idle slot (or after 200 ms at the latest), so boot work never lands inside a scroll frame. */
-const idle = () => new Promise<void>((r) => ('requestIdleCallback' in window ? requestIdleCallback(() => r(), { timeout: 200 }) : setTimeout(r, 16)));
+/** Resolve in an idle slot (or after 1.2 s at the latest), so boot work never lands inside a busy frame. */
+const idle = () => new Promise<void>((r) => ('requestIdleCallback' in window ? requestIdleCallback(() => r(), { timeout: 1200 }) : setTimeout(r, 16)));
 
 export class Controller {
   tier: Tier;

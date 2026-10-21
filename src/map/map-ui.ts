@@ -235,7 +235,7 @@ export function initMap() {
     labels.forEach((l) => l.classList.toggle('on', l.dataset.label === slug && !opts.overview));
     root.classList.toggle('is-town', !!slug && !opts.overview);
     const show = slug ?? 'lehi';
-    cards.forEach((c) => c.classList.toggle('on', c.dataset.card === show));
+    showCard(show);
     pins.forEach((p) => p.classList.toggle('on', !!opts.home && p.dataset.pin === opts.home));
     root.querySelectorAll('[data-home]').forEach((li) => li.classList.toggle('on', (li as HTMLElement).dataset.home === opts.home));
     const card = cards.find((c) => c.dataset.card === show);
@@ -246,11 +246,43 @@ export function initMap() {
     }
     const overview = !slug || opts.overview;
     if (opts.overview) current = null;
-    if (gl) gl.fly(overview ? 'overview' : opts.home ? { home: opts.home } : { town: slug! });
+    if (gl) flyTo(overview ? 'overview' : opts.home ? { home: opts.home } : { town: slug! });
     else go(overview ? OVERVIEW : boxFor(slug!), opts.instant);
     if (opts.focus) buttons.find((b) => b.dataset.town === slug)?.focus();
     fullBtn.hidden = !!overview;
     requestAnimationFrame(fadeCard);
+  }
+
+  // The card swaps only once its photo is decoded (or after 600 ms at the latest): no white card mid-flight (jury r4
+  // P2-4). Hover or focus on a town primes its photo; after the 3D boot every card photo is decoded in idle time.
+  let swapSeq = 0;
+  const cardImg = (slug: string) => cards.find((c) => c.dataset.card === slug)?.querySelector<HTMLImageElement>('img') ?? null;
+  const prime = (slug: string | undefined) => {
+    const img = slug ? cardImg(slug) : null;
+    if (!img || img.dataset.primed) return Promise.resolve();
+    img.dataset.primed = '';
+    img.loading = 'eager';
+    return img.decode().catch(() => {});
+  };
+  function showCard(slug: string) {
+    const next = cards.find((c) => c.dataset.card === slug);
+    const seq = ++swapSeq;
+    const swap = () => {
+      if (seq !== swapSeq) return;
+      cards.forEach((c) => c.classList.toggle('on', c === next));
+      requestAnimationFrame(fadeCard);
+    };
+    const img = cardImg(slug);
+    if (!next || next.classList.contains('on') || !img || (img.complete && img.naturalWidth)) return swap();
+    Promise.race([prime(slug), new Promise((r) => setTimeout(r, 600))]).then(swap);
+  }
+  // Camera flights: the address tags wait while the camera moves and fade in on arrival (jury r4 P2-5).
+  let flights = 0;
+  function flyTo(p: Parameters<ReliefHandle['fly']>[0]) {
+    if (!gl) return;
+    const id = ++flights;
+    root.classList.add('flying');
+    gl.fly(p).then(() => id === flights && root.classList.remove('flying'));
   }
 
   // Desktop: the card scrolls on its own and its actions stick to its foot; while more of it is below, they sit on a
@@ -275,6 +307,10 @@ export function initMap() {
     select(null);
     back?.focus();
   });
+
+  toolbar.addEventListener('pointerover', (e) => prime((e.target as HTMLElement).closest<HTMLElement>('[data-town]')?.dataset.town));
+  toolbar.addEventListener('focusin', (e) => prime((e.target as HTMLElement).closest<HTMLElement>('[data-town]')?.dataset.town));
+  root.querySelector('[data-pins]')!.addEventListener('pointerover', (e) => prime((e.target as HTMLElement).closest<HTMLElement>('[data-pin]')?.dataset.town));
 
   // Toolbar: click / Enter / Space select; arrows, Home and End move the roving focus.
   toolbar.addEventListener('click', (e) => {
@@ -414,14 +450,36 @@ export function initMap() {
     root.classList.add('is-gl');
     h.setFree(free);
     h.onFrame(glFrame);
-    if (current) h.fly({ town: current });
+    if (current) flyTo({ town: current });
+    // every card photo, decoded one after another in idle time, so no flight waits on a picture
+    const rest = cards.map((c) => c.dataset.card!);
+    const nextPhoto = () => { const s = rest.shift(); if (s) requestIdleCallback(() => prime(s).then(nextPhoto), { timeout: 3000 }); };
+    if ('requestIdleCallback' in window) nextPhoto();
   };
   const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && boot(), { rootMargin: '300% 0px' });
   io.observe(root);
+  // Desktops boot ahead of the chapter, but never during the opening (mark → letterbox → name): a cold GPU's first
+  // WebGL context blocks the page for over a second (jury r4 P1-2). The boot waits until html.op is gone, or the
+  // first scroll if that comes sooner, then for an idle slot.
   if (matchMedia('(min-width: 900px) and (pointer: fine)').matches) {
-    const later = () => ('requestIdleCallback' in window ? requestIdleCallback(() => boot(), { timeout: 4000 }) : setTimeout(boot, 1500));
-    if (document.readyState === 'complete') later();
-    else addEventListener('load', later, { once: true });
+    const html = document.documentElement;
+    let armed = false;
+    const arm = () => {
+      if (armed) return;
+      armed = true;
+      mo.disconnect();
+      removeEventListener('scroll', arm);
+      if ('requestIdleCallback' in window) requestIdleCallback(() => boot(), { timeout: 4000 });
+      else setTimeout(boot, 1500);
+    };
+    const mo = new MutationObserver(() => !html.classList.contains('op') && arm());
+    const ready = () => {
+      if (!html.classList.contains('op')) return arm();
+      mo.observe(html, { attributes: true, attributeFilter: ['class'] });
+      addEventListener('scroll', arm, { once: true, passive: true });
+    };
+    if (document.readyState === 'complete') ready();
+    else addEventListener('load', ready, { once: true });
   }
   addEventListener('relief:fallback', () => {
     gl = null;

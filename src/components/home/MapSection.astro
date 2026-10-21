@@ -14,11 +14,17 @@ import { img } from '../../lib/images';
 import { ZILLOW } from '../../data/site';
 
 const DEFAULT = 'lehi';
+/** Listings whose own photo is an interior, and the exterior on file for them. */
+const EXTERIOR: Record<string, string> = { '1056-w-stonehaven-dr-north-salt-lake': 'full-1056-exterior.jpg' };
+/** Keep a short last word (W, N, Dr, Ln) with the word before it: no orphan line in a narrow card. */
+const tidy = (s: string) => s.replace(/ (\S{1,3})$/, '\u00a0$1');
 const cards = TOWNS.map((t) => {
   const homes = HOMES.filter((h) => h.group === t.slug).sort((a, b) => ['for-sale', 'sold', 'past'].indexOf(a.status) - ['for-sale', 'sold', 'past'].indexOf(b.status));
   const n = (s: string) => homes.filter((h) => h.status === s).length;
   const parts = [n('for-sale') && `${n('for-sale')} for sale`, n('sold') && `${n('sold')} sold lately`, n('past') && `${n('past')} past ${n('past') > 1 ? 'listings' : 'listing'}`].filter(Boolean);
-  const lead = homes.find((h) => h.photo && h.photoKind === 'exterior'); // the card shows a house, never a kitchen
+  // the card shows a house, never a kitchen: a listing's exterior, else the exterior we hold for it (jury r4 P2-7)
+  const ext = homes.find((h) => EXTERIOR[h.id]);
+  const lead = homes.find((h) => h.photo && h.photoKind === 'exterior') ?? (ext ? { ...ext, photo: EXTERIOR[ext.id] } : undefined);
   const rv = t.review ? REVIEWS.find((r) => r.n === t.review) : null;
   return { ...t, homes, count: parts.join(' · '), lead, rv };
 });
@@ -79,7 +85,7 @@ const mapData = {
                 {c.homes.slice(0, 3).map((h) => (
                   <li data-home={h.id}>
                     <a href={h.zillow} rel="noopener" target="_blank">
-                      <span class="addr">{h.shown}</span>
+                      <span class="addr">{tidy(h.shown)}</span>
                       <span class="det num">{h.detail}</span>
                     </a>
                     {h.status === 'for-sale' && <button type="button" class="run small" data-run={h.price}>Run the numbers</button>}
@@ -174,14 +180,14 @@ const mapData = {
 
   /* ——— the rail ——— */
   .copy-h {
-    font-size: clamp(36px, 3.334vw, 56px);
+    font-size: 40px; /* 56 on big screens; the site's scale has no 48 (jury r4 P2-15) */
     line-height: 1.02;
     letter-spacing: -0.035em;
     font-weight: 400;
   }
   .copy-lead {
     margin-top: 12px;
-    font-size: 17px;
+    font-size: 18px;
     line-height: 1.45;
     max-width: 38ch;
   }
@@ -221,6 +227,16 @@ const mapData = {
   .slip:focus-visible {
     outline: 3px solid #fff;
     outline-offset: 2px;
+  }
+  @media (min-width: 1280px) and (min-height: 760px) {
+    .copy-h {
+      font-size: 56px;
+    }
+  }
+  /* while the camera flies, the address tags wait; they fade in on arrival (jury r4 P2-5) */
+  .map:global(.flying) .tag {
+    opacity: 0 !important;
+    transition: none;
   }
   /* the card: as tall as it needs, up to the room left under the towns; then it scrolls, actions pinned at its foot */
   .card {
@@ -406,7 +422,7 @@ const mapData = {
     background: #fff;
     color: #0a0a0a;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
   }
   .full:hover {
     background: #e6e6e6;
@@ -482,6 +498,7 @@ const mapData = {
     text-underline-offset: 4px;
   }
   .addr {
+    text-wrap: balance;
     font-family: var(--display);
     font-weight: 600;
     font-size: 22px;
@@ -607,10 +624,10 @@ const mapData = {
       padding-top: 12px;
     }
     .tc-town {
-      font-size: 24px;
+      font-size: 22px;
     }
     .tc-head .small {
-      font-size: 13px;
+      font-size: 14px;
     }
     /* compact home rows: address and price on one line, so two or three homes show above the actions */
     .tc-homes {
@@ -627,7 +644,7 @@ const mapData = {
       column-gap: 8px;
     }
     .addr {
-      font-size: 17px;
+      font-size: 16px;
     }
     .det {
       font-size: 14px;
@@ -651,7 +668,7 @@ const mapData = {
     .tc-act .btn {
       min-height: 40px;
       padding: 0 14px;
-      font-size: 15px;
+      font-size: 14px;
       white-space: nowrap;
     }
     .tc-act .btn.ghost,
@@ -791,7 +808,7 @@ const mapData = {
       padding-top: 18px;
     }
     .addr {
-      font-size: 20px;
+      font-size: 18px;
     }
     .sheet {
       margin: auto 0 0 0;
