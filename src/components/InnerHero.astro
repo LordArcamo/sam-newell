@@ -3,7 +3,7 @@ import Arrow from './Arrow.astro';
 /**
  * Lehi Light inner-page hero (research §4.6): a full-height dark picture panel (square corners), the title in
  * General Sans Light bottom-left (two lines), one sentence, one button and the phone. The picture is the LCP:
- * eager, high priority, never hidden or animated in (it only drifts, under motion-allowed).
+ * eager, high priority, never hidden: under motion-allowed it settles in by its wrapper, behind a fading veil, and drifts.
  */
 import Pic from './Pic.astro';
 import { CONTACT } from '../data/site';
@@ -61,6 +61,7 @@ const nar = (image.width / image.height).toFixed(3);
     inset: 0;
     max-width: 1536px;
     margin-inline: auto;
+    overflow: hidden;
   }
   .ih-p :global(.ph) {
     height: 100%;
@@ -94,8 +95,11 @@ const nar = (image.width / image.height).toFixed(3);
         transform: scale(1.09) translate3d(-1%, -0.8%, 0);
       }
     }
-    /* the title rises out of its mask: on a direct visit after 0.2 s; through the curtain as it lifts
-       (html.lift, wipe.ts), with a fail-safe in case no script runs */
+    /* Entrance, on every visit. Direct: the title rises out of its mask after 0.2 s while the picture settles
+       (1.045 → 1) and comes up from a veil. Through the curtain (html.via, set in <head>): both wait for html.lift,
+       the moment wipe.ts lifts the curtain onto the decoded picture; a fail-safe runs them if no script does.
+       LCP-safe: the <img> is painted at full opacity from the first frame. Only its wrapper (.ph) is transformed,
+       and the veil is a separate layer over it. Renaming the animation restarts it, hence three names apiece. */
     :global(.js) .ln > span {
       animation: ih-rise 1s var(--ease-expo) 0.2s both;
     }
@@ -106,6 +110,28 @@ const nar = (image.width / image.height).toFixed(3);
     :global(html.via.lift) .ln > span {
       animation-name: ih-rise-lift;
       animation-delay: 0.3s;
+    }
+    :global(.js) .ih-p > :global(.ph) {
+      animation: ih-settle 1.8s var(--ease-expo) both;
+    }
+    :global(.js) .ih-p::after {
+      animation: ih-veil 1.2s var(--ease-out) both;
+    }
+    :global(html.via) .ih-p > :global(.ph) {
+      animation-name: ih-settle-via;
+      animation-delay: 1.3s;
+    }
+    :global(html.via) .ih-p::after {
+      animation-name: ih-veil-via;
+      animation-delay: 1.3s;
+    }
+    :global(html.via.lift) .ih-p > :global(.ph) {
+      animation-name: ih-settle-lift;
+      animation-delay: 0.05s;
+    }
+    :global(html.via.lift) .ih-p::after {
+      animation-name: ih-veil-lift;
+      animation-delay: 0.05s;
     }
     @keyframes ih-rise {
       from {
@@ -122,6 +148,45 @@ const nar = (image.width / image.height).toFixed(3);
         transform: translateY(105%);
       }
     }
+    @keyframes ih-settle {
+      from {
+        transform: scale(1.045);
+      }
+    }
+    @keyframes ih-settle-via {
+      from {
+        transform: scale(1.045);
+      }
+    }
+    @keyframes ih-settle-lift {
+      from {
+        transform: scale(1.045);
+      }
+    }
+    @keyframes ih-veil {
+      from {
+        opacity: 0.4;
+      }
+    }
+    @keyframes ih-veil-via {
+      from {
+        opacity: 0.4;
+      }
+    }
+    @keyframes ih-veil-lift {
+      from {
+        opacity: 0.4;
+      }
+    }
+  }
+  /* the veil the picture comes up from (entrance only: it rests at opacity 0) */
+  .ih-p::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #0a0a0a;
+    opacity: 0;
+    pointer-events: none;
   }
   .ih-shade {
     position: absolute;
