@@ -2,7 +2,7 @@
 /** Process rows: a big heading on the left axis, the text on the column-5 axis, one picture in the margin. */
 import Pic from './Pic.astro';
 import type { ImageMetadata } from 'astro';
-interface Step { h: string; p: string; img?: ImageMetadata; alt?: string; pos?: string; id?: string }
+interface Step { h: string; p: string; img?: ImageMetadata; alt?: string; pos?: string; id?: string; ratio?: string }
 interface Props { heading: string; steps: Step[]; id?: string }
 const { heading, steps, id = 'steps' } = Astro.props;
 ---
@@ -13,7 +13,7 @@ const { heading, steps, id = 'steps' } = Astro.props;
       <li class="st" id={s.id}>
         <h3 class="st-h" data-rv>{s.h}</h3>
         <p class="st-p" data-rv style="--i:1" set:html={s.p} />
-        {s.img && <Pic class="st-img" src={s.img} alt={s.alt ?? ''} sizes="(max-width: 900px) 100vw, 22vw" ratio="r43" pos={s.pos} i={2} />}
+        {s.img && <Pic class="st-img" src={s.img} alt={s.alt ?? ''} sizes="(max-width: 900px) 100vw, 22vw" ratio={s.ratio ?? "r43"} pos={s.pos} i={2} />}
       </li>
     ))}
   </ol>

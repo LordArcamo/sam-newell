@@ -10,7 +10,7 @@ const { Browser, sleep } = await import(lib);
 const base = process.argv[2] || 'http://localhost:4345';
 const out = process.argv[3] || path.join(os.homedir(), 'Projects/fazed-3d-sites/clients/sam-newell/media/build');
 const only = process.argv[4]?.split(',');
-const pages = (only ?? ['/', '/buy/', '/sell/', '/invest/', '/podcast/', '/about/', '/contact/', '/blog/', '/blog/first-home-wasatch-front/', '/privacy/', '/terms/', '/nope/']);
+const pages = (only ?? ['/', '/buy/', '/sell/', '/invest/', '/podcast/', '/about/', '/contact/', '/reviews/', '/blog/', '/blog/first-home-wasatch-front/', '/privacy/', '/terms/', '/nope/']);
 const sizes = [
   { w: 1440, h: 900, mobile: false },
   { w: 820, h: 1180, mobile: true },
@@ -20,7 +20,8 @@ mkdirSync(out, { recursive: true });
 const b = await Browser.launch({});
 const errors = [];
 for (const s of sizes) {
-  const p = await b.newPage({ width: s.w, height: s.h, dsf: 1, mobile: s.mobile });
+  // reduced motion: every reveal, shutter and parallax at rest, so a full-page shot shows the real layout (motion is checked by filmstrip.mjs)
+  const p = await b.newPage({ width: s.w, height: s.h, dsf: 1, mobile: s.mobile, reducedMotion: true });
   for (const pg of pages) {
     const name = pg === '/' ? 'home' : pg.replace(/^\/|\/$/g, '').replace(/\//g, '__') || 'home';
     p.consoleErrors = [];
@@ -32,7 +33,9 @@ for (const s of sizes) {
       await sleep(120);
     }
     await p.eval('window.scrollTo(0, 0)');
-    await p.eval(`Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; setTimeout(r, 4000); })))`);
+    // a full-page shot never scrolls, so lazy pictures below the fold would stay unrequested: load them all
+    await p.eval(`document.querySelectorAll('img[loading=lazy]').forEach((i) => (i.loading = 'eager'))`);
+    await p.eval(`Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; setTimeout(r, 15000); })))`);
     await sleep(900);
     await p.screenshot({ path: path.join(out, `${name}-${s.w}.jpg`), fullPage: true, quality: 62 });
     const overflow = await p.eval('document.documentElement.scrollWidth - innerWidth');

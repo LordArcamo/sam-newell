@@ -13,7 +13,7 @@ export const PRIVACY = [
 ];
 
 export const TERMS = [
-  { h: 'What this site is', p: 'samnewellrealestate.com is the website of Sam Newell, a Utah real estate broker with KW Utah Realtors Keller Williams (Brickyard). It gives general information about buying, selling and investing in real estate on the Wasatch Front.' },
+  { h: 'What this site is', p: 'samnewellrealestate.com is the website of Sam Newell, a Utah Realtor with KW Utah Realtors Keller Williams (Brickyard). It gives general information about buying, selling and investing in real estate on the Wasatch Front.' },
   { h: 'Not professional advice', p: 'Nothing here replaces individual real estate, lending, investment, legal or tax advice. The calculator shows examples to help you think; it is not a loan estimate or an appraisal. Talk to Sam, a licensed lender or your own advisers before you act.' },
   { h: 'Investment disclosures', p: 'Multifamily Investment Club is a separate company. Nothing on this site is an offer to sell, or a solicitation of an offer to buy, any security. Any offering is made only through its own documents to eligible investors.' },
   { h: 'Listings and third-party data', p: 'Homes link to Zillow for current price, status and details. Listing information changes constantly, and the linked page, not this site, is the source of truth. Reviews are quoted word for word from Zillow and Apple Podcasts. Third-party trademarks belong to their owners.' },

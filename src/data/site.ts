@@ -7,7 +7,7 @@ import { CONFIRM } from './confirm';
 export const SITE = {
   url: 'https://samnewellrealestate.com',
   name: 'Sam Newell',
-  title: CONFIRM.broker ? 'Real estate broker' : 'Real estate agent',
+  title: 'Realtor', // user decision 2026-10-21 (CONFIRM.broker is off)
   base: 'Lehi, Utah',
   serving: 'Salt Lake and Utah County',
   languages: ['English', 'Spanish'],

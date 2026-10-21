@@ -12,7 +12,9 @@ for (const m of src.matchAll(/^\s*(\w+):\s*(true|false),/gm)) CONFIRM[m[1]] = m[
 const rules = [
   { re: /\bLauren\b|\bhis wife\b|\bSam'?s wife\b|\bhusband\b/i, why: 'no spouse anywhere (user answer)' },
   { re: /Real Men,? Real Conversation|Friday Recap|sam-podcast\.png/i, why: 'Jimmy Rex residue' },
-  { re: /6862779/, why: 'licence number stays off the site' },
+  // The licence number is on the site at the user's request (2026-10-21); it is a sales-agent licence, so it is never
+  // called a broker licence, and "broker" as a title is gated below (the title is Realtor).
+  { re: /broker'?s? licen[cs]e/i, why: 'the licence is not a broker licence (SA suffix)' },
   { re: /Preferred Lending Partner|Zillow preferred agent/i, why: 'unsourced claim' },
   { re: /renter demographic/i, why: 'fair housing' },
   { re: /high returns|guaranteed returns/i, why: 'promissory investment language' },

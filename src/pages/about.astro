@@ -21,7 +21,7 @@ const timeline = [
 ];
 ---
 <Base
-  title="About Sam Newell | Lehi Broker, Builder's Eye, Dad"
+  title="About Sam Newell | Lehi Realtor, Builder's Eye, Dad"
   description="Sam Newell sells homes on the Wasatch Front, frames houses with his friend Oscar at A Framing Company, and fly-fishes with his kids whenever he can."
   crumbs={[{ name: 'About', path: '/about/' }]}
 >
@@ -67,9 +67,8 @@ const timeline = [
       </figure>
     </div>
     <div class="be-pics">
-      <Pic class="be-1" src={img('photos/framing-custom-home.jpg')} alt="A three-storey custom home framed by A Framing Company" sizes="(max-width: 767px) 90vw, 36vw" ratio="r43" />
-      <Pic class="be-2" src={img('photos/framing-park-city-sam.jpg')} alt="Sam on a 6,000 square foot framing job in Park City" sizes="(max-width: 767px) 50vw, 22vw" ratio="r43" pos="50% 30%" i={1} />
-      <Pic class="be-3" src={img('photos/framing-provo-sam.jpg')} alt="Sam in front of a custom home being framed in the Provo Riverbottoms" sizes="(max-width: 767px) 50vw, 22vw" ratio="r43" pos="50% 30%" i={2} />
+      <Pic class="be-1" src={img('photos/framing-custom-home.jpg')} alt="A three-storey custom home framed by A Framing Company" sizes="(max-width: 767px) 90vw, 44vw" ratio="r32" />
+      <Pic class="be-2" src={img('photos/framing-site-garage.jpg')} alt="A house in framing on a hillside site, with the scaffolding still up" sizes="(max-width: 767px) 90vw, 44vw" ratio="r32" i={1} />
     </div>
   </section>
 
@@ -157,11 +156,7 @@ const timeline = [
   }
   .be-pics {
     display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: var(--gap);
-  }
-  .be-pics :global(.be-1) {
-    grid-column: 1 / -1;
   }
 
   .fam {

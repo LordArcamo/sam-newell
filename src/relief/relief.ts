@@ -362,14 +362,17 @@ export class Engine {
     this.bearing = followBearing(azimuth);
     this.reading = false;
     this.applyLight(altitude, azimuth, forced ? LOOKS[forced] : lookFor(altitude / deg, azimuth));
+    if (this.mapRole) this.setReading(true);
   }
+  mapRole = false;
 
   /**
-   * Lehi Light: the map is a gallery object on black. When the real sun is up it lights the plaster; when it is
-   * low or down (< 8°) the model sits in its night state (deep greys). Pins and town labels are always white.
+   * Lehi Light: the map is a gallery object on black, in its night state (deep greys) at every hour, so the white
+   * copy, pins and town labels always read (jury P0, 2026-10-21). Pins and town labels are always white.
    */
   setReading(on: boolean) {
-    const want = on && this.sunAlt < 8 * deg;
+    this.mapRole = on;
+    const want = on;
     this.reading = want;
     if (want) this.applyLight(-20 * deg, 0, { ...LOOKS.night, sky: 0.16, exposure: 2.3, voidc: 0x0a0a0a });
     else this.applyLight(this.sunAlt, this.sunAz, lookFor(this.sunAlt / deg, this.sunAz));

@@ -24,7 +24,7 @@ import keysPoster from '../assets/film/keys.jpg';
 const keaton = review(1);
 const byId = (id: string) => HOMES.find((h) => h.id === id)!;
 const panels = [
-  { h: byId('1872-s-country-ln-w-lehi'), photo: 'listings/full-1872-twilight-front.jpg', alt: '1872 S Country Ln W, Lehi, at twilight', pos: '50% 62%' },
+  { h: byId('1872-s-country-ln-w-lehi'), photo: 'listings/full-1872-front-aerial.jpg', alt: '1872 S Country Ln W, Lehi, at twilight from above the street', pos: '50% 60%', wide: true },
   { h: byId('1056-w-stonehaven-dr-north-salt-lake'), photo: 'listings/full-1056-exterior.jpg', alt: '1056 W Stonehaven Dr, North Salt Lake', pos: '50% 55%' },
   { h: byId('1714-n-3870-w-lehi'), photo: 'listings/full-1714-kitchen.jpg', alt: 'The kitchen at 1714 N 3870 W, Lehi', pos: '50% 50%' },
   { h: byId('sold-w-2330-n-lehi'), photo: 'listings/full-2330-exterior.jpg', alt: 'A townhome on W 2330 N, Lehi, sold by Sam', pos: '50% 60%' },
@@ -45,8 +45,8 @@ const jsonld = [
 ];
 ---
 <Base
-  title="Sam Newell | Lehi Real Estate Broker, Wasatch Front"
-  description="Buy, sell or invest on the Wasatch Front with Lehi broker Sam Newell. 235 homes sold, 4.9 from 45 Zillow reviews. Call (801) 995-2220."
+  title="Sam Newell | Lehi Realtor, Wasatch Front"
+  description="Buy, sell or invest on the Wasatch Front with Lehi Realtor Sam Newell. 235 homes sold, 4.9 from 45 Zillow reviews. Call (801) 995-2220."
   jsonld={jsonld}
 >
   <HeroPreload slot="head" />
@@ -56,6 +56,7 @@ const jsonld = [
   <section class="intro" aria-label="What Sam does" data-intro>
     <p class="statement intro-s">Honest feedback on every house, and the numbers before you offer. That’s the whole job.</p>
     <figure class="ip ip1" data-par="-14"><Pic src={img('photos/sam-portrait-2026-10.jpg')} alt="Sam Newell" sizes="(max-width: 767px) 70vw, 26vw" ratio="r45" pos="50% 25%" rv={false} /></figure>
+    <figure class="ip ip4" data-par="8"><Pic src={img('photos/framing-site-garage.jpg')} alt="A house in framing on a hillside site, with the scaffolding still up" sizes="(max-width: 767px) 90vw, 24vw" ratio="r32" rv={false} /></figure>
     <figure class="ip ip2" data-par="10" data-cursor="Play" data-film="/film/studio.mp4"><Pic src={studioPoster} alt="Sam talking in the Get Leveraged studio" sizes="(max-width: 767px) 90vw, 40vw" ratio="r1610" rv={false} widths={[360, 540, 720]} /></figure>
     <figure class="ip ip3" data-par="-6" data-cursor="Play" data-film="/film/keys.mp4"><Pic src={keysPoster} alt="Keys day: confetti under the Congrats sign at Sam's office as clients close on a home" sizes="(max-width: 767px) 60vw, 24vw" ratio="r11" rv={false} widths={[360, 540, 720]} /></figure>
   </section>
@@ -70,8 +71,8 @@ const jsonld = [
       {panels.map((p, i) => (
         <li class="panel" style={`--z:${i + 1}`}>
           <a href={p.h.zillow} rel="noopener" target="_blank" data-cursor="View" aria-label={`${p.h.shown}, ${p.h.townName}: ${p.h.detail}, on Zillow`}>
-            <div class="panel-img" data-panel-img>
-              <Pic src={img(p.photo)} alt={p.alt} sizes="(max-width: 1536px) 100vw, 1536px" pos={p.pos} rv={false} widths={[768, 1152, 1536]} />
+            <div class:list={['panel-img', { wide: p.wide }]} data-panel-img>
+              <Pic src={img(p.photo)} alt={p.alt} sizes={p.wide ? '100vw' : '(max-width: 1536px) 100vw, 1536px'} pos={p.pos} rv={false} widths={p.wide ? [768, 1152, 1536, 2048, 2560] : [768, 1152, 1536]} />
             </div>
             <div class="row">
               <span class="k">{p.h.status === 'for-sale' ? 'For sale' : 'Sold'} · {p.h.townName}</span>
@@ -100,7 +101,7 @@ const jsonld = [
           <li data-step={i} class:list={[{ on: i === 0 }]}><a href={s.href}>{s.t}</a></li>
         ))}
       </ol>
-      <figure class="pair pa"><Pic src={img('photos/framing-provo-sam.jpg')} alt="Sam on a framing job in the Provo Riverbottoms" sizes="22vw" ratio="r45" pos="50% 30%" rv={false} /></figure>
+      <figure class="pair pa"><Pic src={img('photos/framing-site-garage.jpg')} alt="A house in framing on a hillside site, with the scaffolding still up" sizes="22vw" ratio="r32" rv={false} /></figure>
       <figure class="pair pb"><Pic src={img('photos/framing-custom-home.jpg')} alt="A three-storey custom home framed by A Framing Company" sizes="22vw" ratio="r32" rv={false} /></figure>
       <p class="scene-note">Sam studied construction management at BYU. On a showing he looks past the paint to the frame, the roof and what a fix really costs. <a class="link" href="/buy/">Buying with Sam</a></p>
     </div>
@@ -111,7 +112,7 @@ const jsonld = [
 
   <!-- 6 · 235: the figure on the photograph's edge -->
   <section class="fig" aria-labelledby="fig-h">
-    <div class="fig-photo" data-shutter><Pic src={img('listings/full-1872-drone-wasatch.jpg')} alt="Dusk over Lehi and the Wasatch from above one of Sam's listings, 1872 S Country Ln W" sizes="(max-width: 1536px) 100vw, 1536px" pos="50% 40%" rv={false} widths={[768, 1152, 1536]} /></div>
+    <div class="fig-photo" data-shutter><Pic src={img('listings/full-1872-drone-wasatch.jpg')} alt="Dusk over Lehi and the Wasatch from above one of Sam's listings, 1872 S Country Ln W" sizes="100vw" pos="50% 40%" rv={false} widths={[768, 1152, 1536, 2048, 2560]} /></div>
     <div class="fig-shade" aria-hidden="true"></div>
     <p class="fig-n num" aria-hidden="true" data-rise>{ZILLOW.sold}</p>
     <h2 class="sr-only" id="fig-h">{ZILLOW.sold} homes sold</h2>
@@ -139,10 +140,10 @@ const jsonld = [
     <p class="lead about-lead" data-rv style="--i:1">Sam sells homes up and down the Wasatch Front with {BROKERAGE.name}. He has been in Utah real estate for {SITE.yearsInRealEstate} years and answers calls and texts the same day.</p>
     <div class="tiles">
       <div class="a-photo" data-shutter data-cursor="View">
-        <Pic src={img('photos/family-brighton-2026-10.jpg')} alt="Sam with Heidi and Liam among autumn aspens at Brighton" sizes="(max-width: 900px) 100vw, 64vw" pos="50% 32%" rv={false} />
-        <p class="a-block">Dad of two, fly fisherman, and a builder at heart: he still frames houses with his friend Oscar at A Framing Company. <a class="link" href="/about/">More about Sam</a></p>
+        <Pic src={img('photos/family-brighton-2026-10-square.jpg')} alt="Sam with Heidi and Liam among autumn aspens at Brighton" sizes="(max-width: 900px) 100vw, 48vw" ratio="r11" rv={false} />
       </div>
       <div class="a-tile">
+        <p class="a-block">Dad of two, fly fisherman, and a builder at heart: he still frames houses with his friend Oscar at A Framing Company. <a class="link" href="/about/">More about Sam</a></p>
         <Logo variant="mark" class="a-mark" title="" />
         <dl class="facts num">
           <div><dt>Home base</dt><dd>Lehi, Utah</dd></div>
@@ -199,7 +200,7 @@ const jsonld = [
   /* 2 · intro */
   .intro {
     position: relative;
-    height: 170vh;
+    height: 108vh;
     padding-inline: var(--m);
   }
   .intro-s {
@@ -210,27 +211,32 @@ const jsonld = [
     width: min(40vw, 600px);
     text-align: center;
     font-size: clamp(24px, 2.5vw, 36px);
-    padding-top: 30vh;
+    padding-top: 22vh;
   }
   .ip {
     position: absolute;
     z-index: 1;
   }
-  /* the pictures keep to the side columns: nothing ever crosses the sentence */
+  /* the pictures keep to the side columns: nothing ever crosses the sentence; every screen of the run holds two */
   .ip1 {
     left: 3vw;
-    top: 4vh;
-    width: 25vw;
+    top: 2vh;
+    width: 26vw;
   }
   .ip2 {
-    right: 0;
-    top: 58vh;
-    width: 29vw;
+    right: 2vw;
+    top: 16vh;
+    width: 28vw;
   }
   .ip3 {
-    left: 6vw;
-    top: 108vh;
-    width: 22vw;
+    left: 8vw;
+    top: 62vh;
+    width: 19vw;
+  }
+  .ip4 {
+    right: 3vw;
+    top: 54vh;
+    width: 25vw;
   }
 
   /* 3 · listing panels: each panel sticks, the next slides over it */
@@ -252,7 +258,7 @@ const jsonld = [
   /* each listing is a full-height window; its picture travels more slowly than the page (motion.ts) */
   .panel {
     position: relative;
-    height: 100svh;
+    height: min(72vh, 56.25vw);
     overflow: hidden;
     background: #0a0a0a;
   }
@@ -266,11 +272,16 @@ const jsonld = [
     text-decoration: none;
   }
   /* 1536 px originals: never stretched past their width; wider screens get the black field around them */
+  /* a 16:9 window, centred, never taller than 72vh; the picture travels a little inside it (motion.ts) */
   .panel-img {
     position: absolute;
-    inset: -8% 0;
-    max-width: 1536px;
+    inset: -6% 0;
+    width: min(100%, calc(72vh * 16 / 9), 1536px);
     margin-inline: auto;
+  }
+  /* 4K upscales (2560 px) can go wider than 1536 */
+  .panel-img.wide {
+    width: min(100%, calc(72vh * 16 / 9));
   }
   .panel-img :global(.ph) {
     height: 100%;
@@ -426,8 +437,6 @@ const jsonld = [
   .fig-photo {
     position: absolute;
     inset: 0;
-    max-width: 1536px;
-    margin-inline: auto;
   }
   .fig-photo :global(.ph) {
     height: 100%;
@@ -457,6 +466,42 @@ const jsonld = [
     width: 26ch;
     text-align: right;
     font-size: 19px;
+  }
+  @media (max-width: 900px) {
+    /* phones: photo, shade and number share one 4:5 cell; the line sits under the photo, never over the number */
+    .fig {
+      height: auto;
+      min-height: 0;
+      display: grid;
+      grid-template-areas: 'p' 'e';
+    }
+    .fig-photo,
+    .fig-shade,
+    .fig-n {
+      grid-area: p;
+      position: relative;
+      inset: auto;
+    }
+    .fig-photo {
+      aspect-ratio: 4 / 5;
+    }
+    .fig-shade {
+      align-self: end;
+    }
+    .fig-n {
+      align-self: end;
+      justify-self: start;
+      left: auto;
+      bottom: auto;
+      margin: 0 0 -0.04em var(--m);
+    }
+    .fig-exp {
+      grid-area: e;
+      position: static;
+      width: auto;
+      text-align: left;
+      padding: 20px var(--m) 0;
+    }
   }
   .subfigs {
     display: grid;
@@ -516,27 +561,19 @@ const jsonld = [
     max-width: 46ch;
     margin-bottom: 72px;
   }
+  /* the family photo at its own square shape (no cropped heads), the words and facts beside it */
   .tiles {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
   }
   .a-photo {
     position: relative;
-    aspect-ratio: 16 / 10;
-  }
-  .a-photo :global(.ph) {
-    height: 100%;
+    width: min(100%, 80vh);
   }
   .a-block {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: min(340px, 50%);
-    background: #fff;
-    color: #0a0a0a;
-    padding: 22px 24px;
-    font-size: 17px;
+    font-size: 20px;
+    max-width: 30ch;
   }
   .a-tile {
     background: #1c1c1c;
@@ -605,8 +642,8 @@ const jsonld = [
   /* 10 · talk */
   .talk {
     position: relative;
-    height: 100svh;
-    min-height: 680px;
+    height: 90vh;
+    min-height: 640px;
     overflow: hidden;
   }
   .talk-photo {
@@ -683,7 +720,8 @@ const jsonld = [
       position: static;
       width: auto;
     }
-    .ip2 {
+    .ip2,
+    .ip3 {
       grid-column: 1 / -1;
     }
     .work-head {
@@ -694,7 +732,7 @@ const jsonld = [
       justify-self: start;
     }
     .panel {
-      height: 86svh;
+      height: 125vw;
     }
     .row {
       grid-template-columns: 1fr;
@@ -741,16 +779,7 @@ const jsonld = [
       grid-template-columns: minmax(0, 1fr);
     }
     .a-block {
-      position: static;
-      width: auto;
-    }
-    .a-photo {
-      aspect-ratio: auto;
-    }
-    .a-photo :global(.ph) {
-      aspect-ratio: 16 / 10;
-      height: auto;
-      width: 100%;
+      font-size: 18px;
     }
     .pod {
       grid-template-columns: 1fr;
@@ -769,7 +798,12 @@ const jsonld = [
     }
     .talk-photo {
       position: relative;
-      height: 64svh;
+      height: auto;
+      aspect-ratio: 2560 / 2259;
+    }
+    .talk-photo :global(.ph) {
+      height: auto;
+      aspect-ratio: 2560 / 2259;
     }
     .visit {
       position: relative;
