@@ -22,4 +22,20 @@ export function initBar() {
     { passive: true },
   );
   bar.addEventListener('focusin', () => bar.classList.remove('is-hidden'));
+
+  // home: show the bar once the hero has left the screen
+  const hero = document.querySelector('[data-hero]');
+  if (bar.classList.contains('home') && hero) {
+    new IntersectionObserver(([e]) => bar.classList.toggle('show', !e.isIntersecting), { threshold: 0 }).observe(hero);
+  } else bar.classList.add('show');
+  bar.addEventListener('focusin', () => bar.classList.add('show'));
+
+  // colour by chapter: white chapters ([data-light]) flip the bar while they sit under it
+  const lights = [...document.querySelectorAll<HTMLElement>('[data-light], section.dark, footer.dark')];
+  const check = () => {
+    const y = bar.getBoundingClientRect().bottom - 8;
+    bar.classList.toggle('on-light', lights.some((el) => { const r = el.getBoundingClientRect(); return r.top <= y && r.bottom > y; }));
+  };
+  addEventListener('scroll', () => requestAnimationFrame(check), { passive: true });
+  check();
 }

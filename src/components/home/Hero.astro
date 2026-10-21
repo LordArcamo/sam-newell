@@ -1,252 +1,479 @@
 ---
 /**
- * Hero, frame 0 (SSR, no JS needed): poster <img> = LCP, never hidden or animated in.
- * Posters are captured FROM THE LIVE three.js RENDERER (scripts/capture-posters.mjs): 5 sun states × 3 rigs,
- * each rig a reference frame (desktop 2560×1440, tablet 1536×2048, phone 1170×2532) shown with a cover crop
- * centred on the frame. The live canvas (src/relief) renders the same reference frame and crops it the same way,
- * so the 1.2 s crossfade has no double image. GL MOUNT POINT: [data-relief-mount="hero"].
+ * Lehi Light hero (research-premium §4.2): a 10 px black frame, the view panel (Sam's own Wasatch sunset as the
+ * film slot: a slow drift + light grade until the film loop exists) and the swatch nav column.
+ * The still is the LCP: preloaded in <head>, never hidden. The opening sequence (letterbox, mark, title) is CSS
+ * under html.op, set once per session in <head>; any input skips it; reduced motion never sees it.
+ * FILM SLOT: when a real clip exists, add <video muted playsinline loop preload="none" poster=…> inside .still,
+ * started after LCP (see the TODO in the script below).
  */
 import { getImage } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
-import { ZILLOW, CONTACT, BOOKING_URL, bookingAttrs } from '../../data/site';
-import posters from '../../data/posters.json';
+import Logo from '../Logo.astro';
+import { ZILLOW, CONTACT, BOOKING_URL, bookingAttrs, PODCAST } from '../../data/site';
+import dusk from '../../assets/photos/wasatch-dusk.jpg';
+import dayDesk from '../../assets/film/hero-desktop.jpg';
+import dayPhone from '../../assets/film/hero-phone.jpg';
 
-const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/posters/hero-*.jpg', { eager: true });
-const STATES = ['dawn', 'noon', 'golden', 'blue', 'night'] as const;
-const RIGS = {
-  desktop: { w: [1280, 1920, 2560], media: '(min-aspect-ratio: 6/5)', sizes: 'max(100vw, 178svh)' },
-  tablet: { w: [768, 1152, 1536], media: '(min-aspect-ratio: 3/4)', sizes: 'max(100vw, 75svh)' },
-  phone: { w: [780, 1170], media: '', sizes: '100vw' },
-} as const;
-type Rig = keyof typeof RIGS;
-const src = (state: string, rig: string) => files[`../../assets/posters/hero-${state}-${rig}.jpg`].default;
-const set = async (state: string, rig: Rig, format: 'avif' | 'webp') =>
-  (await Promise.all(RIGS[rig].w.map(async (w) => `${(await getImage({ src: src(state, rig), width: w, format, quality: format === 'avif' ? 50 : 68 })).src} ${w}w`))).join(', ');
-const sets: Record<string, Record<string, { avif: string; webp: string }>> = {};
-for (const st of STATES) {
-  sets[st] = {};
-  for (const rig of Object.keys(RIGS) as Rig[]) sets[st][rig] = { avif: await set(st, rig, 'avif'), webp: await set(st, rig, 'webp') };
-}
-const fallback = (await getImage({ src: src('noon', 'desktop'), width: 1920, format: 'jpg', quality: 72 })).src;
-const plates = Object.fromEntries(Object.entries(posters.rigs).map(([rig, v]) => [rig, Object.fromEntries(Object.entries(v).map(([st, x]) => [st, x.plate]))]));
-const sn = posters.rigs.desktop.golden.sn ?? { fx: 0.32, fy: 0.47 };
-const order: Rig[] = ['desktop', 'tablet', 'phone'];
+// Film by Lehi time (research §4.2 rotation): by day (dawn / noon) Sam's real reel 01 — a new build's deck
+// panning over the valley to the mountains — loops in the view; at golden hour, blue hour and night the view is
+// Sam's own Wasatch sunset photograph with a slow drift. The poster/still is always the LCP.
+const set = async (src: ImageMetadata, ws: number[], format: 'avif' | 'webp') =>
+  (await Promise.all(ws.filter((w) => w <= src.width).map(async (w) => `${(await getImage({ src, width: w, format, quality: 66 })).src} ${w}w`))).join(', ');
+const HERO_SETS = {
+  dusk: { avif: await set(dusk, [720, 1080, 1440, 1920, 2400], 'avif'), webp: await set(dusk, [720, 1080, 1440, 1920, 2400], 'webp') },
+  day: { avif: await set(dayDesk, [720, 1080], 'avif'), webp: await set(dayDesk, [720, 1080], 'webp') },
+  dayPhone: { avif: await set(dayPhone, [480, 720], 'avif'), webp: await set(dayPhone, [480, 720], 'webp') },
+};
+const fallback = (await getImage({ src: dusk, width: 1440, format: 'jpg', quality: 70 })).src;
+const sets = HERO_SETS;
+
+const swatches = [
+  { href: '/buy/', t: 'Buy', p: 'Know what you’re buying' },
+  { href: '/sell/', t: 'Sell', p: 'Priced on numbers, not hope' },
+  { href: '/invest/', t: 'Invest', p: 'Underwrite it like Sam' },
+  { href: '/podcast/', t: 'Podcast', p: `Get Leveraged, ${PODCAST.episodes} episodes` },
+];
 ---
-<section class="hero" data-hero aria-labelledby="hero-title" style={`--snx:${(sn.fx * 100).toFixed(2)}%;--sny:${(sn.fy * 100).toFixed(2)}%`}>
-  <div class="hero-media" data-relief-mount="hero">
-    <div class="frame" data-hero-frame>
-      <picture data-hero-poster>
-        {order.map((rig) => (
-          <>
-            <source type="image/avif" sizes={RIGS[rig].sizes} media={RIGS[rig].media || undefined} data-rig={rig} />
-            <source type="image/webp" sizes={RIGS[rig].sizes} media={RIGS[rig].media || undefined} data-rig={rig} />
-          </>
-        ))}
-        <img
-          width="2560"
-          height="1440"
-          alt="A white plaster relief model of the Wasatch Front seen from above Utah Lake, with Sam's homes pinned and the SN mark standing at Lehi"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-        />
+<section class="hero" data-hero aria-labelledby="hero-title">
+  <div class="view" data-cursor="Film">
+    <div class="still" data-still>
+      <picture>
+        <source type="image/avif" data-k="avif" sizes="(max-width: 900px) 100vw, 84vw" />
+        <source type="image/webp" data-k="webp" sizes="(max-width: 900px) 100vw, 84vw" />
+        <img width="2560" height="1920" alt="" fetchpriority="high" loading="eager" decoding="async" data-hero-img />
       </picture>
-      <script is:inline define:vars={{ sets, plates, fallback }}>
-        // Bucket the poster by the real sun over Lehi (html[data-sun], set in <head>) before anything is fetched,
-        // so only one poster ever downloads.
+      <script is:inline define:vars={{ sets }}>
+        // pick the still for Lehi's time of day before anything is fetched (html[data-sun] is set in <head>)
         (function () {
-          var s = document.documentElement.dataset.sun || 'noon', p = document.currentScript.previousElementSibling;
-          p.querySelectorAll('source').forEach(function (el) {
-            el.srcset = sets[s][el.dataset.rig][el.type === 'image/avif' ? 'avif' : 'webp'];
-          });
-          p.querySelector('img').src = fallback;
-          var rig = matchMedia('(min-aspect-ratio: 6/5)').matches ? 'desktop' : matchMedia('(min-aspect-ratio: 3/4)').matches ? 'tablet' : 'phone';
-          if (plates[rig] && plates[rig][s]) p.closest('[data-hero]').classList.add('plate');
+          var s = document.documentElement.dataset.sun, day = s === 'noon' || s === 'dawn', phone = matchMedia('(max-width: 900px)').matches;
+          var k = day ? (phone ? 'dayPhone' : 'day') : 'dusk', p = document.currentScript.previousElementSibling, img = p.querySelector('img');
+          p.querySelectorAll('source').forEach(function (el) { el.srcset = sets[k][el.dataset.k]; });
+          img.alt = day ? 'A new build’s deck looking over the valley to the Wasatch, from Sam’s own reel' : 'Sunset over the Wasatch from a Utah County field, photographed by Sam';
+          document.documentElement.dataset.view = day ? 'day' : 'dusk';
+          p.closest('[data-still]').dataset.view = day ? 'day' : 'dusk';
         })();
       </script>
-      <noscript><img class="noscript-poster" src={fallback} width="2560" height="1440" alt="A white plaster relief model of the Wasatch Front seen from above Utah Lake" /></noscript>
+      <noscript><img class="ns" src={fallback} alt="Sunset over the Wasatch from a Utah County field, photographed by Sam" width="2560" height="1920" /></noscript>
     </div>
-  </div>
-  <p class="caption small" data-caption>Lehi, Utah</p>
-  <script is:inline>
-    (function () {
-      var t = +document.documentElement.dataset.t || Date.now();
-      var s = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Denver', hour: 'numeric', minute: '2-digit' }).format(t)
-        .replace(/\s?AM$/i, ' a.m.').replace(/\s?PM$/i, ' p.m.');
-      document.currentScript.previousElementSibling.textContent = 'Lehi now, ' + s;
-    })();
-  </script>
-  <div class="hero-foot">
-    <h1 class="title" id="hero-title">Sam<br /> Newell</h1>
-    <div class="side">
-      <p class="sentence">Real estate broker in Lehi, Utah. Buying, selling and investing on the Wasatch Front, with straight answers.</p>
-      <p class="proof num"><b>{ZILLOW.rating}</b> from {ZILLOW.reviews} Zillow reviews · <b>{ZILLOW.sold}</b> homes sold</p>
-      <a class="btn" href={BOOKING_URL} {...bookingAttrs}>Book a call with Sam <span class="arrow" aria-hidden="true">→</span></a>
-      <p class="tel"><a href={CONTACT.phoneHref}>or call or text {CONTACT.phone}</a></p>
+    <div class="shade" aria-hidden="true"></div>
+    <a class="logo" href="/" aria-label="Sam Newell, home"><Logo variant="caps" title="Sam Newell" /></a>
+    <h1 class="title" id="hero-title"><span class="ln"><span>Sam</span></span> <span class="ln"><span>Newell</span></span></h1>
+    <p class="sub">Real estate broker in Lehi, Utah. Buying, selling and investing on the Wasatch Front: <b class="num">{ZILLOW.sold}</b> homes sold, <b class="num">{ZILLOW.rating}</b> on <b class="num">{ZILLOW.reviews}</b> Zillow reviews.</p>
+    <a class="btn act" href={BOOKING_URL} {...bookingAttrs}>Book a call with Sam <span class="arrow" aria-hidden="true">→</span></a>
+    <p class="clock num" data-clock>Lehi, Utah</p>
+    <!-- opening sequence (html.op only) -->
+    <div class="op-cover" aria-hidden="true">
+      <svg class="op-mark" viewBox="-10 -10 325.53 358.21" aria-hidden="true"><path pathLength="1" d="M0.00 243.37 L42.64 267.99 L42.64 135.72 L183.86 217.25 L183.86 267.65 L144.89 290.15 L104.47 266.82 L104.47 204.02 L63.21 180.20 L63.21 289.83 L147.01 338.21 L223.83 293.86 L223.83 237.86 L285.54 273.48 L285.54 136.96 L305.53 136.96 L305.53 91.70 L245.05 56.78 L245.05 203.23 L104.48 122.07 L104.48 71.40 L144.91 48.06 L183.86 70.55 L183.86 135.48 L223.83 158.56 L223.83 44.36 L146.99 0.00 L63.20 48.37 L63.20 99.32 L0.00 62.83 Z" /></svg>
     </div>
+    <div class="lb lb-t" aria-hidden="true"></div>
+    <div class="lb lb-b" aria-hidden="true"></div>
   </div>
+  <nav class="swatches" aria-label="Sections">
+    {swatches.map((s, i) => (
+      <a class={`sw s${i + 1}`} href={s.href} style={`--i:${i}`}>
+        <span class="sw-t">{s.t}</span>
+        <span class="sw-p">{s.p}</span>
+        <span class="sw-a" aria-hidden="true">→</span>
+      </a>
+    ))}
+    <a class="sw s5" href={BOOKING_URL} {...bookingAttrs} style="--i:4">
+      <span class="sw-t">Book a call</span>
+      <span class="sw-p num">{CONTACT.phone}</span>
+      <span class="sw-a" aria-hidden="true">→</span>
+    </a>
+  </nav>
 </section>
+
+<script>
+  // Live Lehi clock; skip the opening on any input.
+  const el = document.querySelector<HTMLElement>('[data-clock]');
+  const tick = () => {
+    const fixed = /[?&](t=|record)/.test(location.search);
+    const now = fixed ? +(document.documentElement.dataset.t || Date.now()) : Date.now();
+    const s = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Denver', hour: 'numeric', minute: '2-digit' }).format(now).replace(/\s?AM$/i, ' a.m.').replace(/\s?PM$/i, ' p.m.');
+    if (el) el.textContent = `Lehi, ${s}`;
+  };
+  tick();
+  setInterval(tick, 30_000);
+
+  // The day film: Sam's reel 01 as a muted, seamless loop, started only after the poster (LCP) has painted and
+  // the page has loaded; never with reduced motion or Save-Data; paused off-screen and in hidden tabs.
+  const still = document.querySelector<HTMLElement>('[data-still]');
+  const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
+  if (still?.dataset.view === 'day' && !matchMedia('(prefers-reduced-motion: reduce)').matches && !nav.connection?.saveData) {
+    const start = () => {
+      const v = document.createElement('video');
+      v.muted = true;
+      v.loop = true;
+      v.playsInline = true;
+      v.setAttribute('playsinline', '');
+      v.setAttribute('aria-hidden', 'true');
+      v.preload = 'auto';
+      v.className = 'film';
+      v.src = matchMedia('(max-width: 900px)').matches ? '/film/hero-phone.mp4' : '/film/hero-desktop.mp4';
+      v.addEventListener('playing', () => v.classList.add('on'), { once: true });
+      still.appendChild(v);
+      v.play().catch(() => {});
+      new IntersectionObserver(([e]) => (e.isIntersecting && !document.hidden ? v.play().catch(() => {}) : v.pause())).observe(still);
+      document.addEventListener('visibilitychange', () => (document.hidden ? v.pause() : v.play().catch(() => {})));
+    };
+    if (document.readyState === 'complete') setTimeout(start, 300);
+    else addEventListener('load', () => setTimeout(start, 300), { once: true });
+  }
+  const html = document.documentElement;
+  if (html.classList.contains('op')) {
+    const skip = () => html.classList.add('op-skip');
+    ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach((ev) => addEventListener(ev, skip, { once: true, passive: true }));
+    setTimeout(() => html.classList.remove('op', 'op-skip'), 3200);
+  }
+</script>
 
 <style>
   .hero {
-    position: relative;
-    height: calc(100svh - var(--bar));
-    min-height: 620px;
-    max-height: 1100px;
-    overflow: hidden;
-    background: var(--tone);
+    height: 100svh;
+    min-height: 640px;
+    max-height: 1200px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(220px, 1fr);
+    gap: 10px;
+    background: #0a0a0a;
+    color: #fff;
   }
-  .hero-media {
+  .view {
+    position: relative;
+    overflow: hidden;
+    background: #141414;
+    container-type: size;
+  }
+  .still {
     position: absolute;
     inset: 0;
-    overflow: hidden;
-    container-type: size;
-    --r: 0.4621; /* phone rig 1170 × 2532 */
-    --px: 0.5;
   }
-  @media (min-aspect-ratio: 3/4) {
-    .hero-media {
-      --r: 0.75; /* tablet rig 1536 × 2048 */
-    }
-  }
-  @media (min-aspect-ratio: 6/5) {
-    .hero-media {
-      --r: 1.7778; /* desktop rig 2560 × 1440 */
-    }
-  }
-  /* The poster frame reproduces object-fit: cover with object-position (px, 60%), so DOM markers and the
-     future GL view offset share one crop. */
-  .frame {
-    position: absolute;
-    width: max(100cqw, 100cqh * var(--r));
-    height: max(100cqh, 100cqw / var(--r));
-    left: clamp(100cqw - max(100cqw, 100cqh * var(--r)), 50cqw - var(--px) * max(100cqw, 100cqh * var(--r)), 0px);
-    top: calc((100cqh - max(100cqh, 100cqw / var(--r))) * 0.5);
-  }
-  .frame img {
+  .still :global(picture) {
+    display: block;
     width: 100%;
     height: 100%;
   }
-  .frame img:not([src]) {
-    visibility: hidden;
+  .still :global(img),
+  .still :global(video) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 62%;
+    transform-origin: 46% 60%;
   }
-  .noscript-poster {
+  .still :global(.ns) {
     position: absolute;
     inset: 0;
   }
-  /* Gallery-white rule (model check I-1): a solid plate behind the title when the measured contrast < 4.5:1 */
-  .hero.plate .title {
-    justify-self: start;
-    background: var(--paper);
-    padding: 0.08em 0.1em 0.04em;
+  .still[data-view='day'] :global(img) {
+    object-position: 50% 50%;
   }
-  :global([data-sun='night']) .title {
-    color: var(--paper);
-  }
-  :global([data-sun='night']) .hero {
-    background: var(--ink);
-  }
-  .caption {
+  .still :global(.film) {
     position: absolute;
-    z-index: 2;
-    top: 20px;
-    right: var(--m);
-    background: var(--paper);
-    padding: 6px 10px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
+    inset: 0;
+    object-position: 50% 50%;
+    opacity: 0;
+    transition: opacity 1.4s var(--ease-io);
   }
-  .hero-foot {
-    position: absolute;
-    z-index: 2;
-    inset: auto 0 0 0;
-    padding: 0 var(--m) 28px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: end;
-    gap: 40px;
-    pointer-events: none;
+  .still :global(.film.on) {
+    opacity: 1;
   }
-  .hero-foot > * {
-    pointer-events: auto;
-  }
-  .title {
-    color: var(--ink);
-  }
-  .side {
-    width: min(420px, 34vw);
-    background: var(--paper);
-    padding: 24px 24px 24px;
-    margin-bottom: 4px;
-  }
-  .sentence {
-    font-weight: 500;
-    margin-bottom: 16px;
-  }
-  .proof {
-    font-size: 16px;
-    margin-bottom: 20px;
-  }
-  .proof b {
-    font-weight: 600;
-  }
-  .side .btn {
-    width: 100%;
-  }
-  .tel {
-    margin-top: 10px;
-    text-align: center;
-    font-size: 16px;
-  }
-  .tel a {
-    font-weight: 600;
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 4px;
-    display: inline-block;
-    padding: 8px 0;
-  }
-  @media (max-width: 1023px) {
-    .side {
-      width: 360px;
+  /* the film feeling until the film exists: a 28 s drift, never paused by anything but reduced motion */
+  @media (prefers-reduced-motion: no-preference) {
+    .still[data-view='dusk'] :global(img) {
+      animation: drift 28s ease-in-out infinite alternate;
+    }
+    @keyframes drift {
+      from {
+        transform: scale(1.03) translate3d(0, 0, 0);
+      }
+      to {
+        transform: scale(1.12) translate3d(-1.6%, -1.2%, 0);
+      }
     }
   }
-  @media (max-width: 767px) {
+  /* a neutral scrim only under the type: top for the name, bottom for the line, button and clock */
+  .shade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to bottom, rgb(0 0 0 / 0.38), rgb(0 0 0 / 0) 38%), /* taste-skill-ignore gradient: neutral scrim under text on a photo */
+      linear-gradient(to top, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0) 34%); /* taste-skill-ignore gradient: neutral scrim under text on a photo */
+  }
+  .logo {
+    position: absolute;
+    top: 28px;
+    left: 28px;
+    z-index: 3;
+    color: #fff;
+  }
+  .logo :global(svg) {
+    height: 26px;
+    width: auto;
+  }
+  .title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 14%;
+    z-index: 2;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .ln {
+    display: inline-block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+    vertical-align: bottom;
+  }
+  .ln > span {
+    display: inline-block;
+  }
+  .sub {
+    position: absolute;
+    left: 28px;
+    bottom: 34px;
+    z-index: 2;
+    max-width: 420px;
+    font-size: 19px;
+    line-height: 1.5;
+  }
+  .sub b {
+    font-weight: 600;
+  }
+  .act {
+    position: absolute;
+    left: 50%;
+    bottom: 34px;
+    z-index: 2;
+    transform: translateX(-50%);
+  }
+  .act:active {
+    transform: translateX(-50%) scale(0.97);
+  }
+  .clock {
+    position: absolute;
+    right: 28px;
+    bottom: 40px;
+    z-index: 2;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .swatches {
+    display: grid;
+    grid-template-rows: repeat(5, 1fr);
+  }
+  .sw {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 20px;
+    text-decoration: none;
+    color: #fff;
+    transition: background-color 0.3s;
+  }
+  .s1 { background: #141414; }
+  .s2 { background: #1c1c1c; }
+  .s3 { background: #262626; }
+  .s4 { background: #303030; }
+  .s5 { background: #fff; color: #0a0a0a; }
+  .s1:hover { background: #1c1c1c; }
+  .s2:hover { background: #262626; }
+  .s3:hover { background: #303030; }
+  .s4:hover { background: #3a3a3a; }
+  .s5:hover { background: #e6e6e6; }
+  .sw-t {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+  }
+  .sw-p {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.4;
+    max-width: 17ch;
+    transition: transform 0.4s var(--ease-out);
+  }
+  .sw-a {
+    margin-top: auto;
+    align-self: flex-end;
+    font-size: 20px;
+    transform: translateX(-8px);
+    opacity: 0;
+    transition: transform 0.4s var(--ease-out), opacity 0.3s;
+  }
+  .sw:hover .sw-p,
+  .sw:focus-visible .sw-p {
+    transform: translateX(6px);
+  }
+  .sw:hover .sw-a,
+  .sw:focus-visible .sw-a {
+    transform: none;
+    opacity: 1;
+  }
+  .sw:active {
+    filter: brightness(1.15);
+  }
+  .sw:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: -6px;
+  }
+  .s5:focus-visible {
+    outline-color: #0a0a0a;
+  }
+
+  /* ——— opening sequence ——— */
+  .op-cover,
+  .lb {
+    display: none;
+  }
+  :global(html.op) .op-cover {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    background: #0a0a0a;
+    animation: op-fade 0.5s ease 0.75s forwards;
+  }
+  .op-mark {
+    width: 64px;
+    height: auto;
+  }
+  .op-mark path {
+    fill: transparent;
+    stroke: #fff;
+    stroke-width: 6;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  :global(html.op) .op-mark path {
+    animation: op-draw 0.6s ease-out forwards, op-fill 0.3s ease 0.45s forwards;
+  }
+  :global(html.op) .lb {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 4;
+    height: max(0px, calc((100cqh - 100cqw / 2.39) / 2));
+    background: #0a0a0a;
+    animation: op-bar 1.2s var(--ease-expo) 0.85s forwards;
+  }
+  .lb-t {
+    top: 0;
+    transform-origin: top;
+  }
+  .lb-b {
+    bottom: 0;
+    transform-origin: bottom;
+  }
+  :global(html.op) .ln > span {
+    transform: translateY(105%);
+    animation: op-rise 0.9s var(--ease-expo) forwards;
+    animation-delay: 1.05s;
+  }
+  :global(html.op) .ln + .ln > span {
+    animation-delay: 1.15s;
+  }
+  :global(html.op) .logo,
+  :global(html.op) .sub,
+  :global(html.op) .act,
+  :global(html.op) .clock {
+    opacity: 0;
+    animation: op-in 0.8s var(--ease-out) 1.5s forwards;
+  }
+  :global(html.op) .sw {
+    opacity: 0;
+    transform: translateX(28px);
+    animation: op-step 0.8s var(--ease-expo) forwards;
+    animation-delay: calc(1.2s + var(--i) * 0.09s);
+  }
+  :global(html.op-skip) .op-cover,
+  :global(html.op-skip) .lb,
+  :global(html.op-skip) .op-mark path,
+  :global(html.op-skip) .ln > span,
+  :global(html.op-skip) .logo,
+  :global(html.op-skip) .sub,
+  :global(html.op-skip) .act,
+  :global(html.op-skip) .clock,
+  :global(html.op-skip) .sw {
+    animation-duration: 0.01s !important;
+    animation-delay: 0s !important;
+  }
+  @keyframes op-draw { to { stroke-dashoffset: 0; } }
+  @keyframes op-fill { to { fill: #fff; } }
+  @keyframes op-fade { to { opacity: 0; visibility: hidden; } }
+  @keyframes op-bar { to { transform: scaleY(0); } }
+  @keyframes op-rise { to { transform: none; } }
+  @keyframes op-in { to { opacity: 1; } }
+  @keyframes op-step { to { opacity: 1; transform: none; } }
+
+  @media (max-width: 900px) {
     .hero {
       height: auto;
       min-height: 0;
       max-height: none;
-      overflow: visible;
-      background: var(--paper);
-    }
-    .hero {
-      --hh: max(68svh, 440px);
-    }
-    .hero-media {
-      position: relative;
-      height: var(--hh);
-    }
-    .caption {
-      top: 14px;
-    }
-    .hero-foot {
-      position: static;
       grid-template-columns: 1fr;
-      gap: 0;
-      padding: 0;
+      grid-template-rows: 64svh auto;
+      padding: 8px;
+      gap: 8px;
+    }
+    .view {
+      min-height: 420px;
+    }
+    .logo {
+      display: none;
     }
     .title {
-      position: absolute;
-      z-index: 2;
-      left: var(--m);
-      top: calc(var(--hh) - 14px);
-      transform: translateY(-100%);
-      font-size: min(25vw, 140px);
+      top: 9%;
+      font-size: 17vw;
+      white-space: normal;
+      line-height: 0.95;
     }
-    .side {
-      width: auto;
-      padding: 24px var(--m) 8px;
+    .sub {
+      display: none;
+    }
+    .act {
+      bottom: 24px;
+      white-space: nowrap;
+    }
+    .clock {
+      top: 16px;
+      bottom: auto;
+      right: 16px;
+      font-size: 14px;
+    }
+    .swatches {
+      grid-template-rows: none;
+    }
+    .sw {
+      flex-direction: row;
+      align-items: center;
+      gap: 14px;
+      min-height: 56px;
+      padding: 0 18px;
+    }
+    .sw-p {
       margin: 0;
+      max-width: none;
+    }
+    .sw-a {
+      margin: 0 0 0 auto;
+      align-self: center;
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (max-width: 420px) {
+    .sw-p {
+      display: none;
     }
   }
 </style>

@@ -1,10 +1,12 @@
 ---
 import Logo from './Logo.astro';
 import { NAV, CONTACT, BOOKING_URL, bookingAttrs } from '../data/site';
+interface Props { home?: boolean }
+const { home = false } = Astro.props;
 const path = Astro.url.pathname;
 const active = (href: string) => path === href || (href !== '/' && path.startsWith(href));
 ---
-<header class="bar" data-bar>
+<header class:list={['bar', { home }]} data-bar>
   <a class="brand" href="/" aria-label="Sam Newell, home">
     <Logo variant="caps" class="brand-logo" title="Sam Newell" />
   </a>
@@ -53,7 +55,32 @@ const active = (href: string) => path === href || (href !== '/' && path.startsWi
     padding-inline: var(--m);
     background: var(--paper);
     color: var(--ink);
-    transition: transform 0.45s var(--ease-out);
+    transition: transform 0.6s var(--ease-expo), background-color 0.3s, color 0.3s;
+  }
+  /* colour by chapter: over a white chapter the bar turns white (bar.ts) */
+  .bar.on-light {
+    background: #fff;
+    color: #0a0a0a;
+  }
+  .bar.on-light .bar-cta {
+    background: #0a0a0a;
+    color: #fff;
+  }
+  /* home, desktop: the hero carries the logo and the swatch nav, so the bar waits off-screen until the
+     hero has gone (bar.ts adds .show) */
+  @media (min-width: 901px) {
+    .bar.home {
+      position: fixed;
+      left: 0;
+      right: 0;
+      transform: translateY(-100%);
+    }
+    .bar.home.show {
+      transform: none;
+    }
+    .bar.home.show.is-hidden {
+      transform: translateY(-100%);
+    }
   }
   .bar.is-hidden {
     transform: translateY(-100%);
@@ -72,8 +99,8 @@ const active = (href: string) => path === href || (href !== '/' && path.startsWi
     gap: 36px;
   }
   .links a {
-    font-weight: 600;
-    font-size: 18px;
+    font-weight: 500;
+    font-size: 17px;
     text-decoration: none;
     padding: 10px 2px;
     position: relative;
@@ -135,8 +162,8 @@ const active = (href: string) => path === href || (href !== '/' && path.startsWi
     position: fixed;
     inset: 0;
     z-index: 100;
-    background: var(--ink);
-    color: var(--paper);
+    background: #0a0a0a;
+    color: #fff;
     display: flex;
     flex-direction: column;
     padding: 0 var(--m) calc(var(--m) + env(safe-area-inset-bottom));
@@ -162,7 +189,7 @@ const active = (href: string) => path === href || (href !== '/' && path.startsWi
     padding: 0 4px;
     font-weight: 600;
     font-size: 18px;
-    color: var(--paper);
+    color: #fff;
   }
   .menu-list {
     margin-top: 32px;
@@ -172,7 +199,7 @@ const active = (href: string) => path === href || (href !== '/' && path.startsWi
   .menu-list a {
     display: block;
     font-family: var(--display);
-    font-weight: 600;
+    font-weight: 300;
     font-size: clamp(40px, 11vw, 64px);
     letter-spacing: -0.035em;
     line-height: 1.08;

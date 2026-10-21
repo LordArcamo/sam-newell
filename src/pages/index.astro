@@ -1,4 +1,8 @@
 ---
+/**
+ * Home — "Lehi Light" (research-premium §4.4). Mostly black; two white chapters (the quote, the footer);
+ * one big picture per screen; the live 3D relief comes back at night as the town picker.
+ */
 import Base from '../layouts/Base.astro';
 import Hero from '../components/home/Hero.astro';
 import HeroPreload from '../components/home/HeroPreload.astro';
@@ -8,29 +12,36 @@ import Logo from '../components/Logo.astro';
 import EpisodeRow from '../components/EpisodeRow.astro';
 import OnAir from '../components/OnAir.astro';
 import { img } from '../lib/images';
-import { FOR_SALE, SOLD, TOWNS } from '../lib/homes';
+import { HOMES } from '../lib/homes';
 import { review, reviewDate } from '../data/reviews';
 import { ZILLOW, PODCAST, CONTACT, BROKERAGE, SITE, MFI, BOOKING_URL, bookingAttrs } from '../data/site';
 import { CONFIRM } from '../data/confirm';
 import { ep, HOME_GROUPS } from '../lib/podcast';
+import { usd } from '../lib/format';
+import studioPoster from '../assets/film/studio.jpg';
+import keysPoster from '../assets/film/keys.jpg';
 
 const keaton = review(1);
-const rows = [...FOR_SALE, ...SOLD.slice(0, 4)];
-const lehi = TOWNS.find((t) => t.slug === 'lehi')!;
+const byId = (id: string) => HOMES.find((h) => h.id === id)!;
+const panels = [
+  { h: byId('1872-s-country-ln-w-lehi'), photo: 'listings/full-1872-twilight-front.jpg', alt: '1872 S Country Ln W, Lehi, at twilight', pos: '50% 62%' },
+  { h: byId('1056-w-stonehaven-dr-north-salt-lake'), photo: 'listings/full-1056-exterior.jpg', alt: '1056 W Stonehaven Dr, North Salt Lake', pos: '50% 55%' },
+  { h: byId('1714-n-3870-w-lehi'), photo: 'listings/full-1714-kitchen.jpg', alt: 'The kitchen at 1714 N 3870 W, Lehi', pos: '50% 50%' },
+  { h: byId('sold-w-2330-n-lehi'), photo: 'listings/full-2330-exterior.jpg', alt: 'A townhome on W 2330 N, Lehi, sold by Sam', pos: '50% 60%' },
+];
+const steps = [
+  { t: 'Know what you’re buying.', href: '/buy/' },
+  { t: 'Priced on numbers, not hope.', href: '/sell/' },
+  { t: 'Underwrite it like Sam.', href: '/invest/' },
+  ...(CONFIRM.mfiClub ? [{ t: 'Invest alongside MFI Club.', href: '/invest/#mfi-club' }] : []),
+];
 const figures = [
   { big: String(ZILLOW.rating), small: `out of 5 from ${ZILLOW.reviews} reviews on Zillow` },
-  { big: `${SITE.yearsInRealEstate} years`, small: 'in Utah real estate' },
   ...(CONFIRM.volume450M ? [{ big: '$450M+', small: 'in closed volume' }] : []),
   ...(CONFIRM.doors2000 ? [{ big: '2,000+', small: `doors through ${MFI.name}` }] : []),
 ];
 const jsonld = [
-  {
-    '@type': 'PodcastSeries',
-    name: PODCAST.name,
-    url: `${SITE.url}/podcast/`,
-    webFeed: PODCAST.rss,
-    author: { '@id': `${SITE.url}/#sam` },
-  },
+  { '@type': 'PodcastSeries', name: PODCAST.name, url: `${SITE.url}/podcast/`, webFeed: PODCAST.rss, author: { '@id': `${SITE.url}/#sam` } },
 ];
 ---
 <Base
@@ -41,143 +52,112 @@ const jsonld = [
   <HeroPreload slot="head" />
   <Hero />
 
-  <!-- 2 · Intro: the statement, photos pass in the side columns -->
-  <section class="intro sec wrap" aria-label="Sam's promise">
-    <p class="statement intro-s" data-rv><span>Honest feedback on every house.</span><br /> <span>The numbers before you offer.</span></p>
-    <Pic class="i1" src={img('photos/framed-house-wasatch.jpg')} alt="A new house framed in timber below the Wasatch mountains" sizes="(max-width: 767px) 100vw, 30vw" ratio="r45" pos="58% 50%" />
-    <Pic class="i3" src={img('photos/family-river.jpg')} alt="Sam with Heidi and Liam by a river in red-rock country" sizes="(max-width: 767px) 50vw, 22vw" ratio="r11" pos="50% 45%" i={1} />
-    <Pic class="i2" src={img('photos/listing-kitchen-2026-05.jpg')} alt="A bright listing kitchen with a quartz island, Lehi" sizes="(max-width: 767px) 50vw, 40vw" ratio="r1610" pos="50% 62%" i={2} />
+  <!-- 2 · Intro: the pinned sentence, his pictures pass -->
+  <section class="intro" aria-label="What Sam does" data-intro>
+    <p class="statement intro-s">Honest feedback on every house, and the numbers before you offer. That’s the whole job.</p>
+    <figure class="ip ip1" data-par="-14"><Pic src={img('photos/sam-portrait-2026-10.jpg')} alt="Sam Newell" sizes="(max-width: 767px) 70vw, 26vw" ratio="r45" pos="50% 25%" rv={false} /></figure>
+    <figure class="ip ip2" data-par="10" data-cursor="Play" data-film="/film/studio.mp4"><Pic src={studioPoster} alt="Sam talking in the Get Leveraged studio" sizes="(max-width: 767px) 90vw, 40vw" ratio="r1610" rv={false} widths={[360, 540, 720]} /></figure>
+    <figure class="ip ip3" data-par="-6" data-cursor="Play" data-film="/film/keys.mp4"><Pic src={keysPoster} alt="Keys day: confetti under the Congrats sign at Sam's office as clients close on a home" sizes="(max-width: 767px) 60vw, 24vw" ratio="r11" rv={false} widths={[360, 540, 720]} /></figure>
   </section>
 
-  <!-- 3 · Homes: big names, fixed preview -->
-  <section class="homes dark sec wrap" aria-labelledby="homes-h" data-homes>
-    <div class="homes-list">
-      <h2 class="h" id="homes-h" data-rv>For sale now,<br /> sold lately</h2>
-      <ol role="list" class="rows">
-        {rows.map((h, i) => (
-          <li class:list={['row', { on: i === 0 }]} data-row={h.id} data-rv style={`--i:${i % 4}`}>
-            <a href={h.zillow} rel="noopener" target="_blank">
-              <span class="r-name">{h.shown}, {h.townName}</span>
-              <span class="r-det num">{h.detail}</span>
-            </a>
-          </li>
+  <!-- 3 · For sale now, sold lately: full panels, one midline row (a sticky stack) -->
+  <section class="work" aria-labelledby="work-h">
+    <header class="work-head wrap">
+      <h2 class="h" id="work-h" data-rv>For sale now,<br /> sold lately</h2>
+      <p class="lead" data-rv style="--i:1">Three homes on the market today and <b class="num">{ZILLOW.sold}</b> sold, as counted on Sam’s Zillow profile in {ZILLOW.asOf}.</p>
+    </header>
+    <ol role="list" class="panels">
+      {panels.map((p, i) => (
+        <li class="panel" style={`--z:${i + 1}`}>
+          <a href={p.h.zillow} rel="noopener" target="_blank" data-cursor="View" aria-label={`${p.h.shown}, ${p.h.townName}: ${p.h.detail}, on Zillow`}>
+            <div class="panel-img" data-panel-img>
+              <Pic src={img(p.photo)} alt={p.alt} sizes="(max-width: 1536px) 100vw, 1536px" pos={p.pos} rv={false} widths={[768, 1152, 1536]} />
+            </div>
+            <div class="row">
+              <span class="k">{p.h.status === 'for-sale' ? 'For sale' : 'Sold'} · {p.h.townName}</span>
+              <span class="row-h">{p.h.shown}</span>
+              <span class="v num">
+                {p.h.status === 'for-sale' ? usd(p.h.price!) : p.h.detail}
+                {p.h.facts && <small>{p.h.facts}</small>}
+              </span>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ol>
+    <p class="see-all wrap"><a class="more" href={ZILLOW.profile} rel="noopener" target="_blank">See all {ZILLOW.sold} on Zillow <span aria-hidden="true">→</span></a></p>
+  </section>
+
+  <!-- 4 · Buy, sell or invest: one scene, stepping statements -->
+  <section class="scene" aria-labelledby="scene-h" data-scene style={`--n:${steps.length}`}>
+    <div class="scene-pin">
+      <div class="scene-bg" data-cursor="Film"><Pic src={img('photos/framed-house-wasatch.jpg')} alt="A new house in timber framing below the Wasatch" sizes="100vw" pos="55% 45%" rv={false} /></div>
+      <div class="scene-shade" aria-hidden="true"></div>
+      <h2 class="sr-only" id="scene-h">Buy, sell or invest</h2>
+      <p class="scene-lead">Buy, sell or invest.</p>
+      <ol role="list" class="stack">
+        {steps.map((s, i) => (
+          <li data-step={i} class:list={[{ on: i === 0 }]}><a href={s.href}>{s.t}</a></li>
         ))}
       </ol>
-      <p class="homes-foot small" data-rv>
-        {ZILLOW.sold} homes sold, as counted on Sam’s Zillow profile in {ZILLOW.asOf}.
-        <a class="link" href="#map">See them on the map</a>
-        <a class="link" href={ZILLOW.profile} rel="noopener" target="_blank">All of Sam’s sales on Zillow</a>
-      </p>
-    </div>
-    <div class="preview" aria-hidden="true">
-      {rows.map((h, i) => (
-        <figure class:list={['pv', { on: i === 0 }]} data-pv={h.id}>
-          {h.photo ? (
-            <Pic src={img(`listings/${h.photo}`)} alt="" sizes="26vw" ratio="r45" rv={false} widths={[360, 550]} />
-          ) : (
-            <div class="pv-map r45">
-              <svg viewBox={`${h.xy ? h.xy.x - 3 : lehi.x - 3} ${h.xy ? -h.xy.north - 3.75 : -lehi.north - 3.75} 6 7.5`} preserveAspectRatio="xMidYMid slice"><use href="/map/relief.svg#relief-geo" /></svg>
-              {h.xy && <i></i>}
-            </div>
-          )}
-          <figcaption class="small">{h.facts || (h.xy ? `${h.shown}, ${h.townName}, on the contour map` : `${h.shown}, ${h.townName}`)}</figcaption>
-        </figure>
-      ))}
+      <figure class="pair pa"><Pic src={img('photos/framing-provo-sam.jpg')} alt="Sam on a framing job in the Provo Riverbottoms" sizes="22vw" ratio="r45" pos="50% 30%" rv={false} /></figure>
+      <figure class="pair pb"><Pic src={img('photos/framing-custom-home.jpg')} alt="A three-storey custom home framed by A Framing Company" sizes="22vw" ratio="r32" rv={false} /></figure>
+      <p class="scene-note">Sam studied construction management at BYU. On a showing he looks past the paint to the frame, the roof and what a fix really costs. <a class="link" href="/buy/">Buying with Sam</a></p>
     </div>
   </section>
 
-  <!-- 4 · Buy, sell or invest: rows with margin photos -->
-  <section class="bsi sec wrap" aria-labelledby="bsi-h">
-    <h2 class="h" id="bsi-h" data-rv>Buy, sell or invest.</h2>
-    <div class="bsi-row">
-      <Pic src={img('photos/framing-custom-home.jpg')} alt="A three-storey custom home framed by A Framing Company" sizes="(max-width: 767px) 90vw, 22vw" ratio="r43" />
-      <div class="bsi-t" data-rv style="--i:1">
-        <h3>Know what you’re buying</h3>
-        <p>Sam studied construction management at BYU and still works on framing jobs. On a showing he looks past the paint to the roof, the frame and what a fix really costs.</p>
-        <a class="more" href="/buy/">Buying with Sam <span aria-hidden="true">→</span></a>
-      </div>
-    </div>
-    <div class="bsi-row flip">
-      <div class="bsi-t" data-rv>
-        <h3>Priced on numbers, not hope</h3>
-        <p>Pricing is a science; the story is an art. Sam prices from recent sales near you and tells you straight what to fix and what to leave.</p>
-        <a class="more" href="/sell/">Selling with Sam <span aria-hidden="true">→</span></a>
-      </div>
-      <Pic src={img('listings/1056-w-stonehaven-dr-nsl.jpg')} alt="1056 W Stonehaven Dr, North Salt Lake, listed by Sam" sizes="(max-width: 767px) 90vw, 22vw" ratio="r43" i={1} widths={[360, 550]} />
-    </div>
-    <div class="bsi-row">
-      <Pic src={img('photos/estate-lots-jordan-river.jpg')} alt="Estate lots above the Jordan River, Lehi, with the Wasatch behind" sizes="(max-width: 767px) 60vw, 16vw" ratio="r11" pos="50% 40%" />
-      <div class="bsi-t" data-rv style="--i:1">
-        <h3>Underwrite it like Sam</h3>
-        <p>Rentals are Sam’s specialty, from a first rental to a new townhome for an out-of-state investor. Run the numbers his way before you make an offer.</p>
-        <a class="more" href="/invest/">Run the numbers <span aria-hidden="true">→</span></a>
-      </div>
-    </div>
-  </section>
+  <!-- 5 · The live relief at night: the town picker -->
+  <MapSection />
 
-  <!-- 5 · One review -->
-  <section class="review wrap" aria-label="A client's words">
-    <Pic src={img('photos/sam-portrait-2026-10.jpg')} alt="Sam Newell in a light-blue polo in a staged living room" sizes="(max-width: 767px) 90vw, 36vw" ratio="r45" pos="50% 30%" />
-    <figure class="rv-q" data-rv style="--i:1">
+  <!-- 6 · 235: the figure on the photograph's edge -->
+  <section class="fig" aria-labelledby="fig-h">
+    <div class="fig-photo" data-shutter><Pic src={img('listings/full-1872-drone-wasatch.jpg')} alt="Dusk over Lehi and the Wasatch from above one of Sam's listings, 1872 S Country Ln W" sizes="(max-width: 1536px) 100vw, 1536px" pos="50% 40%" rv={false} widths={[768, 1152, 1536]} /></div>
+    <div class="fig-shade" aria-hidden="true"></div>
+    <p class="fig-n num" aria-hidden="true" data-rise>{ZILLOW.sold}</p>
+    <h2 class="sr-only" id="fig-h">{ZILLOW.sold} homes sold</h2>
+    <p class="fig-exp">Homes Sam has sold, as counted on his Zillow profile in {ZILLOW.asOf}.</p>
+  </section>
+  <dl class="subfigs wrap num">
+    {figures.map((f, i) => (
+      <div data-rv style={`--i:${i}`}><dt>{f.big}</dt><dd>{f.small}</dd></div>
+    ))}
+  </dl>
+
+  <!-- 7 · The quote: a white chapter -->
+  <section class="quote" data-light aria-label="A client's words">
+    <div class="q-photo" data-shutter><Pic src={img('photos/sam-portrait-2026-10.jpg')} alt="Sam Newell in a light-blue polo" sizes="(max-width: 767px) 90vw, 34vw" ratio="r45" pos="50% 22%" rv={false} /></div>
+    <figure class="q-text" data-rv>
       <blockquote class="statement"><p>“{keaton.excerpts.home}”</p></blockquote>
-      <figcaption>{keaton.name}, {reviewDate(keaton.date)}, on <a class="link" href={ZILLOW.profile} rel="noopener" target="_blank">Zillow</a></figcaption>
+      <figcaption>{keaton.name}, bought a home in 2026 · {reviewDate(keaton.date)}, on <a class="link" href={ZILLOW.profile} rel="noopener" target="_blank">Zillow</a></figcaption>
     </figure>
   </section>
 
-  <!-- 6 · The map (the live thing) -->
-  <MapSection />
-
-  <!-- 7 · 235: the figure on the photo's edge -->
-  <section class="proof dark" aria-labelledby="proof-h">
-    <div class="proof-photo">
-      <Pic src={img('photos/valley-view-utah-county.jpg')} alt="Utah County from a new home: a road, a golden field and the valley running to the mountains" sizes="(max-width: 767px) 100vw, 1350px" pos="50% 37%" rv={false} />
-    </div>
-    <div class="proof-fig wrap">
-      <p class="title proof-n num" aria-hidden="true" data-rise>{ZILLOW.sold}</p>
-      <div class="proof-t">
-        <h2 class="lead" id="proof-h"><span class="sr-only">{ZILLOW.sold} </span>Homes sold</h2>
-        <p>Homes Sam has sold, as counted on his Zillow profile in {ZILLOW.asOf}.</p>
+  <!-- 8 · Lehi is home -->
+  <section class="about wrap" aria-labelledby="about-h">
+    <h2 class="h" id="about-h" data-rv>Lehi is home</h2>
+    <p class="lead about-lead" data-rv style="--i:1">Sam sells homes up and down the Wasatch Front with {BROKERAGE.name}. He has been in Utah real estate for {SITE.yearsInRealEstate} years and answers calls and texts the same day.</p>
+    <div class="tiles">
+      <div class="a-photo" data-shutter data-cursor="View">
+        <Pic src={img('photos/family-brighton-2026-10.jpg')} alt="Sam with Heidi and Liam among autumn aspens at Brighton" sizes="(max-width: 900px) 100vw, 64vw" pos="50% 32%" rv={false} />
+        <p class="a-block">Dad of two, fly fisherman, and a builder at heart: he still frames houses with his friend Oscar at A Framing Company. <a class="link" href="/about/">More about Sam</a></p>
       </div>
-    </div>
-    <dl class="figs wrap sec-b">
-      {figures.map((f, i) => (
-        <div data-rv style={`--i:${i}`}>
-          <dt class="fig-b num">{f.big}</dt>
-          <dd>{f.small}</dd>
-        </div>
-      ))}
-    </dl>
-  </section>
-
-  <!-- 8 · About: wide photo, colour tile, facts -->
-  <section class="about sec wrap" aria-labelledby="about-h">
-    <div class="about-main">
-      <h2 class="h" id="about-h" data-rv>Lehi is home</h2>
-      <p class="lead about-lead" data-rv style="--i:1">Sam sells homes up and down the Wasatch Front with {BROKERAGE.name}. He has been in Utah real estate for {SITE.yearsInRealEstate} years, and he answers calls and texts the same day.</p>
-      <div class="about-photo">
-        <Pic src={img('photos/family-kenai-sockeye.jpg')} alt="Sam and his son Liam in waders, holding Liam's first sockeye on the Kenai River, Alaska" sizes="(max-width: 767px) 100vw, 56vw" ratio="r1610" pos="50% 40%" />
-        <p class="about-block" data-rv style="--i:2">Sam studied construction management at BYU and still frames houses with his friend Oscar at A Framing Company. It is why he looks past the paint. <a class="more" href="/about/">More about Sam <span aria-hidden="true">→</span></a></p>
+      <div class="a-tile">
+        <Logo variant="mark" class="a-mark" title="" />
+        <dl class="facts num">
+          <div><dt>Home base</dt><dd>Lehi, Utah</dd></div>
+          <div><dt>Brokerage</dt><dd>{BROKERAGE.short}</dd></div>
+          <div><dt>On Zillow</dt><dd>{ZILLOW.rating} from {ZILLOW.reviews} reviews</dd></div>
+          <div><dt>Speaks</dt><dd>English, Spanish</dd></div>
+        </dl>
       </div>
-    </div>
-    <div class="tile">
-      <div class="tile-map" aria-hidden="true">
-        <svg viewBox="-21 -56.4 46.3 97.6" preserveAspectRatio="xMidYMid meet"><use href="/map/relief.svg#relief-geo" /></svg>
-        <span class="tile-sn" style={`left:${((lehi.x + 21) / 46.3) * 100}%;top:${((-lehi.north + 56.4) / 97.6) * 100}%`}><Logo variant="mark" title="" /> Lehi</span>
-      </div>
-      <dl class="facts">
-        <div><dt>Home base</dt><dd>Lehi</dd></div>
-        <div><dt>Brokerage</dt><dd>{BROKERAGE.short}</dd></div>
-        <div><dt>On Zillow</dt><dd>{ZILLOW.rating} from {ZILLOW.reviews} reviews</dd></div>
-        <div><dt>Speaks</dt><dd>English and Spanish</dd></div>
-      </dl>
     </div>
   </section>
 
-  <!-- 9 · Get Leveraged: the printed sheet -->
-  <section class="pod dark sec wrap" aria-labelledby="pod-h">
-    <Pic class="pod-photo" src={img('photos/podcast-studio.jpg')} alt="Sam on a leather sofa in the Get Leveraged interview room" sizes="(max-width: 767px) 90vw, 24vw" ratio="r11" pos="50% 40%" />
-    <div class="sheet-p" data-rv style="--i:1">
-      <h2 class="h" id="pod-h">Get Leveraged</h2>
+  <!-- 9 · Get Leveraged: the printed sheet on black -->
+  <section class="pod wrap" aria-labelledby="pod-h">
+    <div class="pod-cover" data-shutter data-cursor="Play"><Pic src={img('photos/get-leveraged-cover.jpg')} alt="Get Leveraged with Sam Newell, the show's cover" sizes="(max-width: 900px) 90vw, 36vw" ratio="r11" rv={false} /></div>
+    <div class="sheet num" data-rv>
+      <h2 id="pod-h">Get Leveraged</h2>
       <p class="meta">The archive: {PODCAST.episodes} episodes on investing, money and family, {PODCAST.first} to 2025. {PODCAST.rating} out of 5 on Apple from {PODCAST.ratings} ratings.</p>
       {HOME_GROUPS.map((g) => (
         <div class="grp">
@@ -193,16 +173,15 @@ const jsonld = [
     </div>
   </section>
 
-  <!-- 10 · Talk to Sam: the visit card on a photo -->
+  <!-- 10 · Talk to Sam: the visit card on a photograph -->
   <section class="talk" id="talk" aria-labelledby="talk-h">
-    <Pic class="talk-photo" src={img('photos/family-brighton-2026-10.jpg')} alt="Sam with his kids, Heidi and Liam, among autumn aspens at Brighton" sizes="(max-width: 767px) 100vw, 1350px" pos="50% 34%" rv={false} />
-    <div class="visit">
-      <h2 class="h" id="talk-h">Talk to Sam</h2>
+    <div class="talk-photo" data-shutter><Pic src={img('photos/family-river.jpg')} alt="Sam with Heidi and Liam by a river in red-rock country" sizes="100vw" pos="50% 40%" rv={false} /></div>
+    <div class="visit" data-rv>
+      <h2 id="talk-h">Talk to Sam</h2>
       <p>Lehi, Utah. Serving Salt Lake and Utah County.</p>
-      <p class="visit-call"><a href={CONTACT.phoneHref}>Call or text {CONTACT.phone}</a></p>
+      <p class="num"><a class="visit-tel" href={CONTACT.phoneHref}>Call or text {CONTACT.phone}</a></p>
       <p>English and Spanish</p>
       <a class="btn" href={BOOKING_URL} {...bookingAttrs}>Book a call <span class="arrow" aria-hidden="true">→</span></a>
-      <a class="more visit-more" href="/contact/">Or send a message <span aria-hidden="true">→</span></a>
     </div>
   </section>
   <OnAir />
@@ -211,323 +190,365 @@ const jsonld = [
 <script>
   import { initMap } from '../map/map-ui';
   import { initPlayer } from '../podcast/player';
-  import { mountRelief } from '../relief/mount';
-  // Homes index: the fixed preview follows hover and focus.
-  const homes = document.querySelector('[data-homes]');
-  if (homes) {
-    const set = (id: string) => {
-      homes.querySelectorAll<HTMLElement>('[data-row]').forEach((r) => r.classList.toggle('on', r.dataset.row === id));
-      homes.querySelectorAll<HTMLElement>('[data-pv]').forEach((p) => p.classList.toggle('on', p.dataset.pv === id));
-    };
-    homes.querySelectorAll<HTMLElement>('[data-row]').forEach((r) => {
-      r.addEventListener('mouseenter', () => set(r.dataset.row!));
-      r.addEventListener('focusin', () => set(r.dataset.row!));
-    });
-  }
   initMap();
   initPlayer();
-  // Hero GL takeover (resolves null until the model ships; the poster stays as the hero).
-  const heroMount = document.querySelector<HTMLElement>('[data-relief-mount="hero"]');
-  if (heroMount) {
-    let started = false;
-    const start = () => {
-      if (started) return;
-      started = true;
-      mountRelief(heroMount, { role: 'hero' });
-    };
-    const now = /[?&](record|capture)/.test(location.search);
-    if (now) start();
-    else if (matchMedia('(min-width: 768px)').matches) {
-      // desktop: the poster is the LCP and is identical to the first GL frame, so the engine (and its one-off
-      // texture upload) waits for the visitor's first move, or for 6 s of quiet after load
-      ['pointermove', 'scroll', 'keydown', 'touchstart'].forEach((ev) => addEventListener(ev, start, { once: true, passive: true }));
-      addEventListener('load', () => setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 2000 }) : start()), 6000), { once: true });
-    }
-    else ['touchstart', 'scroll', 'keydown'].forEach((ev) => addEventListener(ev, start, { once: true, passive: true }));
-  }
 </script>
 
 <style>
-  /* 2 · intro: the statement, then the pictures set large (design review: no small floating photos) */
+  /* 2 · intro */
   .intro {
-    display: grid;
-    grid-template-columns: 30vw 22vw minmax(0, 1fr);
-    column-gap: 2vw;
-    row-gap: 48px;
-    align-items: start;
+    position: relative;
+    height: 170vh;
+    padding-inline: var(--m);
   }
   .intro-s {
-    grid-column: 1 / -1;
-    font-size: clamp(24px, 2.5vw, 36px);
+    position: sticky;
+    top: 40vh;
+    z-index: 2;
+    margin: 0 auto;
+    width: min(40vw, 600px);
+    text-align: center;
+    font-size: 36px;
+    padding-top: 30vh;
   }
-  @media (min-width: 1100px) {
-    .intro-s span {
-      white-space: nowrap;
-    }
+  .ip {
+    position: absolute;
+    z-index: 1;
   }
-  .intro :global(.i1) {
-    grid-column: 1;
+  /* the pictures keep to the side columns: nothing ever crosses the sentence */
+  .ip1 {
+    left: 3vw;
+    top: 4vh;
+    width: 25vw;
   }
-  .intro :global(.i3) {
-    grid-column: 2;
-    align-self: end;
+  .ip2 {
+    right: 0;
+    top: 58vh;
+    width: 29vw;
   }
-  .intro :global(.i2) {
-    grid-column: 3;
-    margin-top: 140px;
+  .ip3 {
+    left: 6vw;
+    top: 108vh;
+    width: 22vw;
   }
-  /* 3 · homes */
-  .homes {
+
+  /* 3 · listing panels: each panel sticks, the next slides over it */
+  .work-head {
     display: grid;
-    grid-template-columns: 1fr 26vw;
-    gap: 5vw;
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+    gap: 32px;
+    padding-top: 140px;
+    padding-bottom: 64px;
   }
-  .homes .h {
-    margin-bottom: 48px;
+  .work-head .lead {
+    justify-self: end;
+    max-width: 40ch;
   }
-  .row a {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 24px;
-    align-items: baseline;
-    padding: 12px 0;
+  .panels {
+    position: relative;
+  }
+  .panel {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    z-index: var(--z);
+    overflow: hidden;
+    background: #0a0a0a;
+  }
+  .panel > a {
+    display: block;
+    height: 100%;
+    color: #fff;
     text-decoration: none;
   }
-  .r-name {
-    font-family: var(--display);
+  /* 1536 px originals: never stretched past their width; wider screens get the black field around them */
+  .panel-img {
+    position: absolute;
+    inset: 0;
+    max-width: 1536px;
+    margin-inline: auto;
+  }
+  .panel-img :global(.ph) {
+    height: 100%;
+    background: #141414;
+  }
+  .row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    grid-template-columns: 22vw 1fr auto;
+    align-items: baseline;
+    gap: 24px;
+    padding: 28px var(--m);
+    background: rgb(10 10 10 / 0.72);
+    transition: background-color 0.4s;
+  }
+  .panel a:hover .row,
+  .panel a:focus-visible .row {
+    background: rgb(10 10 10 / 0.86);
+  }
+  .panel a:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: -8px;
+  }
+  .k {
+    font-size: 16px;
     font-weight: 500;
-    font-size: clamp(24px, 2.5vw, 36px);
-    letter-spacing: -0.025em;
-    line-height: 1.1;
   }
-  .row.on .r-name {
-    font-weight: 600;
+  .row-h {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(30px, 3vw, 48px);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
   }
-  .row a:focus-visible {
-    outline-offset: 2px;
+  .v {
+    text-align: right;
+    font-size: 19px;
+    font-weight: 500;
   }
-  .r-det {
-    font-size: 18px;
-    white-space: nowrap;
-  }
-  .homes-foot {
-    margin-top: 40px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 22px;
+  .v small {
+    display: block;
+    margin-top: 8px;
+    font-size: 15px;
     font-weight: 400;
   }
-  .preview {
-    position: sticky;
-    top: calc(var(--bar) + 40px);
-    align-self: start;
-    margin-top: 120px;
-    display: grid;
-  }
-  .pv {
-    grid-area: 1 / 1;
-    opacity: 0;
-    visibility: hidden; /* not painted while idle (each holds a <use> of the whole relief) */
-    transition: opacity 0.2s, visibility 0s 0.2s;
-  }
-  .pv.on {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.2s;
-  }
-  .pv figcaption {
-    margin-top: 10px;
-  }
-  .pv-map {
+  .see-all {
     position: relative;
-    background: var(--paper);
+    z-index: 9;
+    background: #0a0a0a;
+    padding-top: 48px;
+    padding-bottom: 140px;
+    font-size: 19px;
+  }
+
+  /* 4 · one scene, stepping statements (pinned by CSS sticky; motion.ts steps the statements) */
+  .scene {
+    position: relative;
+    height: calc(var(--n) * 80vh + 100vh);
+  }
+  .scene-pin {
+    position: sticky;
+    top: 0;
+    height: 100svh;
     overflow: hidden;
   }
-  .pv-map svg {
-    width: 100%;
-    height: 100%;
-  }
-  .pv-map i {
+  .scene-bg {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 16px;
-    height: 16px;
-    margin: -8px 0 0 -8px;
-    background: var(--ink);
-    border-radius: 50%;
-    outline: 3px solid var(--paper);
+    inset: 0;
   }
-
-  /* 4 · buy, sell or invest */
-  .bsi .h {
-    margin-bottom: 40px;
-  }
-  .bsi-row {
-    display: grid;
-    grid-template-columns: 22vw minmax(0, 1fr) 22vw;
-    gap: 4vw;
-    align-items: center;
-    padding: 36px 0;
-  }
-  .bsi-row > :global(.ph) {
-    grid-column: 1;
-  }
-  .bsi-row .bsi-t {
-    grid-column: 2;
-    max-width: 60ch;
-  }
-  .bsi-row.flip > :global(.ph) {
-    grid-column: 3;
-    grid-row: 1;
-  }
-  .bsi-row.flip .bsi-t {
-    grid-row: 1;
-  }
-  .bsi-row:last-child > :global(.ph) {
-    width: 16vw;
-    justify-self: end;
-  }
-  .bsi-t h3 {
-    font-size: var(--t-sub);
-    letter-spacing: -0.025em;
-    margin-bottom: 12px;
-  }
-  .bsi-t p {
-    margin-bottom: 16px;
-  }
-
-  /* 5 · review */
-  .review {
-    display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-    gap: 5vw;
-    align-items: end;
-    padding-bottom: var(--sec);
-  }
-  .rv-q .statement {
-    font-size: clamp(24px, 2.5vw, 36px);
-  }
-  .rv-q figcaption {
-    margin-top: 24px;
-  }
-
-  /* 7 · proof */
-  .proof-photo {
-    max-width: 1350px;
-    margin-inline: auto;
-    height: 82svh;
-    min-height: 520px;
-  }
-  .proof-photo :global(.ph) {
+  .scene-bg :global(.ph) {
     height: 100%;
   }
-  .proof-fig {
+  .scene-shade {
+    position: absolute;
+    inset: 0;
+    background: rgb(10 10 10 / 0.5);
+  }
+  .scene-lead {
+    position: absolute;
+    top: 11vh;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: 500;
+    font-size: 18px;
+    z-index: 2;
+  }
+  .stack {
+    position: absolute;
+    top: 17vh;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    text-align: center;
     display: grid;
-    grid-template-columns: auto minmax(0, 380px);
-    justify-content: space-between;
-    align-items: end;
-    gap: 32px;
-    margin-top: -0.1em;
+    gap: 6px;
   }
-  .proof-n {
-    font-size: clamp(140px, 22vw, 340px);
-    line-height: 0.78;
-    margin-top: 36px;
-  }
-  .proof-t h2 {
+  .stack li {
     font-family: var(--display);
-    font-weight: 600;
-    margin-bottom: 6px;
+    font-weight: 400;
+    font-size: 48px;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    transform: scale(0.5);
+    transition: transform 0.6s var(--ease-expo);
   }
-  .figs {
+  .stack li.on {
+    transform: none;
+  }
+  .stack a {
+    text-decoration: none;
+  }
+  .stack a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 8px;
+  }
+  .pair {
+    position: absolute;
+    z-index: 1;
+    width: 22vw;
+  }
+  .pa {
+    left: 5vw;
+    top: 44vh;
+  }
+  .pb {
+    right: 5vw;
+    top: 54vh;
+  }
+  .scene-note {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(580px, 90vw);
+    text-align: center;
+    z-index: 2;
+    font-size: 19px;
+  }
+
+  /* 6 · 235 */
+  .fig {
+    position: relative;
+    height: 88svh;
+    min-height: 560px;
+    overflow: hidden;
+  }
+  .fig-photo {
+    position: absolute;
+    inset: 0;
+    max-width: 1536px;
+    margin-inline: auto;
+  }
+  .fig-photo :global(.ph) {
+    height: 100%;
+  }
+  .fig-shade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 44%;
+    background: rgb(10 10 10 / 0.6);
+  }
+  .fig-n {
+    position: absolute;
+    left: var(--m);
+    bottom: 0.04em;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(140px, 19vw, 300px);
+    line-height: 0.8;
+    letter-spacing: -0.06em;
+  }
+  .fig-exp {
+    position: absolute;
+    right: var(--m);
+    bottom: 36px;
+    width: 26ch;
+    text-align: right;
+    font-size: 19px;
+  }
+  .subfigs {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 32px;
-    padding-top: 96px;
-    padding-bottom: var(--sec);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    padding-top: 64px;
+    padding-bottom: 160px;
   }
-  .fig-b {
+  .subfigs dt {
     font-family: var(--display);
-    font-weight: 600;
-    font-size: clamp(44px, 5vw, 76px);
+    font-weight: 500;
+    font-size: clamp(48px, 5vw, 80px);
     letter-spacing: -0.04em;
-    line-height: 0.95;
+    line-height: 1;
     margin-bottom: 10px;
+  }
+
+  /* 7 · the quote: white chapter */
+  .quote {
+    background: #fff;
+    color: #0a0a0a;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    padding: 180px var(--m);
+  }
+  .q-photo {
+    grid-column: 2 / 6;
+  }
+  .q-text {
+    grid-column: 7 / 12;
+    align-self: center;
+  }
+  .q-text .statement {
+    font-size: clamp(26px, 2.5vw, 36px);
+  }
+  .q-text figcaption {
+    margin-top: 32px;
+    font-size: 16px;
+    font-weight: 500;
   }
 
   /* 8 · about */
   .about {
-    display: grid;
-    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-    gap: 4vw;
+    padding-top: 180px;
+    padding-bottom: 160px;
   }
   .about .h {
-    margin-bottom: 22px;
+    margin-bottom: 24px;
   }
   .about-lead {
-    max-width: 40ch;
-    margin-bottom: 44px;
+    max-width: 46ch;
+    margin-bottom: 72px;
   }
-  .about-photo {
+  .tiles {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+  }
+  .a-photo {
     position: relative;
+    aspect-ratio: 16 / 10;
   }
-  .about-block {
+  .a-photo :global(.ph) {
+    height: 100%;
+  }
+  .a-block {
     position: absolute;
-    top: 24px;
-    right: 24px;
-    width: min(330px, 46%);
-    background: var(--paper);
-    padding: 20px 22px;
-    font-size: 18px;
+    top: 0;
+    right: 0;
+    width: min(340px, 50%);
+    background: #fff;
+    color: #0a0a0a;
+    padding: 22px 24px;
+    font-size: 17px;
   }
-  .about-block .more {
-    display: inline-flex;
-    margin-top: 8px;
-  }
-  .tile {
-    background: var(--tone);
-    padding: 28px;
+  .a-tile {
+    background: #1c1c1c;
+    padding: 32px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 28px;
+    gap: 40px;
   }
-  .tile-map {
-    position: relative;
-    aspect-ratio: 46.3 / 97.6;
-    max-height: 560px;
-    margin-inline: auto;
-    width: 100%;
-    max-width: calc(560px * 46.3 / 97.6);
-  }
-  .tile-map svg {
-    width: 100%;
-    height: 100%;
-  }
-  .tile-sn {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transform: translate(-11px, -50%);
-    font-weight: 600;
-    font-size: 16px;
-    background: var(--tone);
-    padding-right: 6px;
-  }
-  .tile-sn :global(svg) {
-    width: 22px;
+  .a-tile :global(.a-mark) {
+    width: 72px;
     height: auto;
   }
   .facts {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 22px 28px;
+    gap: 22px 24px;
   }
   .facts dt {
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 15px;
   }
   .facts dd {
     font-weight: 600;
@@ -536,27 +557,38 @@ const jsonld = [
   /* 9 · podcast */
   .pod {
     display: grid;
-    grid-template-columns: 24vw minmax(0, 680px);
-    gap: 4vw;
-    justify-content: center;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 640px);
+    gap: 6vw;
+    padding-top: 160px;
+    padding-bottom: 160px;
     align-items: start;
   }
-  .sheet-p {
-    background: var(--paper);
-    color: var(--ink);
-    padding: 44px 48px 40px;
+  .sheet {
+    background: #fff;
+    color: #0a0a0a;
+    padding: 56px 60px;
   }
-  .sheet-p .h {
-    font-size: var(--t-head);
+  .sheet h2 {
+    font-size: 52px;
     margin-bottom: 12px;
   }
   .meta {
-    margin-bottom: 18px;
+    font-size: 16px;
+    margin-bottom: 20px;
   }
   .grp h3 {
-    font-size: 24px;
-    letter-spacing: -0.02em;
-    margin: 22px 0 6px;
+    font-size: 21px;
+    letter-spacing: -0.015em;
+    margin: 26px 0 8px;
+  }
+  .sheet :global(.ep-play) {
+    background: #0a0a0a;
+  }
+  .sheet :global(.ep-play i) {
+    border-left-color: #fff;
+  }
+  .sheet :global(.ep-btn:hover) {
+    background: #ececec;
   }
   .listen {
     margin-top: 28px;
@@ -566,165 +598,168 @@ const jsonld = [
   .talk {
     position: relative;
     height: 100svh;
-    min-height: 720px;
+    min-height: 680px;
     overflow: hidden;
-    background: var(--ink);
   }
-  /* the 1080 px original is never shown past ~1.25× native: a 1350 px frame on the ink field (jury P1-14) */
-  .talk :global(.talk-photo) {
+  .talk-photo {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: min(100%, 1350px);
-    transform: translateX(-50%);
+    inset: 0;
+  }
+  .talk-photo :global(.ph) {
+    height: 100%;
   }
   .visit {
     position: absolute;
     top: 60px;
-    right: var(--m);
+    right: 60px;
     width: 400px;
-    background: var(--paper);
-    padding: 32px;
-    z-index: 1;
+    background: #fff;
+    color: #0a0a0a;
+    padding: 34px;
   }
-  .visit .h {
-    font-size: var(--t-head);
+  .visit h2 {
+    font-size: 40px;
     margin-bottom: 14px;
   }
   .visit p {
     margin-bottom: 6px;
+    font-size: 17px;
   }
-  .visit-call a {
+  .visit-tel {
     font-weight: 600;
     text-decoration: none;
-    font-size: 24px;
   }
   .visit .btn {
     width: 100%;
-    margin-top: 20px;
+    margin-top: 22px;
+    background: #0a0a0a;
+    color: #fff;
   }
-  .visit-more {
-    margin-top: 16px;
+  .visit .btn:hover {
+    background: #303030;
   }
 
-  @media (max-width: 1023px) {
-    .review {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 32px;
+  @media (prefers-reduced-motion: reduce) {
+    .stack li {
+      transform: none;
+      font-size: 36px;
     }
-    .review :global(.ph) {
-      max-width: 420px;
+    .scene {
+      height: auto;
     }
-    .rv-q .statement {
-      font-size: 24px;
+    .scene-pin {
+      position: relative;
+      height: auto;
+      min-height: 100svh;
+      padding-bottom: 160px;
     }
-    .homes {
+  }
+
+  @media (max-width: 900px) {
+    .intro {
+      height: auto;
+      padding-top: 96px;
+      padding-bottom: 96px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .intro-s {
+      position: static;
+      grid-column: 1 / -1;
+      width: auto;
+      padding: 0 0 24px;
+      text-align: left;
+    }
+    .ip {
+      position: static;
+      width: auto;
+    }
+    .ip2 {
+      grid-column: 1 / -1;
+    }
+    .work-head {
+      grid-template-columns: 1fr;
+      padding-top: 96px;
+    }
+    .work-head .lead {
+      justify-self: start;
+    }
+    .panel {
+      height: 86svh;
+    }
+    .row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding: 20px var(--m);
+    }
+    .v {
+      text-align: left;
+    }
+    .stack li {
+      font-size: 30px;
+    }
+    .pair {
+      width: 40vw;
+    }
+    .pa {
+      top: auto;
+      bottom: 150px;
+      left: var(--m);
+    }
+    .pb {
+      top: auto;
+      bottom: 150px;
+      right: var(--m);
+    }
+    .scene-note {
+      font-size: 16px;
+      bottom: 24px;
+    }
+    .subfigs {
+      grid-template-columns: 1fr;
+      padding-bottom: 96px;
+    }
+    .quote {
+      grid-template-columns: 1fr;
+      row-gap: 40px;
+      padding: 96px var(--m);
+    }
+    .q-photo,
+    .q-text {
+      grid-column: 1;
+    }
+    .tiles {
       grid-template-columns: 1fr;
     }
-    .preview {
-      display: none;
+    .a-block {
+      position: static;
+      width: auto;
+    }
+    .a-photo {
+      aspect-ratio: auto;
+    }
+    .a-photo :global(.ph) {
+      aspect-ratio: 16 / 10;
     }
     .pod {
       grid-template-columns: 1fr;
+      padding-top: 96px;
+      padding-bottom: 96px;
     }
-    .pod :global(.pod-photo) {
-      width: min(320px, 70%);
+    .sheet {
+      padding: 32px 22px;
     }
-    .about {
-      grid-template-columns: 1fr;
-    }
-    .figs {
-      grid-template-columns: 1fr 1fr;
-      row-gap: 48px;
-    }
-  }
-  @media (max-width: 767px) {
-    .intro {
-      grid-template-columns: 1fr 1fr;
-      gap: 20px 12px;
-    }
-    .intro-s {
-      font-size: 24px;
-    }
-    .intro-s span {
-      white-space: normal;
-    }
-    .intro :global(.i1) {
-      grid-column: 1 / -1;
-    }
-    .intro :global(.i3) {
-      grid-column: 1;
-    }
-    .intro :global(.i2) {
-      grid-column: 2;
-      margin-top: 0;
-      align-self: end;
-    }
-    .row a {
-      grid-template-columns: 1fr;
-      gap: 2px;
-      padding: 14px 0;
-    }
-    .r-name {
-      font-size: 32px;
-    }
-    .bsi-row,
-    .bsi-row.flip {
-      grid-template-columns: 1fr;
-      gap: 20px;
-      padding: 28px 0;
-    }
-    .bsi-row > :global(.ph),
-    .bsi-row.flip > :global(.ph),
-    .bsi-row .bsi-t,
-    .bsi-row.flip .bsi-t {
-      grid-column: 1;
-      grid-row: auto;
-    }
-    .bsi-row:last-child > :global(.ph) {
-      width: 60%;
-      justify-self: start;
-    }
-    .review {
-      grid-template-columns: 1fr;
-      gap: 32px;
-    }
-    .rv-q .statement {
-      font-size: 24px;
-    }
-    .proof-photo {
-      height: 70svh;
-      min-height: 0;
-    }
-    .proof-fig {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    .proof-n {
-      font-size: 42vw;
-      margin-top: 28px;
-    }
-    .figs {
-      padding-top: 64px;
-    }
-    .about-block {
-      position: static;
-      width: auto;
-      padding: 20px 0 0;
-    }
-    .sheet-p {
-      padding: 28px 20px;
-      margin-inline: -10px;
+    .sheet h2 {
+      font-size: 40px;
     }
     .talk {
       height: auto;
       min-height: 0;
-      background: var(--paper);
     }
-    .talk :global(.talk-photo) {
+    .talk-photo {
       position: relative;
-      height: 70svh;
+      height: 64svh;
     }
     .visit {
       position: relative;
@@ -732,7 +767,6 @@ const jsonld = [
       right: auto;
       width: auto;
       margin: -80px var(--m) 0;
-      padding: 28px 24px;
     }
   }
 </style>

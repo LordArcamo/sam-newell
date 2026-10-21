@@ -1,5 +1,5 @@
-// Motion chunk (GSAP + ScrollTrigger + Lenis), loaded after first paint on idle. Desktop smooth scroll only;
-// nothing under reduced motion. One clock: gsap.ticker drives Lenis (added last, lesson #05).
+// Motion chunk (GSAP + ScrollTrigger + Lenis), loaded after first paint on idle. Transform / opacity only.
+// Nothing here hides content: reveals are CSS classes that fail open (reveal.ts). Reduced motion: nothing runs.
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
@@ -7,24 +7,53 @@ import Lenis from 'lenis';
 export function initMotion() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   gsap.registerPlugin(ScrollTrigger);
+  const desktop = matchMedia('(min-width: 901px)').matches;
 
-  // The hero poster never moves: the live relief (src/relief) owns the hero's motion (drift + scroll dolly),
-  // and the poster under it must keep the identical crop for a clean hand-off.
-
-  // Parallax drift on marked pictures (the moving-picture layer).
-  document.querySelectorAll<HTMLElement>('[data-drift]').forEach((el) => {
-    const amt = Number(el.dataset.drift || 8);
-    gsap.fromTo(el, { yPercent: amt }, { yPercent: -amt, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } });
-  });
-
-  // The 235 figure counts its line in (no count-up of the number itself; it is a fact, shown whole).
-  document.querySelectorAll<HTMLElement>('[data-rise]').forEach((el) => {
-    gsap.fromTo(el, { yPercent: 40, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true } });
-  });
-
-  const desktop = matchMedia('(min-width: 1024px) and (pointer: fine)').matches;
+  // Intro: the sentence holds (CSS sticky) while his pictures pass at their own speeds.
   if (desktop) {
-    const lenis = new Lenis({ lerp: 0.12, syncTouch: false, anchors: true }); // offsets come from CSS scroll-padding / scroll-margin
+    document.querySelectorAll<HTMLElement>('[data-par]').forEach((el) => {
+      const amt = Number(el.dataset.par || 0);
+      gsap.fromTo(el, { yPercent: -amt }, { yPercent: amt, ease: 'none', scrollTrigger: { trigger: el.closest('section') ?? el, start: 'top bottom', end: 'bottom top', scrub: true } });
+    });
+  }
+
+  // Listing panels: each still settles 1.08 → 1 as its panel slides up over the last one.
+  document.querySelectorAll<HTMLElement>('[data-panel-img]').forEach((el) => {
+    gsap.fromTo(el, { scale: 1.08 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: el.closest('li') ?? el, start: 'top bottom', end: 'top top', scrub: true } });
+  });
+
+  // One scene, stepping statements: the pinned scene (CSS sticky) hands the light from one line to the next.
+  document.querySelectorAll<HTMLElement>('[data-scene]').forEach((scene) => {
+    const items = [...scene.querySelectorAll<HTMLElement>('[data-step]')];
+    const bg = scene.querySelector<HTMLElement>('.scene-bg');
+    ScrollTrigger.create({
+      trigger: scene,
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: (st) => {
+        const i = Math.min(items.length - 1, Math.floor(st.progress * items.length));
+        items.forEach((li, k) => li.classList.toggle('on', k === i));
+      },
+    });
+    if (bg) gsap.fromTo(bg, { scale: 1.1 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: scene, start: 'top top', end: 'bottom bottom', scrub: true } });
+    scene.querySelectorAll<HTMLElement>('.pair').forEach((p, k) => {
+      gsap.fromTo(p, { yPercent: k ? 30 : 50 }, { yPercent: k ? -30 : -40, ease: 'none', scrollTrigger: { trigger: scene, start: 'top top', end: 'bottom bottom', scrub: true } });
+    });
+  });
+
+  // The 235 figure rises out of the shade as its chapter arrives.
+  document.querySelectorAll<HTMLElement>('[data-rise]').forEach((el) => {
+    gsap.fromTo(el, { yPercent: 35, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 95%', once: true } });
+  });
+
+  // Big stills drift slowly while on screen (the film feeling, transform only).
+  document.querySelectorAll<HTMLElement>('[data-drift]').forEach((el) => {
+    const amt = Number(el.dataset.drift || 6);
+    gsap.fromTo(el, { yPercent: -amt }, { yPercent: amt, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } });
+  });
+
+  if (matchMedia('(min-width: 1024px) and (pointer: fine)').matches) {
+    const lenis = new Lenis({ lerp: 0.1, syncTouch: false, anchors: true }); // offsets come from CSS scroll-padding / scroll-margin
     (window as any).__lenis = lenis;
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.lagSmoothing(0);

@@ -5,6 +5,7 @@ import Pic from '../components/Pic.astro';
 import EpisodeRow from '../components/EpisodeRow.astro';
 import OnAir from '../components/OnAir.astro';
 import { img } from '../lib/images';
+import studioPoster from '../assets/film/studio.jpg';
 import { EPISODES, GROUPS } from '../lib/podcast';
 import { PODCAST, SITE } from '../data/site';
 import { PODCAST_REVIEWS, reviewDate } from '../data/reviews';
@@ -33,9 +34,10 @@ const jsonld = [
     title="Get Leveraged"
     lead={`An archive of ${PODCAST.episodes} conversations on investing, money and family, recorded 2020 to 2025.`}
     cta={{ href: PODCAST.apple, label: 'Listen on Apple', external: true }}
-    image={img('photos/get-leveraged-cover.jpg')}
-    alt="Get Leveraged with Sam Newell: the show's cover, Sam laughing in the studio"
-    pos="50% 30%"
+    image={img('photos/podcast-studio.jpg')}
+    alt="Sam in the Get Leveraged interview room"
+    pos="50% 35%"
+    cursor="Play"
   >
     <p class="small">{PODCAST.rating} out of 5 on Apple from {PODCAST.ratings} ratings. Also on <a class="link" href={PODCAST.spotify} rel="noopener" target="_blank">Spotify</a>.</p>
   </InnerHero>
@@ -55,7 +57,7 @@ const jsonld = [
         </div>
         <p class="small" aria-live="polite" data-count>{EPISODES.length} episodes</p>
       </div>
-      <Pic class="arch-p" src={img('photos/podcast-studio.jpg')} alt="Sam on a leather sofa in the Get Leveraged interview room" sizes="(max-width: 767px) 70vw, 26vw" ratio="r45" pos="50% 40%" />
+      <div class="arch-p" data-film="/film/studio.mp4" data-cursor="Play"><Pic src={studioPoster} alt="Sam talking in the Get Leveraged studio" sizes="(max-width: 767px) 70vw, 26vw" ratio="r1610" rv={false} widths={[360, 540, 720]} /></div>
     </div>
     <ul role="list" class="eps" data-eps>
       {EPISODES.map((e) => (

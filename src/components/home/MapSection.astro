@@ -22,6 +22,9 @@ const cards = TOWNS.map((t) => {
   const rv = t.review ? REVIEWS.find((r) => r.n === t.review) : null;
   return { ...t, homes, count: parts.join(' · '), lead, rv };
 });
+// the town slips along the bottom (research §4.5): the towns with homes on the map, Lehi first
+const SLIP_ORDER = ['lehi', 'north-salt-lake', 'provo', 'eagle-mountain', 'orem', 'saratoga-springs', 'pleasant-grove', 'american-fork'];
+const slips = SLIP_ORDER.map((slug) => cards.find((c) => c.slug === slug)!).filter((c) => c && c.homes.length);
 const pins = HOMES.filter((h) => h.xy).sort((a, b) => b.xy!.north - a.xy!.north);
 const lehi = TOWNS.find((t) => t.slug === 'lehi')!;
 const mapData = {
@@ -33,7 +36,7 @@ const mapData = {
 <section class="map" id="map" aria-labelledby="map-h" data-map>
   <div class="stage" data-relief-mount="map" data-stage>
     <svg class="relief" viewBox="-30 -56 64 40" preserveAspectRatio="none" data-ui data-map-svg role="img" aria-label="Contour map of the Wasatch Front from North Salt Lake to Provo, with Utah Lake and the Great Salt Lake">
-      <use href="/map/relief.svg#relief-geo" />
+      <use href="/map/relief-dark.svg#relief-geo" />
     </svg>
     <div class="overlay" aria-hidden="true" data-labels>
       {TOWNS.map((t) => <span class="tl small" data-label={t.slug}>{t.name}</span>)}
@@ -51,15 +54,17 @@ const mapData = {
     </ul>
   </div>
 
-  <div class="panel" data-towns>
-    <h2 class="panel-h" id="map-h">Pick your town</h2>
-    <div class="town-list" role="toolbar" aria-label="Towns" aria-orientation="vertical" data-toolbar>
-      {TOWNS.map((t) => (
-        <button type="button" class="town" data-town={t.slug} aria-pressed={t.slug === DEFAULT ? 'true' : 'false'} tabindex={t.slug === DEFAULT ? 0 : -1} aria-controls="map-card">
-          {t.name}
-        </button>
-      ))}
-    </div>
+  <div class="copy" data-towns>
+    <h2 class="h copy-h" id="map-h">Pick your town</h2>
+    <p class="lead">Every pin is a home Sam has listed or sold. Tap a town and the model flies there.</p>
+  </div>
+  <div class="slips num" role="toolbar" aria-label="Towns" aria-orientation="horizontal" data-toolbar>
+    {slips.map((c, i) => (
+      <button type="button" class="slip" style={`--h:${[172, 136, 158, 128, 146, 120, 150, 132][i % 8]}px;--r:${[0, -1.2, 0, 0, 1.5, 0, -0.8, 0][i % 8]}deg`} data-town={c.slug} aria-pressed={c.slug === DEFAULT ? 'true' : 'false'} tabindex={c.slug === DEFAULT ? 0 : -1} aria-controls="map-card">
+        <b>{c.name}</b>
+        <span>{c.count}{c.slug === 'lehi' ? ' · home base' : ''}</span>
+      </button>
+    ))}
   </div>
 
   <div class="card dark" id="map-card" data-cards>
@@ -70,7 +75,7 @@ const mapData = {
           <Pic src={img(`listings/${c.lead.photo}`)} alt={`${c.lead.shown}, ${c.lead.townName}`} sizes="390px" ratio="r169" rv={false} widths={[390, 550]} />
         ) : (
           <div class="macro r169" aria-hidden="true">
-            <svg viewBox={`${c.x - 4} ${-c.north - 2.67} 8 5.33`} preserveAspectRatio="xMidYMid slice"><use href="/map/relief.svg#relief-geo" /></svg>
+            <svg viewBox={`${c.x - 4} ${-c.north - 2.67} 8 5.33`} preserveAspectRatio="xMidYMid slice"><use href="/map/relief-dark.svg#relief-geo" /></svg>
             {c.homes.filter((h) => h.xy).map((h) => (
               <i style={`left:${((h.xy!.x - (c.x - 4)) / 8) * 100}%;top:${((-h.xy!.north - (-c.north - 2.67)) / 5.33) * 100}%`}></i>
             ))}
@@ -128,7 +133,7 @@ const mapData = {
     height: 100svh;
     min-height: 760px;
     overflow: hidden;
-    background: var(--tone);
+    background: #0a0a0a;
     scroll-margin-top: calc(-1 * (var(--bar) + 16px)); /* the section fills the screen: land flush (jury P1-6) */
   }
   .stage {
@@ -257,55 +262,74 @@ const mapData = {
     outline-color: var(--ink);
   }
 
-  .panel {
+  .copy {
     position: absolute;
-    top: var(--m);
-    left: var(--m);
-    bottom: var(--m);
-    width: 250px;
-    background: var(--paper);
-    padding: 24px 16px 16px;
+    top: 96px;
+    left: max(var(--m), 12vw);
+    width: min(520px, 60vw);
+    z-index: 3;
+    pointer-events: none;
+  }
+  .copy-h {
+    margin-bottom: 18px;
+  }
+  .slips {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 0;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 10px;
+    align-items: end;
+  }
+  .slip {
+    height: var(--h);
+    background: #fff;
+    color: #0a0a0a;
+    text-align: left;
+    padding: 18px 16px 0;
     display: flex;
     flex-direction: column;
-    z-index: 2;
+    gap: 8px;
+    transform: rotate(var(--r));
+    transform-origin: 50% 100%;
+    transition: transform 0.5s var(--ease-expo), background-color 0.3s;
   }
-  .panel-h {
-    font-size: 32px;
-    letter-spacing: -0.025em;
-    margin: 0 8px 14px;
-  }
-  .town-list {
-    display: grid;
-    gap: 2px;
-    overflow-y: auto;
-  }
-  .town {
-    text-align: left;
-    padding: 8px 10px;
-    font-size: 18px;
-    font-weight: 500;
-    min-height: 40px;
-    transition: background-color var(--hover), color var(--hover), padding var(--hover) var(--ease-out);
-  }
-  .town:hover {
-    background: var(--tone);
-    padding-left: 14px;
-  }
-  .town[aria-pressed='true'] {
-    background: var(--ink);
-    color: var(--paper);
+  .slip b {
+    font-family: var(--display);
     font-weight: 600;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
   }
-  .town:focus-visible {
-    outline-offset: -3px;
+  .slip span {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .slip:hover {
+    transform: translateY(-10px) rotate(var(--r));
+  }
+  .slip[aria-pressed='true'] {
+    transform: translateY(-22px) rotate(0deg);
+  }
+  .slip[aria-pressed='true'] b {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 6px;
+  }
+  .slip:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
   }
 
   .card {
     position: absolute;
-    left: calc(var(--m) + 266px);
-    bottom: var(--m);
+    right: var(--m);
+    top: 96px;
     width: 390px;
-    max-height: calc(100% - 2 * var(--m));
+    max-height: calc(100% - 96px - 220px);
     overflow-y: auto;
     z-index: 2;
   }
@@ -361,7 +385,7 @@ const mapData = {
     transition: background-color var(--hover);
   }
   .tc-homes li.on {
-    background: #262626;
+    background: #ececec;
   }
   .tc-homes a {
     text-decoration: none;
@@ -429,11 +453,11 @@ const mapData = {
     font-size: 16px;
   }
   .btn.ghost {
-    background: #262626;
-    color: var(--paper);
+    background: #ececec;
+    color: #0a0a0a;
   }
   .btn.ghost:hover {
-    background: #3a3a3a;
+    background: #d9d9d9;
   }
 
   .sheet {
@@ -488,8 +512,12 @@ const mapData = {
     overflow: visible;
   }
   :global(html:not(.js)) .stage,
-  :global(html:not(.js)) .panel {
+  :global(html:not(.js)) .slips {
     display: none;
+  }
+  :global(html:not(.js)) .copy {
+    position: static;
+    padding: 96px var(--m) 32px;
   }
   :global(html:not(.js)) .card {
     position: static;
@@ -515,33 +543,38 @@ const mapData = {
       flex-direction: column;
       scroll-margin-top: 0;
     }
-    .panel {
+    .copy {
       position: static;
-      width: auto;
-      padding: 20px var(--m) 12px;
       order: 1;
+      width: auto;
+      padding: 72px var(--m) 24px;
     }
-    .panel-h {
-      margin: 0 0 10px;
-    }
-    /* one horizontal strip of towns (jury P1-7) */
-    .town-list {
+    /* the slips become one horizontal strip under the map */
+    .slips {
+      position: static;
+      order: 3;
       display: flex;
-      flex-wrap: nowrap;
       overflow-x: auto;
       scroll-snap-type: x proximity;
-      gap: 6px;
-      margin: 0 calc(-1 * var(--m));
-      padding: 0 var(--m) 6px;
+      gap: 8px;
+      padding: 26px var(--m) 16px;
       scrollbar-width: none;
+      align-items: flex-end;
     }
-    .town {
+    .slip {
       flex: none;
+      width: 168px;
+      height: auto;
+      min-height: 104px;
+      padding-bottom: 14px;
       scroll-snap-align: start;
-      background: var(--paper);
-      white-space: nowrap;
-      min-height: 44px;
-      font-size: 16px;
+      transform: none;
+    }
+    .slip:hover {
+      transform: none;
+    }
+    .slip[aria-pressed='true'] {
+      transform: translateY(-12px);
     }
     .stage {
       position: relative;
@@ -554,11 +587,12 @@ const mapData = {
       position: absolute;
       left: var(--m);
       right: var(--m);
-      bottom: var(--m);
+      top: auto;
+      bottom: calc(var(--slips-h, 150px) + var(--m));
       width: auto;
       max-height: none;
       overflow: visible;
-      order: 3;
+      order: 4;
     }
     /* compact docked card: two homes, the actions; the full list and the review stay on wider screens */
     .tc-homes li:nth-child(n + 3),

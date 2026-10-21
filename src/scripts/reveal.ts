@@ -2,7 +2,7 @@
 // Pre-hide CSS exists only under .js + prefers-reduced-motion:no-preference, and never uses visibility,
 // so Tab reaches everything and focus reveals instantly.
 export function initReveals() {
-  const els = [...document.querySelectorAll<HTMLElement>('[data-rv],[data-rv-img]')];
+  const els = [...document.querySelectorAll<HTMLElement>('[data-rv],[data-rv-img],[data-shutter]')];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce || !('IntersectionObserver' in window)) {
     els.forEach((el) => el.classList.add('in'));
@@ -39,7 +39,7 @@ export function initReveals() {
   let st = 0;
   addEventListener('scroll', () => { clearTimeout(st); st = window.setTimeout(sweep, 1200); }, { passive: true });
   document.addEventListener('focusin', (e) => {
-    const t = (e.target as HTMLElement).closest<HTMLElement>('[data-rv],[data-rv-img]');
+    const t = (e.target as HTMLElement).closest<HTMLElement>('[data-rv],[data-rv-img],[data-shutter]');
     t?.classList.add('in');
     (e.target as HTMLElement).querySelectorAll?.('[data-rv],[data-rv-img]').forEach((x) => x.classList.add('in'));
     let p = (e.target as HTMLElement).parentElement;

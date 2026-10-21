@@ -152,7 +152,7 @@ export class Controller {
     }
     let drew = false;
     // the map sits on the tone ground (like the SVG plinth); the hero on the void of the sky state
-    const bg = v.role === 'map' && !e.look.night ? 0xd9d9d9 : e.look.voidc;
+    const bg = v.role === 'map' ? 0x0a0a0a : e.look.voidc; // Lehi Light: the relief always sits on black
     if ((e.scene.background as import('three').Color | null)?.getHex() !== bg) (e.scene.background as import('three').Color).setHex(bg);
     if (v.role === 'hero') {
       const rig = rigFor(innerWidth / innerHeight);

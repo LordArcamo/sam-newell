@@ -365,15 +365,22 @@ export class Engine {
   }
 
   /**
-   * The map is for reading: when the real sun is low or down (< 8°), it is lit by a fixed afternoon light
-   * (28° from the south-west, the noon look) instead of a flat dusk grey. The hero always keeps the true sun.
+   * Lehi Light: the map is a gallery object on black. When the real sun is up it lights the plaster; when it is
+   * low or down (< 8°) the model sits in its night state (deep greys). Pins and town labels are always white.
    */
   setReading(on: boolean) {
     const want = on && this.sunAlt < 8 * deg;
-    if (want === this.reading) return;
     this.reading = want;
-    if (want) this.applyLight(28 * deg, 50 * deg, LOOKS.noon);
+    if (want) this.applyLight(-20 * deg, 0, { ...LOOKS.night, sky: 0.16, exposure: 2.3, voidc: 0x0a0a0a });
     else this.applyLight(this.sunAlt, this.sunAz, lookFor(this.sunAlt / deg, this.sunAz));
+    if (on) {
+      for (const m of this.pinMats) {
+        const st = m as MeshStandardMaterial;
+        st.emissive?.setHex(0xffffff);
+        if (st.emissive) st.emissiveIntensity = 0.85;
+      }
+      for (const l of this.labels) (l.material as MeshStandardMaterial).color.setHex(0xffffff);
+    }
   }
 
   applyLight(altitude: number, azimuth: number, L: Look) {

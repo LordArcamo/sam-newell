@@ -92,7 +92,7 @@ void ZILLOW;
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
     {!noCanonical && <link rel="canonical" href={canonical} />}
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href="/fonts/GeneralSans-Semibold.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin />
@@ -130,23 +130,42 @@ void ZILLOW;
         h.dataset.sun = alt < -6 ? 'night' : alt < 0 ? 'blue' : alt <= 10 ? (az < 0 ? 'dawn' : 'golden') : 'noon';
         h.dataset.t = String(t);
         if (/[?&]gl=off/.test(q)) h.dataset.gl = 'off';
+        // Motion flags (Lehi Light): the opening plays once per session on the home page; a page arrived at
+        // through the black curtain starts covered. Never with reduced motion, never in ?record/?capture.
+        try {
+          var rm = matchMedia('(prefers-reduced-motion: reduce)').matches, ss = sessionStorage, tool = /[?&](record|capture)/.test(q);
+          if (!rm && !tool && location.pathname === '/' && !ss.getItem('sn-op')) { h.classList.add('op'); ss.setItem('sn-op', '1'); }
+          var w = ss.getItem('sn-wipe');
+          if (w) { ss.removeItem('sn-wipe'); if (!rm) { h.classList.add('arriving'); h.dataset.wipe = w; } }
+        } catch (x) {}
       })(document);
     </script>
     <slot name="head" />
     <script type="application/ld+json" set:html={ld} />
   </head>
   <body>
+    <div class="curtain" aria-hidden="true"><p class="curtain-t" data-curtain-t></p></div>
+    <script is:inline>
+      (function () { var t = document.documentElement.dataset.wipe; if (t) document.querySelector('[data-curtain-t]').textContent = t; })();
+    </script>
     <a class="skip" href="#main">Skip to content</a>
-    <Header />
+    <Header home={Astro.url.pathname === '/'} />
     <main id="main" tabindex="-1">
       <slot />
     </main>
     <Footer />
+    <div class="cur" aria-hidden="true" data-cur></div>
     <script>
       import { initMenu } from '../scripts/menu';
       import { initReveals } from '../scripts/reveal';
       import { initBar } from '../scripts/bar';
       import { initNewsletter } from '../scripts/forms';
+      import { initWipe } from '../scripts/wipe';
+      import { initCursor } from '../scripts/cursor';
+      import { initFilms } from '../scripts/films';
+      initWipe();
+      initFilms();
+      initCursor();
       initMenu();
       initReveals();
       initBar();

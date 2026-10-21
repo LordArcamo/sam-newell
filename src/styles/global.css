@@ -1,10 +1,27 @@
-/* Sam Newell — "From the Point" · Gallery white (colour option 1) · General Sans + Switzer (type option B)
-   Fonts: original Fontshare WOFF2 files, unmodified (ITF Free Font License). */
+/* Sam Newell — "Lehi Light" (premium, dark luxury, film-led) · General Sans + Switzer
+   Fonts: original Fontshare WOFF2 files, unmodified (ITF Free Font License).
+   Token names kept from v1 so every component flips with the theme:
+     --paper = the ground (black), --ink = the type (white), --tone = the first surface step.
+   .dark (v1's black band) therefore renders as a WHITE chapter here — the two-tone rhythm of the brief. */
 
 @font-face {
   font-family: 'General Sans';
   src: url('/fonts/GeneralSans-Semibold.woff2') format('woff2');
   font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Regular.woff2') format('woff2');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
@@ -53,18 +70,22 @@
 }
 
 :root {
-  --ink: #0a0a0a;
-  --paper: #ffffff;
-  --tone: #d9d9d9; /* a surface tone only, never text on paper */
+  --ink: #ffffff;
+  --paper: #0a0a0a;
+  --tone: #1c1c1c; /* first surface step on black (tone steps: #141414 / #1c1c1c / #262626 / #303030) */
+  --t1: #141414;
+  --t2: #1c1c1c;
+  --t3: #262626;
+  --t4: #303030;
 
   --display: 'General Sans', 'General Sans Fallback', system-ui, sans-serif;
   --text: 'Switzer', 'Switzer Fallback', system-ui, sans-serif;
 
-  /* five sizes */
-  --t-title: clamp(88px, 15.2vw, 240px);
-  --t-head: clamp(40px, 4.4vw, 72px);
+  /* type for the dark mode (research-premium §4.1) */
+  --t-title: clamp(72px, 9.4vw, 150px); /* General Sans Light, the hero name */
+  --t-head: clamp(44px, 5vw, 88px);
   --t-sub: 32px;
-  --t-lead: 24px;
+  --t-lead: 22px;
   --t-body: 18px;
   --t-small: 16px;
 
@@ -75,6 +96,7 @@
 
   --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --hover: 0.18s;
 }
 @media (max-width: 767px) {
@@ -109,12 +131,16 @@ html.lenis body {
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }
+html {
+  background: var(--paper);
+}
 body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--text);
   font-size: var(--t-body);
-  line-height: 1.55;
+  line-height: 1.6;
+  letter-spacing: 0.005em;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -155,7 +181,7 @@ h2,
 h3,
 h4 {
   font-family: var(--display);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1.02;
   text-wrap: balance;
@@ -179,10 +205,13 @@ p {
 /* ——— roles ——— */
 .title {
   font-family: var(--display);
-  font-weight: 600;
+  font-weight: 300;
   font-size: var(--t-title);
-  line-height: 0.84;
-  letter-spacing: -0.055em;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+.light {
+  font-weight: 300;
 }
 .h {
   font-size: var(--t-head);
@@ -202,10 +231,10 @@ p {
 }
 .statement {
   font-family: var(--display);
-  font-weight: 600;
-  font-size: clamp(28px, 2.5vw, 36px);
-  letter-spacing: -0.025em;
-  line-height: 1.12;
+  font-weight: 400;
+  font-size: clamp(26px, 2.5vw, 36px);
+  letter-spacing: -0.015em;
+  line-height: 1.3;
   text-wrap: balance;
 }
 @media (max-width: 767px) {
@@ -241,12 +270,12 @@ p {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 52px;
-  padding: 0 24px;
+  min-height: 56px;
+  padding: 0 26px;
   background: var(--ink);
   color: var(--paper);
   font-family: var(--text);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 18px;
   line-height: 1;
   text-decoration: none;
@@ -254,7 +283,7 @@ p {
   transition: transform var(--hover) var(--ease-out), background-color var(--hover);
 }
 .btn:hover {
-  background: #262626;
+  background: #d9d9d9;
 }
 .btn:active {
   transform: scale(0.97);
@@ -272,7 +301,8 @@ p {
 }
 .dark .btn:hover,
 .btn.light:hover {
-  background: var(--tone);
+  background: var(--t4);
+  color: #fff;
 }
 @media (max-width: 767px) {
   .btn {
@@ -371,4 +401,118 @@ p {
   .relief-canvas {
     transition-duration: 0.15s;
   }
+}
+
+/* ——— shutter: chapter-opening pictures open from the bottom edge and settle 1.06 → 1 (research §4.3) ———
+   Pre-hidden only with JS and motion allowed; reveal.ts fails open, so nothing stays shut. */
+@media (prefers-reduced-motion: no-preference) {
+  /* the clip sits on the child: an observer can't see an element whose own clip-path is empty */
+  .js [data-shutter] > * {
+    clip-path: inset(100% 0 0 0);
+  }
+  .js [data-shutter] img {
+    transform: scale(1.06);
+  }
+  .js [data-shutter].in > * {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1.1s var(--ease-expo);
+  }
+  .js [data-shutter].in img {
+    transform: none;
+    transition: transform 1.8s var(--ease-out);
+  }
+}
+
+/* ——— the black curtain between pages (src/scripts/wipe.ts) ——— */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #0a0a0a;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  transform: translateY(101%);
+}
+.curtain-t {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(40px, 6vw, 96px);
+  letter-spacing: -0.04em;
+  opacity: 0;
+}
+html.leaving .curtain {
+  transform: none;
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+  pointer-events: auto;
+}
+html.leaving .curtain-t {
+  opacity: 1;
+  transition: opacity 0.3s 0.25s;
+}
+/* arriving: the curtain starts closed (set in <head> before first paint), shows the title card, then lifts.
+   Pure CSS with fill-mode, so it lifts even if no script runs. */
+html.arriving .curtain {
+  transform: none;
+  animation: curtain-up 0.7s cubic-bezier(0.76, 0, 0.24, 1) 0.45s forwards;
+}
+html.arriving .curtain-t {
+  opacity: 1;
+  animation: curtain-t 0.45s ease 0.3s forwards;
+}
+@keyframes curtain-up {
+  to {
+    transform: translateY(-101%);
+  }
+}
+@keyframes curtain-t {
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .curtain {
+    display: none;
+  }
+}
+
+/* ——— the View / Play cursor (desktop, fine pointer) ——— */
+.cur {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 250;
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  border-radius: 50%;
+  background: #fff;
+  color: #0a0a0a;
+  display: grid;
+  place-items: center;
+  font: 600 14px/1 var(--text);
+  pointer-events: none;
+  transform: translate(-200px, -200px) scale(0);
+  transition: transform 0.35s var(--ease-out);
+}
+.cur.on {
+  transition: transform 0.18s var(--ease-out);
+}
+
+/* film loops laid over their posters (src/scripts/films.ts) */
+.ph {
+  position: relative;
+}
+.film-v {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.film-v.on {
+  opacity: 1;
 }

@@ -1,6 +1,9 @@
 ---
-/** Inner-page hero: ≤80svh, two halves. Left: H1 (≤2 lines), one lead sentence, one square button.
-    Right: one picture, edge to edge. H1 and picture are never hidden or animated in (LCP). */
+/**
+ * Lehi Light inner-page hero (research §4.6): a full-height dark picture panel (square corners), the title in
+ * General Sans Light bottom-left (two lines), one sentence, one button and the phone. The picture is the LCP:
+ * eager, high priority, never hidden or animated in (it only drifts, under motion-allowed).
+ */
 import Pic from './Pic.astro';
 import { CONTACT } from '../data/site';
 import type { ImageMetadata } from 'astro';
@@ -12,12 +15,17 @@ interface Props {
   alt: string;
   pos?: string;
   tone?: boolean;
+  cursor?: string;
 }
-const { title, lead, cta, image, alt, pos = '50% 50%', tone = false } = Astro.props;
+const { title, lead, cta, image, alt, pos = '50% 50%', cursor = 'View' } = Astro.props;
 ---
-<section class="ih" aria-labelledby="ih-h">
+<section class="ih" aria-labelledby="ih-h" data-ih>
+  <div class="ih-p" data-cursor={cursor}>
+    <Pic src={image} alt={alt} sizes="(max-width: 1536px) 100vw, 1536px" pos={pos} eager />
+  </div>
+  <div class="ih-shade" aria-hidden="true"></div>
   <div class="ih-t">
-    <h1 class="h ih-h" id="ih-h" set:html={title} />
+    <h1 class="ih-h" id="ih-h"><span class="ln"><span set:html={title} /></span></h1>
     <p class="lead ih-lead">{lead}</p>
     {cta && (
       <p class="ih-act">
@@ -29,32 +37,85 @@ const { title, lead, cta, image, alt, pos = '50% 50%', tone = false } = Astro.pr
     )}
     <slot />
   </div>
-  <div class:list={['ih-p', { tone }]}>
-    <Pic src={image} alt={alt} sizes="(max-width: 767px) 100vw, 50vw" pos={pos} eager />
-  </div>
 </section>
 <style>
   .ih {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: min(80svh, 820px);
+    position: relative;
+    height: calc(100svh - var(--bar));
+    min-height: 600px;
+    max-height: 1100px;
+    overflow: hidden;
+    background: #0a0a0a;
+    color: #fff;
+    margin: 0 10px;
+  }
+  .ih-p {
+    position: absolute;
+    inset: 0;
+    max-width: 1536px;
+    margin-inline: auto;
+  }
+  .ih-p :global(.ph) {
+    height: 100%;
+    background: #141414;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ih-p :global(img) {
+      animation: ih-drift 26s ease-in-out infinite alternate;
+      transform-origin: 50% 60%;
+    }
+    @keyframes ih-drift {
+      from {
+        transform: scale(1.02);
+      }
+      to {
+        transform: scale(1.09) translate3d(-1%, -0.8%, 0);
+      }
+    }
+    /* arriving through the curtain: the title rises out of its mask as the curtain lifts */
+    :global(html.arriving) .ln > span {
+      display: inline-block;
+      transform: translateY(105%);
+      animation: ih-rise 1s var(--ease-expo) 0.85s forwards;
+    }
+    @keyframes ih-rise {
+      to {
+        transform: none;
+      }
+    }
+  }
+  .ih-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.1) 62%, rgb(0 0 0 / 0)); /* taste-skill-ignore gradient: neutral scrim under text on a photo */
   }
   .ih-t {
-    padding: 72px var(--m) 72px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 22px;
-    align-items: flex-start;
+    position: absolute;
+    left: 28px;
+    right: 28px;
+    bottom: 36px;
+    display: grid;
+    gap: 20px;
+    justify-items: start;
+    z-index: 2;
   }
   .ih-h {
-    font-size: clamp(48px, 5.6vw, 92px);
-    letter-spacing: -0.04em;
+    font-weight: 300;
+    font-size: clamp(56px, 6vw, 96px);
+    letter-spacing: -0.045em;
     line-height: 0.98;
-    max-width: 11ch;
+    max-width: 12ch;
+  }
+  .ln {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+  }
+  .ln > span {
+    display: inline-block;
   }
   .ih-lead {
-    max-width: 30ch;
+    max-width: 34ch;
   }
   .ih-act {
     display: flex;
@@ -71,32 +132,19 @@ const { title, lead, cta, image, alt, pos = '50% 50%', tone = false } = Astro.pr
     display: inline-flex;
     align-items: center;
   }
-  .ih-p {
-    position: relative;
-    min-height: 420px;
-  }
-  .ih-p :global(.ph) {
-    position: absolute;
-    inset: 0;
-  }
-  .ih-p.tone :global(.ph) {
-    background: var(--tone);
-  }
   @media (max-width: 767px) {
     .ih {
-      grid-template-columns: 1fr;
-      min-height: 0;
+      height: 88svh;
+      min-height: 560px;
+      margin: 0 8px;
     }
     .ih-t {
-      padding: 40px var(--m) 36px;
+      left: 20px;
+      right: 20px;
+      bottom: 24px;
     }
     .ih-h {
-      font-size: clamp(42px, 12vw, 60px);
-    }
-    .ih-p {
-      min-height: 0;
-      aspect-ratio: 4 / 3.4;
-      order: -1; /* picture first on phones: the LCP image sits at the top and text reflow can't move it */
+      font-size: clamp(44px, 13vw, 60px);
     }
   }
 </style>

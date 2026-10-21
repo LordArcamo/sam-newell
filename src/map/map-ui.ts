@@ -39,10 +39,13 @@ export function initMap() {
   // The free area of the stage that the panel and card do not cover (desktop overlays them).
   function free() {
     const W = stage.clientWidth, H = stage.clientHeight;
-    const overlay = getComputedStyle(cardWrap).position === 'absolute';
+    const overlay = getComputedStyle(cardWrap).position === 'absolute' && innerWidth >= 1024;
     if (!overlay) return { W, H, l: 16, t: 16, w: W - 32, h: H - 32 };
-    const right = cardWrap.getBoundingClientRect().right - stage.getBoundingClientRect().left + 24;
-    return { W, H, l: right, t: 24, w: Math.max(200, W - right - 32), h: H - 48 };
+    // desktop: the card sits on the right, the slips along the bottom
+    const sr = stage.getBoundingClientRect();
+    const cardL = cardWrap.getBoundingClientRect().left - sr.left;
+    const slipsT = (root.querySelector<HTMLElement>('[data-toolbar]')?.getBoundingClientRect().top ?? sr.bottom) - sr.top;
+    return { W, H, l: 24, t: 24, w: Math.max(240, cardL - 48), h: Math.max(240, slipsT - 48) };
   }
 
   function fit(b: Box) {
@@ -63,12 +66,14 @@ export function initMap() {
   function apply(v: typeof vb) {
     vb = v;
     const W = stage.clientWidth, H = stage.clientHeight;
-    const minX = free().l - 12; // anything left of this sits under the panel and card on desktop
+    const fr = free();
+    const minX = fr.l - 12; // labels and pins outside the free area sit under the card or the slips
+    const maxX = fr.l + fr.w + 12, maxY = fr.t + fr.h + 12;
     svg.setAttribute('viewBox', `${v.x.toFixed(3)} ${v.y.toFixed(3)} ${(W / v.s).toFixed(3)} ${(H / v.s).toFixed(3)}`);
     const place = (el: HTMLElement, p: Pt) => {
       const px = (p.x - v.x) * v.s, py = (p.y - v.y) * v.s;
       el.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px)`;
-      const off = px < Math.max(-40, minX) || py < -40 || px > W + 40 || py > H + 40;
+      const off = px < Math.max(-40, minX) || py < -40 || px > Math.min(W + 40, maxX) || py > Math.min(H + 40, maxY);
       if (el.classList.contains('pin')) { el.classList.toggle('flip', px > W - 140); el.classList.toggle('flop', px < 140); }
       el.style.visibility = off || (el.classList.contains('pin') && collides(px, py)) ? 'hidden' : '';
     };
@@ -82,7 +87,7 @@ export function initMap() {
       const t = townPt[el.dataset.label!];
       const px = (t.x - v.x) * v.s, py = (t.y - v.y) * v.s;
       el.style.transform = `translate(${(px + 10).toFixed(1)}px, ${(py - 10).toFixed(1)}px)`;
-      el.style.visibility = px < minX || py < 0 || px > W - 40 || py > H ? 'hidden' : '';
+      el.style.visibility = px < minX || py < 0 || px > Math.min(W - 40, maxX) || py > Math.min(H, maxY) ? 'hidden' : '';
     });
     const spx = (data.sn.x - v.x) * v.s, spy = (data.sn.y - v.y) * v.s;
     sn.style.transform = `translate(${(spx - 15).toFixed(1)}px, ${(spy - 34).toFixed(1)}px)`;
@@ -153,7 +158,7 @@ export function initMap() {
   toolbar.addEventListener('keydown', (e) => {
     const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
     if (i < 0) return;
-    const horizontal = getComputedStyle(toolbar).display === 'flex' && innerWidth >= 1024;
+    const horizontal = toolbar.getAttribute('aria-orientation') !== 'vertical';
     const next = horizontal ? ['ArrowRight', 'ArrowDown'] : ['ArrowDown', 'ArrowRight'];
     const prev = horizontal ? ['ArrowLeft', 'ArrowUp'] : ['ArrowUp', 'ArrowLeft'];
     let j = -1;
@@ -223,8 +228,9 @@ export function initMap() {
   // the model, and the pin buttons follow the projected pin heads every rendered frame.
   const glFrame = () => {
     if (!gl) return;
-    const minX = free().l - 12;
-    const W = stage.clientWidth, H = stage.clientHeight;
+    const fr = free();
+    const minX = fr.l - 12;
+    const W = Math.min(stage.clientWidth, fr.l + fr.w + 12), H = Math.min(stage.clientHeight, fr.t + fr.h + 12);
     placed = [];
     pins.forEach((el) => {
       const p = gl!.project(el.dataset.pin!);

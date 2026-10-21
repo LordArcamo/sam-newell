@@ -29,11 +29,12 @@ const year = 2026;
         <button class="btn light" type="submit">Join</button>
         <p class="news-msg small" role="status" aria-live="polite" tabindex="-1" data-news-msg></p>
       </form>
-      <p class="call"><a href={CONTACT.phoneHref}>Call or text {CONTACT.phone}</a></p>
     </div>
   </div>
-  <div class="wordmark wrap" aria-hidden="true">
-    <Logo variant="caps" class="wm" title="" />
+  <p class="phone wrap num"><a href={CONTACT.phoneHref} aria-label={`Call or text Sam at ${CONTACT.phone}`}>{CONTACT.phone}</a></p>
+  <div class="lock wrap">
+    <Logo variant="caps" class="wm" title="Sam Newell" />
+    <p class="small">Call or text. English and Spanish.</p>
   </div>
   <p class="legal wrap small">
     Sam Newell, {SITE.title.toLowerCase()}, with {BROKERAGE.name}, {BROKERAGE.street}, {BROKERAGE.city}, {BROKERAGE.region} {BROKERAGE.zip}, {BROKERAGE.phone}.
@@ -95,8 +96,8 @@ const year = 2026;
   .news input {
     min-height: 52px;
     padding: 0 16px;
-    background: var(--paper);
-    color: var(--ink);
+    background: #ececec;
+    color: #0a0a0a;
     border: 0;
     border-radius: 0;
     font-size: 18px;
@@ -105,7 +106,7 @@ const year = 2026;
     color: #4a4a4a;
   }
   .news input:focus-visible {
-    outline: 3px solid var(--paper);
+    outline: 3px solid #0a0a0a;
     outline-offset: 3px;
   }
   .news-msg {
@@ -127,12 +128,33 @@ const year = 2026;
     text-decoration: none;
     font-size: 24px;
   }
-  .wordmark {
+  /* contact as the headline (research §4.4 #11) */
+  .phone {
     margin-top: 96px;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(64px, 10vw, 168px);
+    letter-spacing: -0.05em;
+    line-height: 0.9;
   }
-  .wordmark :global(.wm) {
-    width: 100%;
-    height: auto;
+  .phone a {
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.5s var(--ease-expo);
+  }
+  .phone a:hover {
+    transform: translateX(12px);
+  }
+  .lock {
+    margin-top: 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 24px;
+  }
+  .lock :global(.wm) {
+    height: 40px;
+    width: auto;
   }
   .legal {
     margin-top: 28px;
@@ -160,8 +182,16 @@ const year = 2026;
     .foot {
       padding-top: 80px;
     }
-    .wordmark {
-      margin-top: 72px;
+    .phone {
+      margin-top: 64px;
+      font-size: 15vw;
+    }
+    .lock {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .lock :global(.wm) {
+      height: 28px;
     }
   }
 </style>

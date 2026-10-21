@@ -71,5 +71,13 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg"><defs><g id="relief-geo">` 
   `</g></defs></svg>`;
 await mkdir('public/map', { recursive: true });
 await writeFile('public/map/relief.svg', svg);
+// Lehi Light: the same relief at night for the dark map (plinth deep grey, contours in white)
+const dark = svg
+  .replace('fill="#0a0a0a"/>', 'fill="#303030"/>')
+  .replace('fill="#ffffff"/>', 'fill="#141414"/>')
+  .replaceAll('fill="#d9d9d9"', 'fill="#1f1f1f"')
+  .replace('stroke="#0a0a0a" stroke-opacity="0.32"', 'stroke="#ffffff" stroke-opacity="0.16"')
+  .replace('stroke="#0a0a0a" stroke-opacity="0.6"', 'stroke="#ffffff" stroke-opacity="0.34"');
+await writeFile('public/map/relief-dark.svg', dark);
 const kb = (Buffer.byteLength(JSON.stringify(out)) / 1024).toFixed(0);
 console.log(`map-geo.json: ${lines.minor.length + lines.index.length} contours, ${n} points, ${kb} KB`);
