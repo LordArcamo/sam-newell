@@ -208,7 +208,7 @@ const jsonld = [
     margin: 0 auto;
     width: min(40vw, 600px);
     text-align: center;
-    font-size: 36px;
+    font-size: clamp(24px, 2.5vw, 36px);
     padding-top: 30vh;
   }
   .ip {
@@ -248,13 +248,15 @@ const jsonld = [
   .panels {
     position: relative;
   }
+  /* each listing is a full-height window; its picture travels more slowly than the page (motion.ts) */
   .panel {
-    position: sticky;
-    top: 0;
+    position: relative;
     height: 100svh;
-    z-index: var(--z);
     overflow: hidden;
     background: #0a0a0a;
+  }
+  .panel + .panel {
+    margin-top: 10px;
   }
   .panel > a {
     display: block;
@@ -265,7 +267,7 @@ const jsonld = [
   /* 1536 px originals: never stretched past their width; wider screens get the black field around them */
   .panel-img {
     position: absolute;
-    inset: 0;
+    inset: -8% 0;
     max-width: 1536px;
     margin-inline: auto;
   }
@@ -510,7 +512,7 @@ const jsonld = [
   }
   .tiles {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 16px;
   }
   .a-photo {
@@ -661,7 +663,7 @@ const jsonld = [
       padding-top: 96px;
       padding-bottom: 96px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
     }
     .intro-s {
@@ -730,7 +732,7 @@ const jsonld = [
       grid-column: 1;
     }
     .tiles {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     .a-block {
       position: static;
@@ -741,6 +743,8 @@ const jsonld = [
     }
     .a-photo :global(.ph) {
       aspect-ratio: 16 / 10;
+      height: auto;
+      width: 100%;
     }
     .pod {
       grid-template-columns: 1fr;

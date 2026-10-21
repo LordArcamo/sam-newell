@@ -17,9 +17,10 @@ export function initMotion() {
     });
   }
 
-  // Listing panels: each still settles 1.08 → 1 as its panel slides up over the last one.
+  // Listing panels: each picture travels through its window more slowly than the page and settles 1.06 → 1.
   document.querySelectorAll<HTMLElement>('[data-panel-img]').forEach((el) => {
-    gsap.fromTo(el, { scale: 1.08 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: el.closest('li') ?? el, start: 'top bottom', end: 'top top', scrub: true } });
+    const win = el.closest('li') ?? el;
+    gsap.fromTo(el, { yPercent: -6, scale: 1.06 }, { yPercent: 6, scale: 1, ease: 'none', scrollTrigger: { trigger: win, start: 'top bottom', end: 'bottom top', scrub: true } });
   });
 
   // One scene, stepping statements: the pinned scene (CSS sticky) hands the light from one line to the next.
