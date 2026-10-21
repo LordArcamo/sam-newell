@@ -61,6 +61,8 @@ export function initMap() {
         };
         // already past the chapter's opening (deep link, reload mid-page): no drawing, just the map
         if (root.getBoundingClientRect().top < innerHeight * 0.1) return;
+        // a keyboard user who tabs in mid-draw gets the finished map at once (the pins are focusable only after)
+        root.addEventListener('focusin', land, { once: true });
         root.classList.add('hold');
         topo.classList.add('drawn-ready');
         const tl = gsap.timeline({ scrollTrigger: { trigger: root, start: 'top 80%', end: 'top 10%', scrub: 0.6, invalidateOnRefresh: true } });
@@ -131,15 +133,16 @@ export function initMap() {
   // Tag spacing (jury r2, the Provo flight): with a town picked every pin shows its address; a tag that would overlap
   // one already placed (same precedence as above) stays quiet until hover or focus.
   const tagW = new Map<HTMLElement, number>();
+  // tag widths are read once, all together (one layout), never between the writes of a frame
+  const measureTags = () => pins.forEach((el) => { if (!tagW.has(el)) tagW.set(el, el.querySelector<HTMLElement>('.tag')!.offsetWidth || 160); });
   const declutter = (pos: Map<HTMLElement, { x: number; y: number }>) => {
+    if (tagW.size < pins.length) measureTags();
     const boxes: [number, number, number, number][] = [];
     const town = root.classList.contains('is-town');
     for (const el of ordered()) {
       const q = pos.get(el);
       if (!q || el.style.visibility === 'hidden' || !town) { el.classList.remove('mute'); continue; }
-      const tag = el.querySelector<HTMLElement>('.tag')!;
-      let w = tagW.get(el);
-      if (!w) { w = tag.offsetWidth || 160; tagW.set(el, w); }
+      const w = tagW.get(el) ?? 160;
       const x0 = el.classList.contains('flip') ? q.x + 12 - w : el.classList.contains('flop') ? q.x - 12 : q.x - w / 2;
       const b: [number, number, number, number] = [x0 - 4, q.y - 48, x0 + w + 4, q.y - 16];
       const hit = boxes.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
@@ -172,11 +175,19 @@ export function initMap() {
       pos.set(el, { x: (p.x - v.x) * v.s, y: (p.y - v.y) * v.s });
     });
     declutter(pos);
-    labels.forEach((el) => {
+    // town names on the flat map: the picked town and Lehi first; a name that would overlap one already placed waits
+    const boxes: [number, number, number, number][] = [];
+    [...labels].sort((a, b) => (b.dataset.label === current ? 1 : 0) - (a.dataset.label === current ? 1 : 0) || (b.dataset.label === 'lehi' ? 1 : 0) - (a.dataset.label === 'lehi' ? 1 : 0)).forEach((el) => {
       const t = townPt[el.dataset.label!];
       const px = (t.x - v.x) * v.s, py = (t.y - v.y) * v.s;
       el.style.transform = `translate(${(px + 10).toFixed(1)}px, ${(py - 10).toFixed(1)}px)`;
-      el.style.visibility = px < minX || py < 0 || px > Math.min(W - 40, maxX) || py > Math.min(H, maxY) ? 'hidden' : '';
+      let w = tagW.get(el);
+      if (!w) { w = el.offsetWidth || 90; tagW.set(el, w); }
+      const b: [number, number, number, number] = [px + 10, py - 22, px + 10 + w, py + 2];
+      const off = px < minX || py < 0 || px > Math.min(W - 40, maxX) || py > Math.min(H, maxY);
+      const hit = boxes.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+      el.style.visibility = off || hit ? 'hidden' : '';
+      if (!off && !hit) boxes.push(b);
     });
     const spx = (data.sn.x - v.x) * v.s, spy = (data.sn.y - v.y) * v.s;
     sn.style.transform = `translate(${(spx - 15).toFixed(1)}px, ${(spy - 34).toFixed(1)}px)`;
@@ -236,7 +247,6 @@ export function initMap() {
     const overview = !slug || opts.overview;
     if (opts.overview) current = null;
     if (gl) gl.fly(overview ? 'overview' : opts.home ? { home: opts.home } : { town: slug! });
-    if (gl) drawRoute(overview ? null : slug);
     else go(overview ? OVERVIEW : boxFor(slug!), opts.instant);
     if (opts.focus) buttons.find((b) => b.dataset.town === slug)?.focus();
     fullBtn.hidden = !!overview;
@@ -368,47 +378,9 @@ export function initMap() {
 
   // The 3D: mount when the section nears the viewport. In GL mode the town labels and the SN mark are part of
   // the model, and the pin buttons follow the projected pin heads every rendered frame.
-  // V5: a line from Lehi, home base, to the picked town draws with the camera flight (0.9 s); the last one retracts.
-  // Straight, as the crow flies: it marks the distance from home base, it is not a road.
-  const NS = 'http://www.w3.org/2000/svg';
-  const route = document.createElementNS(NS, 'svg');
-  route.setAttribute('class', 'route');
-  route.setAttribute('aria-hidden', 'true');
-  route.dataset.ui = '';
-  const rl = document.createElementNS(NS, 'line');
-  rl.setAttribute('pathLength', '1');
-  route.appendChild(rl);
-  stage.appendChild(route);
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let routeTo: string | null = null;
-  let routeAnim: Animation | null = null;
-  const drawRoute = (slug: string | null) => {
-    const next = slug && slug !== 'lehi' ? slug : null;
-    if (next === routeTo) return;
-    routeAnim?.cancel();
-    if (!next) {
-      if (routeTo && !still) routeAnim = rl.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: 1 }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
-      else rl.style.strokeDashoffset = '1';
-      routeTo = null;
-      return;
-    }
-    routeTo = next;
-    rl.style.strokeDashoffset = '0';
-    if (!still) routeAnim = rl.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 900, delay: 120, easing: 'cubic-bezier(0.45, 0, 0.55, 1)', fill: 'backwards' });
-  };
-  const placeRoute = () => {
-    if (!gl || !routeTo) return;
-    const a = gl.project('sn'), b = gl.project(`town:${routeTo}`);
-    if (!a || !b) return;
-    rl.setAttribute('x1', a.x.toFixed(1));
-    rl.setAttribute('y1', a.y.toFixed(1));
-    rl.setAttribute('x2', b.x.toFixed(1));
-    rl.setAttribute('y2', b.y.toFixed(1));
-  };
-
+  // V5 (the route from Lehi) is drawn in the model itself, draped on the terrain (relief.ts setRoute).
   const glFrame = () => {
     if (!gl) return;
-    placeRoute();
     const fr = free();
     const minX = fr.l - 12;
     const W = Math.min(stage.clientWidth, fr.l + fr.w + 12), H = Math.min(stage.clientHeight, fr.t + fr.h + 12);
@@ -428,21 +400,29 @@ export function initMap() {
   };
   // Reduced motion: the contour poster, still (no model, no flights), like the hero keeps its still instead of the film.
   if (reduce.matches) return;
-  const io = new IntersectionObserver(
-    async (es) => {
-      if (!es.some((e) => e.isIntersecting)) return;
-      io.disconnect();
-      const h = await mountRelief(stage, { role: 'map' });
-      if (!h) return;
-      gl = h;
-      root.classList.add('is-gl');
-      h.setFree(free);
-      h.onFrame(glFrame);
-      if (current) h.fly({ town: current });
-    },
-    { rootMargin: '200px' },
-  );
+  // Boot early, in idle time, so nothing of it lands in a scroll frame at the hand-off (jury r3 P1-5): on desktops
+  // right after load; on phones and tablets (data and battery) when the chapter is about three screens away.
+  let booted = false;
+  const boot = async () => {
+    if (booted) return;
+    booted = true;
+    io.disconnect();
+    const h = await mountRelief(stage, { role: 'map' });
+    if (!h) return;
+    measureTags();
+    gl = h;
+    root.classList.add('is-gl');
+    h.setFree(free);
+    h.onFrame(glFrame);
+    if (current) h.fly({ town: current });
+  };
+  const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && boot(), { rootMargin: '300% 0px' });
   io.observe(root);
+  if (matchMedia('(min-width: 900px) and (pointer: fine)').matches) {
+    const later = () => ('requestIdleCallback' in window ? requestIdleCallback(() => boot(), { timeout: 4000 }) : setTimeout(boot, 1500));
+    if (document.readyState === 'complete') later();
+    else addEventListener('load', later, { once: true });
+  }
   addEventListener('relief:fallback', () => {
     gl = null;
     root.classList.remove('is-gl');

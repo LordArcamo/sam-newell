@@ -4,7 +4,7 @@
  */
 import { gsap } from 'gsap';
 import { Vector3, Vector2, PerspectiveCamera, Raycaster, Plane } from 'three';
-import { Engine, RIGS, rigFor, camFromPose, MODEL_BOX, type Pose as CamPose, type PinData, type TownData, type Rig } from './relief';
+import { Engine, RIGS, rigFor, camFromPose, MODEL_BOX, pinScaleFor, type Pose as CamPose, type PinData, type TownData, type Rig } from './relief';
 import type { Tier } from './gpu';
 import type { Pose, ReliefHandle } from './mount';
 import posters from '../data/posters.json';
@@ -27,6 +27,8 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 /** The map's light is fixed (dark at every hour), so its bearing is too: nearly north-up, so the frame lines up with
  *  the model's footprint and the overview can fill the stage without showing an edge. */
 const MAP_BEARING = 188;
+/** Resolve in an idle slot (or after 200 ms at the latest), so boot work never lands inside a scroll frame. */
+const idle = () => new Promise<void>((r) => ('requestIdleCallback' in window ? requestIdleCallback(() => r(), { timeout: 200 }) : setTimeout(r, 16)));
 
 export class Controller {
   tier: Tier;
@@ -69,6 +71,21 @@ export class Controller {
     // pre-compile every shader before the intro
     e.setView(e.heroPose('desktop'), 1280, 720, RIGS.desktop);
     await e.renderer.compileAsync(e.scene, e.camera);
+    // warm the map exactly as it will first draw (jury r3 P1-5: a 133 ms first frame at the hand-off): night state,
+    // a route (its line program), textures uploaded, the depth pass and one real render, each in its own idle slot
+    await idle();
+    e.setReading(true);
+    const warm = this.overviewPose();
+    e.setView(warm, 640, 400, null);
+    e.setRoute('provo', 640, 400);
+    e.drawRoute(1);
+    await idle();
+    await e.prewarm();
+    await idle();
+    e.fitShadow(new Vector3(warm.tx, 0.5, warm.tz), 45);
+    e.render();
+    e.setRoute(null, 640, 400);
+    e.setReading(false);
     if (!RECORD && !CAPTURE) setInterval(() => this.relight(), 60_000);
     document.addEventListener('visibilitychange', () => this.kick());
     addEventListener('resize', () => { this.mapDirty = true; this.refit = true; this.kick(); });
@@ -156,10 +173,11 @@ export class Controller {
       cam.aspect = W / H;
       cam.setViewOffset(W, H, W / 2 - (fr.l + fr.w / 2), H / 2 - (fr.t + fr.h / 2), W, H);
       cam.updateMatrixWorld();
-      const pxPerUnit = H / (2 * d * Math.tan((base.vfov * Math.PI) / 360));
-      const k = Math.min(4, Math.max(1, 10 / (0.26 * pxPerUnit)));
+      const tn = Math.tan((base.vfov * Math.PI) / 360);
       return pts.every(({ p, h, pin }) => {
-        for (const y of [0, (pin ? k : 1) * h]) {
+        // the same screen-space pin size as the render (Engine.sizePins)
+        const k = pin ? pinScaleFor(H / (2 * Math.max(1, cam.position.distanceTo(p)) * tn)) : 1;
+        for (const y of [0, k * h]) {
           tmp.set(p.x, p.y + y, p.z).project(cam);
           const x = ((tmp.x + 1) / 2) * W, yy = ((1 - tmp.y) / 2) * H;
           // 18 px inside the free area: a pin head is ~12–20 px across, its centre must not sit on the edge
@@ -234,6 +252,7 @@ export class Controller {
   attach(el: HTMLElement, role: Role): ReliefHandle {
     const v: View = { el, role, visible: false, ratio: 0, shown: false, cbs: [] };
     this.views.set(role, v);
+    if (role === 'map') idle().then(() => idle()).then(() => this.warmView(v));
     const io = new IntersectionObserver(
       (es) => {
         for (const x of es) { v.visible = x.isIntersecting; v.ratio = x.intersectionRatio; }
@@ -254,6 +273,31 @@ export class Controller {
       setFree: (fn) => { v.free = fn; self.mapDirty = true; self.refit = true; self.kick(); },
       dispose: () => self.fallback(),
     };
+  }
+
+  /**
+   * Before the map is on screen: put the canvas in its stage at its real size and draw one full frame there (opacity
+   * 0), so the drawing buffer, the sun depth pass and the first composite are paid in idle time, not in the scroll frame
+   * that brings the map in (jury r3 P1-5).
+   */
+  warmView(v: View) {
+    if (this.dead || this.active || !v.free) return;
+    const e = this.engine;
+    const W = v.el.clientWidth, H = v.el.clientHeight;
+    if (!W || !H) return;
+    v.el.appendChild(e.canvas);
+    e.renderer.setSize(W, H, false);
+    e.setReading(true);
+    (e.scene.background as import('three').Color).setHex(0x0a0a0a);
+    this.mapPose = this.poseFor(this.mapGoal);
+    this.refit = false;
+    const f = v.free();
+    e.setView(this.mapPose, W, H, null, { cx: f.l + f.w / 2, cy: f.t + f.h / 2 });
+    e.sizePins(H);
+    e.routeMat?.resolution.set(W, H);
+    e.fitShadow(new Vector3(this.mapPose.tx, 0.5, this.mapPose.tz), this.mapPose.dist > 60 ? 45 : 14);
+    e.render();
+    this.mapDirty = true;
   }
 
   pick() {
@@ -332,14 +376,14 @@ export class Controller {
       const shift = f ? { cx: f.l + f.w / 2, cy: f.t + f.h / 2 } : undefined;
       const pose = { ...this.mapPose };
       // pins never shrink below a ~10 px head on screen (design review #4)
-      const pxPerUnit = H / (2 * pose.dist * Math.tan((pose.vfov * Math.PI) / 360));
-      e.pinScale(Math.min(4, Math.max(1, 10 / (0.26 * pxPerUnit))));
       const key = `map:${pose.tx.toFixed(1)}:${pose.tz.toFixed(1)}:${e.state}:${e.reading}`;
       if (key !== this.shadowKey && (!this.flying || e.frame % 6 === 0)) {
         e.fitShadow(new Vector3(pose.tx, 0.5, pose.tz), pose.dist > 60 ? 45 : 14);
         this.shadowKey = key;
       }
       e.setView(pose, W, H, null, shift);
+      e.sizePins(H);
+      e.routeMat?.resolution.set(W, H);
       e.occlude(null, 1);
       e.render();
       drew = true;
@@ -450,6 +494,16 @@ export class Controller {
     // a picked home flies to its town's frame (the pin and its row light up); every goal is fitted to the stage
     this.mapGoal = p;
     const dest = this.poseFor(p);
+    // V5: the route draws on with the flight (0.12 s in, 0.9 s), draped on the terrain; overview takes it away
+    const e = this.engine;
+    const to = p === 'overview' || p === 'hero' ? null : 'town' in p ? p.town : e.opts.pins.find((x) => x.id === p.home)?.town ?? null;
+    if (to !== e.routeTo) {
+      const v = this.views.get('map');
+      e.setRoute(to, v?.el.clientWidth || innerWidth, v?.el.clientHeight || innerHeight);
+      const r = { k: 0 };
+      if (reduce) e.drawRoute(1);
+      else gsap.to(r, { k: 1, duration: 0.9, delay: 0.12, ease: 'power1.inOut', onUpdate: () => { e.drawRoute(r.k); this.mapDirty = true; this.kick(); } });
+    }
     const from = { ...this.mapPose };
     let db = ((dest.bearing - from.bearing + 540) % 360) - 180;
     db = Math.max(-45, Math.min(45, db));

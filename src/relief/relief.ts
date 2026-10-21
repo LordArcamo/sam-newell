@@ -11,6 +11,10 @@ import {
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { Line2 } from 'three/examples/jsm/lines/Line2.js';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
+import i15 from '../map/i15.json';
 import { sunPosition, skyState, sunDirection, type SkyState } from '../lib/sky';
 import type { Tier } from './gpu';
 
@@ -158,12 +162,14 @@ const PLASTER_FRAG_COLOR = /* glsl */ `
   float index = contourLine(h, 500.0, fw) * 0.30;
   float minor = contourLine(h, 20.0, fw) * 0.08 * (1.0 - step(1600.0, h)) * (1.0 - smoothstep(25.0, 35.0, slopeDeg));
   float ink = mask * max(max(major, index), minor);
+  // night: light lines on dark ground read as terraces on steep faces at close range, so they fade out with slope
+  ink *= mix(1.0, 1.0 - smoothstep(22.0, 38.0, slopeDeg), uNight);
   // I-15 groove from the distance field in alpha
   float dm = (gt.a - 0.2) / 0.8 * 250.0;
   float groove = 1.0 - smoothstep(uGroove.x, uGroove.y, dm);
   vec3 base = diffuseColor.rgb * (1.0 + 0.05 * (gGrainS - 0.5));
   // by day the lines are ink on plaster; on the night map they are light on deep grey, like the SVG poster
-  diffuseColor.rgb = mix(base * (1.0 - ink) * (1.0 - 0.18 * groove), base * (1.0 + 2.5 * ink + 0.6 * groove), uNight);
+  diffuseColor.rgb = mix(base * (1.0 - ink) * (1.0 - 0.18 * groove), base * (1.0 + 1.8 * ink + 0.6 * groove), uNight);
   gInk = ink + 0.25 * groove;
 }
 `;
@@ -338,6 +344,8 @@ export class Engine {
     });
     this.scene.add(root);
     root.updateMatrixWorld(true);
+    this.buildHeightGrid();
+    this.textures = [grad, cavity, grain];
 
     // pins: disc = for sale, sphere = sold / past; needles cast no long shadow (I-2), a fading streak instead // taste-skill-ignore: WebGL sun shadow, not a CSS shadow
     const proto = { live: pins.scene.getObjectByName('pin_live_head')!, past: pins.scene.getObjectByName('pin_past_head')!, needle: pins.scene.getObjectByName('pin_needle')! };
@@ -379,10 +387,130 @@ export class Engine {
     for (const [, g] of this.pinRoots) g.scale.setScalar(k);
   }
 
+  /** Pins in screen space (jury r3 P2): every head ~PIN_PX across whatever its distance, within a sane range. */
+  sizePins(H: number) {
+    const cam = this.camera;
+    const t = Math.tan((cam.fov * Math.PI) / 360);
+    for (const [, g] of this.pinRoots) {
+      const d = Math.max(1, cam.position.distanceTo(g.position));
+      g.scale.setScalar(pinScaleFor(H / (2 * d * t)));
+    }
+  }
+
+  textures: Texture[] = [];
+  /** Upload the textures and compile every program now (idle time), not on the first map frame. */
+  async prewarm() {
+    for (const t of this.textures) this.renderer.initTexture(t);
+    await this.renderer.compileAsync(this.scene, this.camera);
+  }
+
+  // ——— V5: the route from Lehi, draped on the terrain (along I-15 where the town sits on it) ———
+  route: Line2 | null = null;
+  routeMat: LineMaterial | null = null;
+  routeTo: string | null = null;
+  routeN = 0;
+  /** Build the route to a town's main pin; returns the number of drawable segments. */
+  setRoute(slug: string | null, W: number, H: number) {
+    if (this.route) { this.scene.remove(this.route); this.route.geometry.dispose(); this.route = null; }
+    this.routeTo = slug;
+    this.routeN = 0;
+    if (!slug || slug === 'lehi') return 0;
+    const t = this.opts.towns.find((x) => x.slug === slug);
+    if (!t) return 0;
+    const mine = this.opts.pins.filter((p) => p.town === slug);
+    const end = mine.length ? mine.reduce((a, b) => (Math.hypot(a.x - t.x, a.y - t.y) <= Math.hypot(b.x - t.x, b.y - t.y) ? a : b)) : { x: t.x, y: t.y };
+    const path = routePath({ x: 0, y: 0 }, end);
+    // resample every ~120 m and lift 30 m (x2 exaggeration) above the ground
+    const pts: number[] = [];
+    for (let i = 0; i < path.length - 1; i++) {
+      const a = path[i], b = path[i + 1];
+      const L = Math.hypot(b.x - a.x, b.y - a.y);
+      const n = Math.max(1, Math.ceil(L / 0.12));
+      for (let k = 0; k < n; k++) {
+        const x = a.x + ((b.x - a.x) * k) / n, z = a.y + ((b.y - a.y) * k) / n;
+        pts.push(x, this.heightAt(x, z) + 0.06, z);
+      }
+    }
+    const last = path[path.length - 1];
+    pts.push(last.x, this.heightAt(last.x, last.y) + 0.02, last.y);
+    const geo = new LineGeometry();
+    geo.setPositions(pts);
+    if (!this.routeMat) this.routeMat = new LineMaterial({ color: 0xffffff, linewidth: 2, worldUnits: false, transparent: true, opacity: 0.92, depthTest: true, toneMapped: false });
+    this.routeMat.resolution.set(W, H);
+    const line = new Line2(geo, this.routeMat);
+    line.computeLineDistances();
+    line.renderOrder = 2;
+    this.route = line;
+    this.routeN = pts.length / 3 - 1;
+    geo.instanceCount = 0;
+    this.scene.add(line);
+    return this.routeN;
+  }
+  /** Draw-on: k in 0…1 of the route is shown (whole segments; at ~120 m each that reads as a continuous stroke). */
+  drawRoute(k: number) {
+    if (this.route) (this.route.geometry as LineGeometry).instanceCount = Math.round(Math.max(0, Math.min(1, k)) * this.routeN);
+  }
+
+  /**
+   * Terrain height at (x, z) without a raycast (a ray against 144k triangles cost ~10 ms each: 18 of them were the
+   * 220 ms stall at the scene→map hand-off, jury r3 P1-5). A 0.5 km bucket grid of the relief's triangles, built
+   * once; a lookup tests the handful of triangles in one bucket.
+   */
+  private hgrid: { x0: number; z0: number; c: number; nx: number; nz: number; cells: Int32Array; start: Int32Array; v: Float32Array } | null = null;
+  private buildHeightGrid() {
+    const g = this.relief.geometry;
+    const pos = g.attributes.position;
+    const idx = g.index;
+    const m = this.relief.matrixWorld;
+    const n = pos.count;
+    const v = new Float32Array(n * 3);
+    const t = new Vector3();
+    for (let i = 0; i < n; i++) {
+      t.fromBufferAttribute(pos, i).applyMatrix4(m);
+      v[i * 3] = t.x; v[i * 3 + 1] = t.y; v[i * 3 + 2] = t.z;
+    }
+    const tris = idx ? idx.count / 3 : n / 3;
+    const tri = (k: number, j: number) => (idx ? idx.getX(k * 3 + j) : k * 3 + j);
+    const B = MODEL_BOX, c = 0.5;
+    const nx = Math.ceil((B.max.x - B.min.x) / c) + 1, nz = Math.ceil((B.max.z - B.min.z) / c) + 1;
+    const count = new Int32Array(nx * nz + 1);
+    const span = (k: number) => {
+      let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+      for (let j = 0; j < 3; j++) { const a = tri(k, j) * 3; x0 = Math.min(x0, v[a]); x1 = Math.max(x1, v[a]); z0 = Math.min(z0, v[a + 2]); z1 = Math.max(z1, v[a + 2]); }
+      return [Math.max(0, Math.floor((x0 - B.min.x) / c)), Math.min(nx - 1, Math.floor((x1 - B.min.x) / c)), Math.max(0, Math.floor((z0 - B.min.z) / c)), Math.min(nz - 1, Math.floor((z1 - B.min.z) / c))];
+    };
+    for (let k = 0; k < tris; k++) { const [a, b, cz, d] = span(k); for (let zz = cz; zz <= d; zz++) for (let xx = a; xx <= b; xx++) count[zz * nx + xx + 1]++; }
+    const start = new Int32Array(nx * nz + 1);
+    for (let i = 1; i <= nx * nz; i++) start[i] = start[i - 1] + count[i];
+    const fill = start.slice();
+    const cells = new Int32Array(start[nx * nz]);
+    for (let k = 0; k < tris; k++) { const [a, b, cz, d] = span(k); for (let zz = cz; zz <= d; zz++) for (let xx = a; xx <= b; xx++) cells[fill[zz * nx + xx]++] = k; }
+    // keep the triangle corner indices with the vertices so lookups need no index buffer
+    const corners = new Int32Array(tris * 3);
+    for (let k = 0; k < tris; k++) for (let j = 0; j < 3; j++) corners[k * 3 + j] = tri(k, j);
+    this.hcorners = corners;
+    this.hgrid = { x0: B.min.x, z0: B.min.z, c, nx, nz, cells, start, v };
+  }
+  private hcorners: Int32Array | null = null;
   heightAt(x: number, z: number) {
-    this.raycaster.set(new Vector3(x, 50, z), new Vector3(0, -1, 0));
-    const hit = this.raycaster.intersectObject(this.relief, false)[0];
-    return hit ? hit.point.y : 0.2;
+    const G = this.hgrid, C = this.hcorners;
+    if (!G || !C) return 0.2;
+    const cx = Math.floor((x - G.x0) / G.c), cz = Math.floor((z - G.z0) / G.c);
+    if (cx < 0 || cz < 0 || cx >= G.nx || cz >= G.nz) return 0.2;
+    const cell = cz * G.nx + cx, v = G.v;
+    let best = -Infinity;
+    for (let i = G.start[cell]; i < G.start[cell + 1]; i++) {
+      const k = G.cells[i];
+      const a = C[k * 3] * 3, b = C[k * 3 + 1] * 3, c = C[k * 3 + 2] * 3;
+      const d = (v[b + 2] - v[c + 2]) * (v[a] - v[c]) + (v[c] - v[b]) * (v[a + 2] - v[c + 2]);
+      if (Math.abs(d) < 1e-12) continue;
+      const l1 = ((v[b + 2] - v[c + 2]) * (x - v[c]) + (v[c] - v[b]) * (z - v[c + 2])) / d;
+      const l2 = ((v[c + 2] - v[a + 2]) * (x - v[c]) + (v[a] - v[c]) * (z - v[c + 2])) / d;
+      const l3 = 1 - l1 - l2;
+      if (l1 < -1e-6 || l2 < -1e-6 || l3 < -1e-6) continue;
+      best = Math.max(best, l1 * v[a + 1] + l2 * v[b + 1] + l3 * v[c + 1]);
+    }
+    return best === -Infinity ? 0.2 : best;
   }
 
   now() {
@@ -627,7 +755,7 @@ export class Engine {
     }
     const g = id === 'sn' ? this.snPin : this.pinRoots.get(id);
     if (!g) return null;
-    const head = g.position.clone().add(new Vector3(0, id === 'sn' ? 2 : 1.05, 0));
+    const head = g.position.clone().add(new Vector3(0, id === 'sn' ? 2 : 1.05 * g.scale.y, 0));
     const p = head.project(this.camera);
     return { x: ((p.x + 1) / 2) * W, y: ((1 - p.y) / 2) * H, visible: p.z < 1 && p.x > -1.1 && p.x < 1.1 && p.y > -1.1 && p.y < 1.1 };
   }
@@ -642,10 +770,12 @@ export class Engine {
     return { center: new Vector3(cx, this.heightAt(cx, cz), cz), spanX: Math.max(...xs) - Math.min(...xs), spanZ: Math.max(...ys) - Math.min(...ys) };
   }
 
+  private townY = new Map<string, number>();
   townTarget(slug: string) {
     const t = this.opts.towns.find((x) => x.slug === slug);
     if (!t) return null;
-    return new Vector3(t.x, this.heightAt(t.x, t.y), t.y);
+    if (!this.townY.has(slug)) this.townY.set(slug, this.heightAt(t.x, t.y));
+    return new Vector3(t.x, this.townY.get(slug)!, t.y);
   }
 
   dispose() {
@@ -677,6 +807,40 @@ function solve3(A: number[][], b: number[]): number[] | null {
     }
   }
   return [m[0][3] / m[0][0], m[1][3] / m[1][1], m[2][3] / m[2][2]];
+}
+
+/** Pin head size on screen: ~13 px whatever the distance (scale 0.45–4 of the modelled pin, head 0.26 km). */
+export const PIN_PX = 13;
+export const pinScaleFor = (pxPerUnit: number) => Math.min(4, Math.max(0.45, PIN_PX / (0.26 * pxPerUnit)));
+
+/**
+ * Lehi → a town: along I-15 when both ends sit within 3 km of it (most of Sam's towns do), else straight across the
+ * terrain. Points are map data frame (x east, y = −north = scene z).
+ */
+function routePath(a: { x: number; y: number }, b: { x: number; y: number }) {
+  const P = (i15 as unknown as { pts: [number, number][] }).pts;
+  // the cheapest way: off-road legs cost 1.4× a kilometre of interstate, so the line joins I-15 where that saves
+  // distance and leaves it where the town is closest, with no doubling back; if the road saves nothing, straight
+  const W = 1.4;
+  const S = [0];
+  for (let i = 1; i < P.length; i++) S.push(S[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+  const da = P.map((q) => Math.hypot(q[0] - a.x, q[1] - a.y));
+  const db = P.map((q) => Math.hypot(q[0] - b.x, q[1] - b.y));
+  let best = { c: W * Math.hypot(b.x - a.x, b.y - a.y), i: -1, j: -1 };
+  for (let i = 0; i < P.length; i++) {
+    if (da[i] > 4) continue;
+    for (let j = 0; j < P.length; j++) {
+      if (db[j] > 4 || i === j) continue;
+      const c = W * da[i] + Math.abs(S[j] - S[i]) + W * db[j];
+      if (c < best.c) best = { c, i, j };
+    }
+  }
+  if (best.i < 0) return [a, b];
+  const out = [a];
+  const step = best.j > best.i ? 1 : -1;
+  for (let i = best.i; i !== best.j + step; i += step) out.push({ x: P[i][0], y: P[i][1] });
+  out.push(b);
+  return out;
 }
 
 export const MODEL_BOX = new Box3(new Vector3(-20.97, -1.8, -56.43), new Vector3(25.32, 4.6, 41.19));
