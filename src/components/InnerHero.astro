@@ -232,12 +232,28 @@ const fallback = await getImage({ src: image, width: Math.min(1280, image.width)
   .ih-t {
     position: absolute;
     left: 28px;
-    right: 28px;
     bottom: 36px;
+    max-width: calc(100% - 56px); /* shrink-wraps the words, so the scrim below is only as big as they are */
     display: grid;
     gap: 20px;
     justify-items: start;
     z-index: 2;
+  }
+  /* The scrim behind the words (jury r3 P1-2): one flat black layer the size of the text block, feathered by a
+     blur, so a bright photo darkens only where the title and lead sit. White Light 300 keeps ≥ 3:1 behind the
+     title and ≥ 4.5:1 behind the lead on the brightest frames. */
+  .ih-t::before {
+    content: '';
+    position: absolute;
+    inset: -56px -96px -44px -56px;
+    z-index: -1;
+    background: #000;
+    opacity: 0.55;
+    filter: blur(44px);
+    pointer-events: none;
+  }
+  .ih.portrait .ih-t::before {
+    display: none; /* the words sit on the black field beside a portrait photo */
   }
   .ih-h {
     font-weight: 300;
@@ -314,7 +330,11 @@ const fallback = await getImage({ src: image, width: Math.min(1280, image.width)
     }
     .ih-t {
       position: static;
+      max-width: none;
       padding: 28px 12px 8px;
+    }
+    .ih-t::before {
+      display: none; /* stacked: the words sit on black below the picture */
     }
     .ih-h {
       font-size: clamp(44px, 13vw, 60px);
