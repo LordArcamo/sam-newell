@@ -467,6 +467,11 @@ const jsonld = [
   .scene:global(.live) li:not(:global(.on)) {
     pointer-events: none;
   }
+  /* the step on screen sits on top of the transparent ones */
+  .scene:global(.live) li:global(.on) .st-a,
+  .scene:global(.live) li:global(.on) .st-note {
+    z-index: 3;
+  }
   .scene:global(.live) .st-a {
     transition: opacity 0.6s var(--ease-expo), transform 0.7s var(--ease-expo);
   }
