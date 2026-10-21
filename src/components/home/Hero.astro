@@ -20,7 +20,7 @@ import { HERO_VIEWS } from './hero-views';
 //   night → night loop on desktop, the night still on phones (phone alternates are poster-only)
 // Every still settles from 1.06 to 1.0 in code. The poster/still is always the LCP.
 const set = async (src: ImageMetadata, ws: number[], format: 'avif' | 'webp') =>
-  (await Promise.all(ws.filter((w) => w <= src.width).map(async (w) => `${(await getImage({ src, width: w, format, quality: 66 })).src} ${w}w`))).join(', ');
+  (await Promise.all(ws.filter((w) => w <= src.width).map(async (w) => `${(await getImage({ src, width: w, format, quality: 52 })).src} ${w}w`))).join(', ');
 const sets: Record<string, { avif: string; webp: string; alt: string; film?: string }> = {};
 for (const [k, v] of Object.entries(HERO_VIEWS)) sets[k] = { avif: await set(v.src, v.ws, 'avif'), webp: await set(v.src, v.ws, 'webp'), alt: v.alt, film: v.film };
 const fallback = (await getImage({ src: HERO_VIEWS.golden.src, width: 1440, format: 'jpg', quality: 70 })).src;

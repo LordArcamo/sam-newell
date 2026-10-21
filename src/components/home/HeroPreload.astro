@@ -4,7 +4,7 @@ import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { HERO_VIEWS } from './hero-views';
 const set = async (src: ImageMetadata, ws: number[]) =>
-  (await Promise.all(ws.filter((w) => w <= src.width).map(async (w) => `${(await getImage({ src, width: w, format: 'avif', quality: 66 })).src} ${w}w`))).join(', ');
+  (await Promise.all(ws.filter((w) => w <= src.width).map(async (w) => `${(await getImage({ src, width: w, format: 'avif', quality: 52 })).src} ${w}w`))).join(', ');
 const pre: Record<string, string> = {};
 for (const [k, v] of Object.entries(HERO_VIEWS)) pre[k] = await set(v.src, v.ws);
 ---
