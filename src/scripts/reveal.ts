@@ -81,18 +81,39 @@ export function initReveals() {
     els.forEach((el) => el.classList.add('in'));
     return;
   }
+  // a shutter opens only on a decoded picture (never on an empty frame), at most 1.2 s after it is due
+  const open = (el: HTMLElement) => {
+    const img = el.querySelector('img');
+    if (!img || (img.complete && img.naturalWidth)) return el.classList.add('in');
+    img.loading = 'eager';
+    const go = () => el.classList.add('in');
+    const t = setTimeout(go, 1200);
+    img.decode().then(() => { clearTimeout(t); go(); }, () => { clearTimeout(t); go(); });
+  };
   const io = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {
         if (e.isIntersecting) {
-          e.target.classList.add('in');
-          (e.target as HTMLElement).style.translate = '';
-          io.unobserve(e.target);
+          const el = e.target as HTMLElement;
+          if (el.hasAttribute('data-shutter')) open(el);
+          else el.classList.add('in');
+          el.style.translate = '';
+          io.unobserve(el);
         }
       }
     },
     { rootMargin: '0px 0px -8% 0px', threshold: 0.01 },
   );
+  // shutters' pictures start loading a little before they are due
+  const warm = new IntersectionObserver(
+    (entries) => entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('img').forEach((i) => (i.loading = 'eager'));
+      warm.unobserve(e.target);
+    }),
+    { rootMargin: '0px 0px 60% 0px' },
+  );
+  els.forEach((el) => el.hasAttribute('data-shutter') && warm.observe(el));
   els.forEach((el) => {
     // Anything already above the fold on load shows immediately (never delay the first screen).
     const r = el.getBoundingClientRect();

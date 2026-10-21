@@ -34,7 +34,7 @@ const panels = [
 const steps = [
   { t: 'Know what you’re buying.', href: '/buy/', photo: 'listings/scene-1872-rear-twilight.jpg', alt: 'The back of 1872 S Country Ln W, Lehi, lit at dusk', cap: '1872 S Country Ln W, Lehi', pos: '50% 55%', note: 'Sam studied construction management at BYU. On a showing he looks past the paint to the frame, the roof and what a fix really costs.', more: 'Buying with Sam', moreHref: '/buy/' },
   { t: 'Priced on numbers, not hope.', href: '/sell/', photo: 'listings/scene-1056-aerial.jpg', alt: 'The neighbourhood around 1056 W Stonehaven Dr, North Salt Lake, from above', cap: 'Around 1056 W Stonehaven Dr, North Salt Lake', pos: '50% 50%', note: 'Sam prices your home from recent sales near you, not from hope, and shows you the sales he used.', more: 'Selling with Sam', moreHref: '/sell/' },
-  { t: 'Underwrite it like Sam.', href: '/invest/', photo: 'listings/scene-1714-living.jpg', alt: 'The open living room and kitchen at 1714 N 3870 W, Lehi', cap: '1714 N 3870 W, Lehi', pos: '50% 55%', note: 'Rentals are Sam’s specialty. Run the numbers the way he does before you make an offer.', more: 'Run the numbers', moreHref: '/invest/#calc' },
+  { t: 'Underwrite it like Sam.', href: '/invest/', photo: 'listings/scene-1714-living.jpg', alt: 'The open living room and kitchen at 1714 N 3870 W, Lehi', cap: '1714 N 3870 W, Lehi', pos: '50% 90%', note: 'Rentals are Sam’s specialty. Run the numbers the way he does before you make an offer.', more: 'Run the numbers', moreHref: '/invest/#calc' },
   ...(CONFIRM.mfiClub ? [{ t: 'Invest alongside MFI Club.', href: '/invest/#mfi-club', photo: 'listings/scene-1872-lake-aerial.jpg', alt: 'Lehi and Utah Lake from above 1872 S Country Ln W', cap: 'Lehi and Utah Lake, from above 1872 S Country Ln W', pos: '50% 50%', note: `Sam founded ${MFI.name} in Lehi in ${MFI.founded}. It buys and runs larger apartment buildings.`, more: 'About MFI Club', moreHref: '/invest/#mfi-club' }] : []),
 ];
 const figures = [
@@ -77,8 +77,8 @@ const jsonld = [
               <Pic src={img(p.photo)} alt={p.alt} sizes={p.wide ? '100vw' : '(max-width: 1536px) 100vw, 1536px'} pos={p.pos} rv={false} low widths={p.wide ? [768, 1152, 1536, 2048, 2560] : [768, 1152, 1536]} />
             </div>
             <div class="row">
-              <span class="k">{p.h.status === 'for-sale' ? 'For sale' : 'Sold'} · {p.h.townName}</span>
               <span class="row-h">{p.h.shown}</span>
+              <span class="k">{p.h.status === 'for-sale' ? 'For sale' : 'Sold'} · {p.h.townName}</span>
               <span class="v num">
                 {p.h.status === 'for-sale' ? usd(p.h.price!) : p.h.detail}
                 {p.h.facts && <small>{p.h.facts}</small>}
@@ -215,7 +215,7 @@ const jsonld = [
     margin: 0 auto;
     width: min(40vw, 600px);
     text-align: center;
-    font-size: clamp(24px, 2.5vw, 36px);
+    font-size: clamp(24px, 2.25vw, 32px);
     padding-top: 22vh;
   }
   .ip {
@@ -301,10 +301,12 @@ const jsonld = [
     width: min(100%, calc(72vh * 16 / 9), 1536px);
     transform: translate(-50%, -50%);
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
-    align-items: baseline;
-    gap: 24px;
-    padding: 28px 32px;
+    /* the address first, its status and town under it, the price on the right: no label above a heading */
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'h v' 'k v';
+    align-items: end;
+    gap: 6px 24px;
+    padding: 24px 32px;
     background: rgb(10 10 10 / 0.72);
     transition: background-color 0.4s;
   }
@@ -317,25 +319,31 @@ const jsonld = [
     outline-offset: -8px;
   }
   .k {
+    grid-area: k;
     font-size: 16px;
     font-weight: 500;
   }
+  .v {
+    grid-area: v;
+    align-self: center;
+  }
   .row-h {
+    grid-area: h;
     font-family: var(--display);
     font-weight: 400;
-    font-size: clamp(30px, 3vw, 48px);
+    font-size: clamp(32px, 3vw, 40px);
     letter-spacing: -0.03em;
     line-height: 1.05;
   }
   .v {
     text-align: right;
-    font-size: 19px;
+    font-size: 18px;
     font-weight: 500;
   }
   .v small {
     display: block;
     margin-top: 8px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 400;
   }
   .see-all {
@@ -344,7 +352,7 @@ const jsonld = [
     background: #0a0a0a;
     padding-top: 48px;
     padding-bottom: 140px;
-    font-size: 19px;
+    font-size: 18px;
   }
 
   /* 4 · one scene (pinned by CSS sticky; motion.ts hands the screen from one statement to the next and cuts the
@@ -383,7 +391,7 @@ const jsonld = [
   .sb-shade {
     position: absolute;
     inset: 0;
-    background: rgb(10 10 10 / 0.38);
+    background: linear-gradient(to bottom, rgb(10 10 10 / 0.42), rgb(10 10 10 / 0) 52%), rgb(10 10 10 / 0.34); /* taste-skill-ignore gradient: neutral scrim under the statement on a photo */
     pointer-events: none;
   }
   .sb-shade::after {
@@ -399,7 +407,7 @@ const jsonld = [
     position: absolute;
     right: var(--m);
     bottom: 40px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
     color: #fff;
   }
@@ -566,7 +574,7 @@ const jsonld = [
       transform: none;
       text-align: left;
       margin-top: 12px;
-      font-size: 17px;
+      font-size: 18px;
     }
     .scene:not(:global(.live)) li:not(:first-child) .st-note,
     .scene:not(:global(.live)) li:not(:first-child) .sb-cap {
@@ -598,8 +606,8 @@ const jsonld = [
     left: 0;
     right: 0;
     bottom: 0;
-    height: 44%;
-    background: rgb(10 10 10 / 0.6);
+    height: 56%;
+    background: linear-gradient(to top, rgb(10 10 10 / 0.78), rgb(10 10 10 / 0.5) 45%, rgb(10 10 10 / 0)); /* taste-skill-ignore gradient: neutral scrim under the figure on a photo */
   }
   .fig-n {
     position: absolute;
@@ -617,7 +625,7 @@ const jsonld = [
     bottom: 36px;
     width: 26ch;
     text-align: right;
-    font-size: 19px;
+    font-size: 18px;
   }
   @media (max-width: 900px) {
     /* phones: photo, shade and number share one 4:5 cell; the line sits under the photo, never over the number */
@@ -688,7 +696,7 @@ const jsonld = [
     align-self: center;
   }
   .q-text .statement {
-    font-size: clamp(24px, 2.1vw, 30px);
+    font-size: clamp(24px, 2.25vw, 32px);
   }
   .q-text figcaption {
     margin-top: 32px;
@@ -727,7 +735,7 @@ const jsonld = [
     width: min(100%, 80vh);
   }
   .a-block {
-    font-size: 20px;
+    font-size: 22px;
     max-width: 30ch;
   }
   .a-tile {
@@ -748,7 +756,7 @@ const jsonld = [
     gap: 22px 24px;
   }
   .facts dt {
-    font-size: 15px;
+    font-size: 16px;
   }
   .facts dd {
     font-weight: 600;
@@ -777,7 +785,7 @@ const jsonld = [
     margin-bottom: 20px;
   }
   .grp h3 {
-    font-size: 21px;
+    font-size: 22px;
     letter-spacing: -0.015em;
     margin: 26px 0 8px;
   }
@@ -823,7 +831,7 @@ const jsonld = [
   }
   .visit p {
     margin-bottom: 6px;
-    font-size: 17px;
+    font-size: 18px;
   }
   .visit-tel {
     font-weight: 600;
@@ -876,6 +884,7 @@ const jsonld = [
     .row {
       width: 100%;
       grid-template-columns: 1fr;
+      grid-template-areas: 'h' 'k' 'v';
       gap: 6px;
       padding: 20px var(--m);
     }

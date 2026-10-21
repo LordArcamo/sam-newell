@@ -9,11 +9,11 @@ const { a, b, heading, dark = false } = Astro.props;
   <h2 class="h qs-h" id={`qs-${a.r.n}`} data-rv>{heading}</h2>
   <figure class="qa" data-rv style="--i:1">
     <blockquote class="statement"><p>“{a.r.excerpts[a.key]}”</p></blockquote>
-    <figcaption>{a.r.name}, {a.r.what.toLowerCase()}, {reviewDate(a.r.date)}, on Zillow</figcaption>
+    <figcaption>{a.r.name}, {a.r.what.charAt(0).toLowerCase() + a.r.what.slice(1)}, {reviewDate(a.r.date)}, on Zillow</figcaption>
   </figure>
   <figure class="qb" data-rv style="--i:2">
     <blockquote class="lead"><p>“{b.r.excerpts[b.key]}”</p></blockquote>
-    <figcaption>{b.r.name}, {b.r.what.toLowerCase()}, {reviewDate(b.r.date)}, on Zillow</figcaption>
+    <figcaption>{b.r.name}, {b.r.what.charAt(0).toLowerCase() + b.r.what.slice(1)}, {reviewDate(b.r.date)}, on Zillow</figcaption>
   </figure>
   <p class="qs-more small" data-rv style="--i:3"><a class="link" href="/reviews/">Read all the reviews</a></p>
 </section>

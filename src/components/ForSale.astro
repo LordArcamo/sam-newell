@@ -31,8 +31,8 @@ const homes = [...FOR_SALE].sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
               <Pic src={img(f ? f.photo : `listings/${h.photo}`)} alt={`${h.address}, ${h.townName}`} sizes={f?.wide ? '100vw' : '(max-width: 1536px) 100vw, 1536px'} pos={f?.pos ?? '50% 50%'} rv={false} widths={f?.wide ? [768, 1152, 1536, 2048, 2560] : [768, 1152, 1536]} />
             </div>
             <div class:list={['fs-row', { wide: f?.wide }]}>
-              <span class="k">For sale · {h.townName}</span>
               <span class="fs-addr">{h.address}</span>
+              <span class="k">For sale · {h.townName}</span>
               <span class="v num">{usd(h.price!)}<small>{h.facts}</small></span>
             </div>
           </a>
@@ -85,9 +85,11 @@ const homes = [...FOR_SALE].sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
     width: min(100%, calc(72vh * 16 / 9), 1536px);
     transform: translate(-50%, -50%);
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
-    align-items: baseline;
-    gap: 24px;
+    /* the address first, its status and town under it, the price on the right: no label above a heading */
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'h v' 'k v';
+    align-items: end;
+    gap: 6px 24px;
     padding: 24px 32px;
     background: rgb(10 10 10 / 0.72);
     transition: background-color 0.4s;
@@ -101,17 +103,20 @@ const homes = [...FOR_SALE].sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
     outline-offset: -3px;
   }
   .k {
-    font-size: 15px;
+    grid-area: k;
+    font-size: 16px;
     font-weight: 500;
   }
   .fs-addr {
+    grid-area: h;
     font-family: var(--display);
     font-weight: 300;
-    font-size: clamp(24px, 2.4vw, 36px);
+    font-size: clamp(22px, 2.25vw, 32px);
     letter-spacing: -0.03em;
-    text-align: center;
   }
   .v {
+    grid-area: v;
+    align-self: center;
     font-size: 18px;
     font-weight: 600;
     text-align: right;
@@ -140,6 +145,7 @@ const homes = [...FOR_SALE].sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
     .fs-row {
       width: 100%;
       grid-template-columns: 1fr;
+      grid-template-areas: 'h' 'k' 'v';
       gap: 6px;
       padding: 20px var(--m);
     }

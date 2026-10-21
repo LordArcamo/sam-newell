@@ -296,7 +296,7 @@ const swatches = [
     bottom: 34px;
     z-index: 2;
     max-width: 420px;
-    font-size: 19px;
+    font-size: 18px;
     line-height: 1.5;
   }
   .sub b {
@@ -321,7 +321,7 @@ const swatches = [
     right: 28px;
     bottom: 40px;
     z-index: 2;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
   }
 
@@ -354,12 +354,12 @@ const swatches = [
   .sw-t {
     font-family: var(--display);
     font-weight: 500;
-    font-size: 19px;
+    font-size: 18px;
     letter-spacing: -0.01em;
   }
   .sw-p {
     margin-top: 10px;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.4;
     max-width: 17ch;
     transition: transform 0.4s var(--ease-out);
@@ -367,7 +367,7 @@ const swatches = [
   .sw-a {
     margin-top: auto;
     align-self: flex-end;
-    font-size: 20px;
+    font-size: 22px;
     transform: translateX(-8px);
     opacity: 0;
     transition: transform 0.4s var(--ease-out), opacity 0.3s;
@@ -485,7 +485,7 @@ const swatches = [
   @media (min-width: 901px) and (max-width: 1180px), (min-width: 901px) and (max-height: 760px) {
     .sub {
       bottom: 92px;
-      font-size: 17px;
+      font-size: 18px;
       max-width: 400px;
     }
     .act {
@@ -503,6 +503,12 @@ const swatches = [
       padding: 14px 18px;
     }
     .sw-p {
+      margin-top: 6px;
+      font-size: 14px;
+    }
+  }
+  @media (max-height: 640px) and (min-width: 901px) {
+    .sw-p {
       display: none;
     }
     .name {
@@ -516,7 +522,7 @@ const swatches = [
     .sub {
       bottom: 84px;
       max-width: 360px;
-      font-size: 15px;
+      font-size: 16px;
     }
   }
 
