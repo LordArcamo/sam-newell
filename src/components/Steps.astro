@@ -8,7 +8,7 @@ import Pic from './Pic.astro';
 import StudWall from './StudWall.astro';
 import type { ImageMetadata } from 'astro';
 type Ratio = '' | 'r32' | 'r45' | 'r1610' | 'r11' | 'r43' | 'r169';
-interface Step { h: string; p: string; img?: ImageMetadata; alt?: string; pos?: string; id?: string; ratio?: string; drawing?: string }
+interface Step { h: string; p: string; img?: ImageMetadata; alt?: string; pos?: string; id?: string; ratio?: string; drawing?: string; cap?: string }
 interface Props { heading: string; steps: Step[]; id?: string }
 const { heading, steps, id = 'steps' } = Astro.props;
 ---
@@ -28,9 +28,10 @@ const { heading, steps, id = 'steps' } = Astro.props;
             <div class="st-art"><StudWall /></div>
           ) : (
             s.img && (
-              <div class="st-img" data-shutter>
-                <Pic src={s.img} alt={s.alt ?? ''} sizes="(max-width: 900px) 100vw, 44vw" ratio={(s.ratio ?? 'r43') as Ratio} pos={s.pos} rv={false} />
-              </div>
+              <figure class="st-img">
+                <div data-shutter><Pic src={s.img} alt={s.alt ?? ''} sizes="(max-width: 900px) 100vw, 44vw" ratio={(s.ratio ?? 'r43') as Ratio} pos={s.pos} rv={false} /></div>
+                {s.cap && <figcaption class="st-cap">{s.cap}</figcaption>}
+              </figure>
             )
           )}
         </li>
@@ -63,7 +64,7 @@ const { heading, steps, id = 'steps' } = Astro.props;
   .st {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 44vw);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 32px 5vw;
     align-items: center;
   }
@@ -71,16 +72,14 @@ const { heading, steps, id = 'steps' } = Astro.props;
     grid-template-columns: minmax(0, 1fr);
   }
   .st.flip {
-    grid-template-columns: minmax(0, 44vw) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
   .st.flip .st-t {
     order: 2;
   }
-  .st.tall {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 30vw);
-  }
-  .st.tall.flip {
-    grid-template-columns: minmax(0, 30vw) minmax(0, 1fr);
+  .st.tall .st-img {
+    width: min(100%, 30vw);
+    justify-self: center;
   }
   /* the node on the line, level with the middle of the step */
   .st-n {
@@ -105,6 +104,12 @@ const { heading, steps, id = 'steps' } = Astro.props;
       background: var(--ink);
     }
   }
+  .st-t {
+    max-width: 520px;
+  }
+  .st.flip .st-t {
+    justify-self: start;
+  }
   .st-h {
     font-size: var(--t-sub);
     letter-spacing: -0.025em;
@@ -112,6 +117,11 @@ const { heading, steps, id = 'steps' } = Astro.props;
   }
   .st-p {
     max-width: 46ch;
+  }
+  .st-cap {
+    margin-top: 10px;
+    font-size: 14px;
+    opacity: 0.75;
   }
   .st-art {
     color: inherit;

@@ -1,79 +1,154 @@
 ---
+/**
+ * The live listings in the home page's listing-window treatment: a 16:9 window (never taller than 72vh) per
+ * home, the picture travelling slowly through it (motion.ts [data-panel-img]), the facts on one row over the
+ * picture's own width, and the two actions under it.
+ */
 import Arrow from './Arrow.astro';
-/** The live listings, with photos (Zillow p_h files at small sizes until Sam sends the MLS originals). */
 import Pic from './Pic.astro';
 import { FOR_SALE } from '../lib/homes';
 import { img } from '../lib/images';
+import { usd } from '../lib/format';
 interface Props { heading?: string; calc?: string }
 const { heading = 'For sale now', calc = '/invest/' } = Astro.props;
+// the full-size listing photo for each window (the card photos are small Zillow files)
+const FULL: Record<string, { photo: string; pos: string; wide?: boolean }> = {
+  '1872-s-country-ln-w-lehi': { photo: 'listings/full-1872-front-aerial.jpg', pos: '50% 60%', wide: true },
+  '1056-w-stonehaven-dr-north-salt-lake': { photo: 'listings/full-1056-exterior.jpg', pos: '50% 55%' },
+  '1714-n-3870-w-lehi': { photo: 'listings/full-1714-kitchen.jpg', pos: '50% 50%' },
+};
+const homes = [...FOR_SALE].sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
 ---
-<section class="fs sec wrap" aria-labelledby="fs-h">
-  <h2 class="h" id="fs-h" data-rv>{heading}</h2>
+<section class="fs sec" aria-labelledby="fs-h">
+  <h2 class="h wrap" id="fs-h" data-rv>{heading}</h2>
   <ul role="list" class="fs-list">
-    {FOR_SALE.map((h, i) => (
-      <li class="fs-item">
-        <Pic src={img(`listings/${h.photo}`)} alt={`${h.address}, ${h.townName}`} sizes="(max-width: 767px) 90vw, 30vw" ratio="r32" widths={[360, 550]} i={i} />
-        <div class="fs-t" data-rv style={`--i:${i + 1}`}>
-          <h3>{h.address}, {h.townName}</h3>
-          <p class="fs-price num">{h.detail}</p>
-          <p class="small">{h.facts}</p>
-          <p class="fs-links">
+    {homes.map((h) => {
+      const f = FULL[h.id];
+      return (
+        <li class="fs-item">
+          <a class="fs-win" href={h.zillow} rel="noopener" target="_blank" data-cursor="View" aria-label={`${h.address}, ${h.townName}: ${h.detail}, on Zillow`}>
+            <div class:list={['fs-img', { wide: f?.wide }]} data-panel-img>
+              <Pic src={img(f ? f.photo : `listings/${h.photo}`)} alt={`${h.address}, ${h.townName}`} sizes={f?.wide ? '100vw' : '(max-width: 1536px) 100vw, 1536px'} pos={f?.pos ?? '50% 50%'} rv={false} widths={f?.wide ? [768, 1152, 1536, 2048, 2560] : [768, 1152, 1536]} />
+            </div>
+            <div class:list={['fs-row', { wide: f?.wide }]}>
+              <span class="k">For sale · {h.townName}</span>
+              <span class="fs-addr">{h.address}</span>
+              <span class="v num">{usd(h.price!)}<small>{h.facts}</small></span>
+            </div>
+          </a>
+          <p class:list={['fs-links', { wide: f?.wide }]}>
             <a class="more" href={h.zillow} rel="noopener" target="_blank">See it on Zillow <Arrow /></a>
             <a class="more" href={`${calc}?price=${h.price}#calc`}>Run the numbers <Arrow /></a>
           </p>
-        </div>
-      </li>
-    ))}
+        </li>
+      );
+    })}
   </ul>
-  <p class="small fs-note" data-rv>Prices as listed on {new Date('2026-10-21').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. Zillow has the current status.</p>
+  <p class="small fs-note wrap" data-rv>Prices as listed on {new Date('2026-10-21').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. Zillow has the current status.</p>
 </section>
 <style>
   .fs .h {
-    margin-bottom: 48px;
+    margin-bottom: 56px;
   }
   .fs-list {
     display: grid;
-    grid-template-columns: 1.25fr 1fr 1fr;
-    gap: 40px var(--gap);
-    align-items: start;
+    gap: 56px;
   }
-  .fs-item:nth-child(2) {
-    margin-top: 96px;
+  /* the window: 16:9, at most 72vh, centred; the picture travels a little inside it */
+  .fs-win {
+    position: relative;
+    display: block;
+    height: min(72vh, 56.25vw);
+    overflow: hidden;
+    color: #fff;
+    text-decoration: none;
   }
-  .fs-item:nth-child(3) {
-    margin-top: 40px;
+  .fs-img {
+    position: absolute;
+    inset: -6% 0;
+    width: min(100%, calc(72vh * 16 / 9), 1536px);
+    margin-inline: auto;
   }
-  .fs-t {
-    margin-top: 16px;
+  .fs-img.wide,
+  .fs-row.wide,
+  .fs-links.wide {
+    width: min(100%, calc(72vh * 16 / 9));
   }
-  .fs-t h3 {
-    font-size: 24px;
-    letter-spacing: -0.02em;
-    line-height: 1.15;
+  .fs-img :global(.ph) {
+    height: 100%;
+    background: #141414;
   }
-  .fs-price {
+  .fs-row {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(100%, calc(72vh * 16 / 9), 1536px);
+    transform: translate(-50%, -50%);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+    align-items: baseline;
+    gap: 24px;
+    padding: 24px 32px;
+    background: rgb(10 10 10 / 0.72);
+    transition: background-color 0.4s;
+  }
+  .fs-win:hover .fs-row,
+  .fs-win:focus-visible .fs-row {
+    background: rgb(10 10 10 / 0.86);
+  }
+  .fs-win:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: -3px;
+  }
+  .k {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .fs-addr {
     font-family: var(--display);
-    font-weight: 600;
-    font-size: 32px;
+    font-weight: 300;
+    font-size: clamp(24px, 2.4vw, 36px);
     letter-spacing: -0.03em;
-    margin: 6px 0 2px;
+    text-align: center;
+  }
+  .v {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: right;
+  }
+  .v small {
+    display: block;
+    font-size: 14px;
+    font-weight: 400;
   }
   .fs-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 20px;
-    margin-top: 12px;
+    gap: 6px 28px;
+    width: min(100%, calc(72vh * 16 / 9), 1536px);
+    margin: 14px auto 0;
+    padding-inline: 4px;
   }
   .fs-note {
     margin-top: 40px;
     font-weight: 400;
   }
   @media (max-width: 900px) {
-    .fs-list {
-      grid-template-columns: 1fr;
+    .fs-win {
+      height: 125vw;
     }
-    .fs-item:nth-child(n) {
-      margin-top: 0;
+    .fs-row {
+      width: 100%;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding: 20px var(--m);
+    }
+    .fs-addr,
+    .v {
+      text-align: left;
+    }
+    .fs-links {
+      padding-inline: var(--m);
     }
   }
 </style>
