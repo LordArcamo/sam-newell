@@ -20,8 +20,9 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'long', day: 'nu
     title="Notes from Sam"
     lead="Short reads on buying, selling and investing in Utah."
     cta={latest ? { href: `/blog/${latest.id}/`, label: 'Read the latest' } : undefined}
-    image={latest?.data.cover ?? img('photos/valley-view-utah-county.jpg')}
-    alt={latest?.data.coverAlt ?? ''}
+    image={img('photos/wasatch-blue-hour.jpg')}
+    alt="Blue hour over the Wasatch from a Utah County field, from Sam’s own photograph"
+    pos="50% 70%"
   />
   <section class="posts sec wrap" aria-labelledby="posts-h">
     <h2 class="sr-only" id="posts-h">All notes</h2>
