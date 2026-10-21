@@ -71,7 +71,7 @@ const timeline = [
       </figure>
     </div>
     <div class="be-pics">
-      <div class="be-1" data-shutter><Pic src={img('photos/framing-three-storey-blue-sky.jpg')} alt="A three-storey custom home in framing under a blue sky, by A Framing Company" sizes="(max-width: 767px) 90vw, 44vw" ratio="r32" /></div>
+      <div class="be-1" data-shutter><Pic src={img('photos/framing-provo-sam.jpg')} alt="Sam on a framing job in the Provo Riverbottoms, a sheathed roof behind him" sizes="(max-width: 767px) 62vw, 26vw" ratio="r45" pos="50% 56%" /></div>
       <div class="be-2" data-shutter><Pic src={img('photos/framing-site-garage.jpg')} alt="A house in framing on a hillside site, with the scaffolding still up" sizes="(max-width: 767px) 90vw, 44vw" ratio="r32" i={1} /></div>
     </div>
   </section>
@@ -202,6 +202,16 @@ const timeline = [
   .be-pics {
     display: grid;
     gap: var(--gap);
+  }
+  /* a different job from the /buy/ hero: Sam on site in Provo, a phone frame, so it stands portrait and smaller */
+  .be-1 {
+    width: 58%;
+    justify-self: end;
+  }
+  @media (max-width: 767px) {
+    .be-1 {
+      width: 68%;
+    }
   }
 
   .fam {
