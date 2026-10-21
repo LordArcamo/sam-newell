@@ -56,7 +56,7 @@ const mapData = {
       <circle class="home" cx="0" cy="0" r="0.42" />
     </svg>
     <svg class="relief" viewBox="-30 -56 64 40" preserveAspectRatio="none" data-ui data-map-svg role="img" aria-label="Contour map of the Wasatch Front from North Salt Lake to Provo, with Utah Lake and the Great Salt Lake">
-      <use href="/map/relief-dark.svg#relief-geo" />
+      <use data-href="/map/relief-dark.svg#relief-geo" />
     </svg>
     <div class="overlay" aria-hidden="true" data-labels data-ui>
       {TOWNS.map((t) => <span class="tl small" data-label={t.slug}>{t.name}</span>)}
@@ -82,7 +82,7 @@ const mapData = {
           <Pic src={img(`listings/${c.lead.photo}`)} alt={`${c.lead.shown}, ${c.lead.townName}`} sizes="390px" ratio="r169" rv={false} widths={[390, 550]} />
         ) : (
           <div class="macro r169" aria-hidden="true">
-            <svg viewBox={`${c.x - 4} ${-c.north - 2.67} 8 5.33`} preserveAspectRatio="xMidYMid slice"><use href="/map/relief-dark.svg#relief-geo" /></svg>
+            <svg viewBox={`${c.x - 4} ${-c.north - 2.67} 8 5.33`} preserveAspectRatio="xMidYMid slice"><use data-href="/map/relief-dark.svg#relief-geo" /></svg>
             {c.homes.filter((h) => h.xy).map((h) => (
               <i style={`left:${((h.xy!.x - (c.x - 4)) / 8) * 100}%;top:${((-h.xy!.north - (-c.north - 2.67)) / 5.33) * 100}%`}></i>
             ))}
@@ -93,7 +93,7 @@ const mapData = {
             <h3 class="tc-town" id={`tc-${c.slug}`}>{c.name}</h3>
             <p class="small">{c.count || 'No homes shown here yet.'}</p>
           </div>
-          <!-- the list and the quote scroll inside the card (fade at the bottom edge); the actions never leave it -->
+          <!-- the list and the quote scroll inside the card (a hairline over the actions while more is below); the actions never leave it -->
           <div class="tc-scroll" data-lenis-prevent data-tc-scroll>
             {c.homes.length > 0 ? (
               <ul role="list" class="tc-homes">
@@ -449,7 +449,8 @@ const mapData = {
     outline: 2px solid var(--paper);
   }
   .tc-body {
-    padding: 20px 22px 22px;
+    --pad: 22px;
+    padding: 20px var(--pad) var(--pad);
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -466,9 +467,14 @@ const mapData = {
     margin: 0 -8px;
     padding: 0 8px;
   }
-  /* more below: the list fades out at its foot instead of stopping mid-line */
-  .tc-scroll.fade {
-    mask-image: linear-gradient(#000 calc(100% - 44px), transparent);
+  /* more below: the pinned actions sit on a grey plate, so the list reads as running on underneath (tone, no lines) */
+  .tc-scroll.is-cut + .tc-act {
+    background: #efefef;
+    margin: 0 calc(-1 * var(--pad)) calc(-1 * var(--pad));
+    padding: 16px var(--pad) var(--pad);
+  }
+  .tc-scroll.is-cut + .tc-act .btn.ghost {
+    background: #fff;
   }
   .tc-town {
     font-size: 32px;
@@ -728,7 +734,8 @@ const mapData = {
       display: none;
     }
     .tc-body {
-      padding: 18px 18px 20px;
+      --pad: 18px;
+      padding: 18px var(--pad) var(--pad);
     }
     .addr {
       font-size: 20px;
@@ -773,7 +780,6 @@ const mapData = {
       min-height: 84px;
       padding: 12px 14px 12px;
       gap: 4px;
-      border: 1px solid #fff;
     }
     .slip b {
       font-size: 18px;
@@ -781,10 +787,11 @@ const mapData = {
     .slip span {
       font-size: 14px;
     }
+    /* the picked town steps down a tone (no outline): white type on #2e2e2e, still underlined */
     .slip[aria-pressed='true'] {
       transform: none;
-      background: var(--paper);
-      color: var(--ink);
+      background: #2e2e2e;
+      color: #fff;
     }
   }
 </style>

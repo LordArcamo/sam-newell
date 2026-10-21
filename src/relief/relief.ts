@@ -166,7 +166,7 @@ const PLASTER_FRAG_COLOR = /* glsl */ `
   gInk = ink + 0.25 * groove;
 }
 `;
-// The night map's contours carry a faint light of their own, so they read on the shadow side of the ridges too.
+// The night map's contours carry a faint light of their own, so they still read on the unlit side of the ridges.
 const PLASTER_FRAG_EMISSIVE = /* glsl */ `
 totalEmissiveRadiance += uNight * vec3(0.045 * gInk);
 `;

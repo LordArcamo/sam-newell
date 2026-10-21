@@ -15,6 +15,14 @@ export function initMap() {
   const found = document.querySelector<HTMLElement>('[data-map]');
   if (!found) return;
   const root: HTMLElement = found;
+  // The contour poster (150 KB) is not part of the first paint: it loads about a screen before the chapter arrives.
+  const uses = [...root.querySelectorAll<SVGUseElement>('use[data-href]')];
+  const lazy = new IntersectionObserver((es) => {
+    if (!es.some((e) => e.isIntersecting)) return;
+    lazy.disconnect();
+    uses.forEach((u) => u.setAttribute('href', u.dataset.href!));
+  }, { rootMargin: '100% 0px' });
+  lazy.observe(root);
   const data: Data = JSON.parse(root.querySelector('[data-map-json]')!.textContent!);
   const stage = root.querySelector<HTMLElement>('[data-stage]')!;
   const svg = root.querySelector<SVGSVGElement>('[data-map-svg]')!;
@@ -157,10 +165,10 @@ export function initMap() {
     requestAnimationFrame(fadeCard);
   }
 
-  // The card's list scrolls inside it; a fade at its foot says "more below" until the end is reached.
+  // The card's list scrolls inside it; a hairline over the actions says "more below" until the end is reached.
   const fadeCard = () => {
     const sc = cards.find((c) => c.classList.contains('on'))?.querySelector<HTMLElement>('[data-tc-scroll]');
-    if (sc) sc.classList.toggle('fade', sc.scrollHeight - sc.scrollTop - sc.clientHeight > 2);
+    if (sc) sc.classList.toggle('is-cut', sc.scrollHeight - sc.scrollTop - sc.clientHeight > 2);
   };
   root.querySelectorAll<HTMLElement>('[data-tc-scroll]').forEach((sc) => sc.addEventListener('scroll', fadeCard, { passive: true }));
 
