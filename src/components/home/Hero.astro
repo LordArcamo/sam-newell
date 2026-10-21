@@ -126,8 +126,14 @@ const swatches = [
       new IntersectionObserver(([e]) => (e.isIntersecting && !document.hidden ? v.play().catch(() => {}) : v.pause())).observe(still);
       document.addEventListener('visibilitychange', () => (document.hidden ? v.pause() : v.play().catch(() => {})));
     };
-    if (document.readyState === 'complete') setTimeout(start, 300);
-    else addEventListener('load', () => setTimeout(start, 300), { once: true });
+    // the poster is the LCP: the film waits for `load`, an idle moment and, on phones, a further beat, so its
+    // bytes never compete with the first screen
+    const later = () => {
+      const idle = (fn: () => void) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 300));
+      idle(() => setTimeout(start, matchMedia('(max-width: 900px)').matches ? 1200 : 300));
+    };
+    if (document.readyState === 'complete') later();
+    else addEventListener('load', later, { once: true });
   }
   const html = document.documentElement;
   if (html.classList.contains('op')) {

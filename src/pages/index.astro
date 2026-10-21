@@ -57,10 +57,10 @@ const jsonld = [
   <!-- 2 · Intro: the pinned sentence, his pictures pass -->
   <section class="intro" aria-label="What Sam does" data-intro>
     <p class="statement intro-s">Honest feedback on every house, and the numbers before you offer. That’s the whole job.</p>
-    <figure class="ip ip1" data-par="-14"><Pic src={img('photos/podcast-shoot-helicopter.jpg')} alt="Sam with a guest beside a helicopter on a Get Leveraged shoot" sizes="(max-width: 767px) 70vw, 26vw" ratio="r45" pos="50% 40%" rv={false} /></figure>
-    <figure class="ip ip4" data-par="8"><Pic src={img('photos/framing-site-garage.jpg')} alt="A house in framing on a hillside site, with the scaffolding still up" sizes="(max-width: 767px) 90vw, 24vw" ratio="r32" rv={false} /></figure>
-    <figure class="ip ip2" data-par="10" data-film="/film/studio.mp4"><Pic src={studioPoster} alt="Sam talking in the Get Leveraged studio" sizes="(max-width: 767px) 90vw, 40vw" ratio="r1610" rv={false} widths={[360, 540, 720]} /></figure>
-    <figure class="ip ip3" data-par="-6" data-film="/film/keys.mp4" data-film-once><Pic src={keysPoster} alt="Keys day: confetti under the Congrats sign at Sam's office as clients close on a home" sizes="(max-width: 767px) 60vw, 24vw" ratio="r11" rv={false} widths={[360, 540, 720]} /></figure>
+    <figure class="ip ip1" data-par="-14"><Pic src={img('photos/podcast-shoot-helicopter.jpg')} alt="Sam with a guest beside a helicopter on a Get Leveraged shoot" sizes="(max-width: 767px) 70vw, 26vw" ratio="r45" pos="50% 40%" rv={false} low /></figure>
+    <figure class="ip ip4" data-par="8"><Pic src={img('photos/framing-site-garage.jpg')} alt="A house in framing on a hillside site, with the scaffolding still up" sizes="(max-width: 767px) 90vw, 24vw" ratio="r32" rv={false} low /></figure>
+    <figure class="ip ip2" data-par="10" data-film="/film/studio.mp4"><Pic src={studioPoster} alt="Sam talking in the Get Leveraged studio" sizes="(max-width: 767px) 90vw, 40vw" ratio="r1610" rv={false} low widths={[360, 540, 720]} /></figure>
+    <figure class="ip ip3" data-par="-6" data-film="/film/keys.mp4" data-film-once><Pic src={keysPoster} alt="Keys day: confetti under the Congrats sign at Sam's office as clients close on a home" sizes="(max-width: 767px) 60vw, 24vw" ratio="r11" rv={false} low widths={[360, 540, 720]} /></figure>
   </section>
 
   <!-- 3 · For sale now, sold lately: full panels, one midline row (a sticky stack) -->
@@ -74,7 +74,7 @@ const jsonld = [
         <li class="panel" style={`--z:${i + 1}`}>
           <a href={p.h.zillow} rel="noopener" target="_blank" data-cursor="View" aria-label={`${p.h.shown}, ${p.h.townName}: ${p.h.detail}, on Zillow`}>
             <div class:list={['panel-img', { wide: p.wide }]} data-panel-img>
-              <Pic src={img(p.photo)} alt={p.alt} sizes={p.wide ? '100vw' : '(max-width: 1536px) 100vw, 1536px'} pos={p.pos} rv={false} widths={p.wide ? [768, 1152, 1536, 2048, 2560] : [768, 1152, 1536]} />
+              <Pic src={img(p.photo)} alt={p.alt} sizes={p.wide ? '100vw' : '(max-width: 1536px) 100vw, 1536px'} pos={p.pos} rv={false} low widths={p.wide ? [768, 1152, 1536, 2048, 2560] : [768, 1152, 1536]} />
             </div>
             <div class="row">
               <span class="k">{p.h.status === 'for-sale' ? 'For sale' : 'Sold'} · {p.h.townName}</span>

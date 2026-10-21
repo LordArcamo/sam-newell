@@ -14,8 +14,10 @@ interface Props {
   rv?: boolean;
   i?: number;
   widths?: number[];
+  /** below-the-fold pictures that must never compete with the first screen */
+  low?: boolean;
 }
-const { src, alt, sizes, ratio = '', pos = '50% 50%', eager = false, class: cls = '', rv = true, i = 0, widths } = Astro.props;
+const { src, alt, sizes, ratio = '', pos = '50% 50%', eager = false, class: cls = '', rv = true, i = 0, widths, low = false } = Astro.props;
 const ws = (widths ?? [360, 540, 720, 960, 1280, 1600, 2000]).filter((w) => w <= src.width);
 if (!ws.includes(src.width) && src.width < 2000) ws.push(src.width);
 ---
@@ -28,7 +30,7 @@ if (!ws.includes(src.width) && src.width < 2000) ws.push(src.width);
     formats={['avif', 'webp']}
     quality={eager ? 50 : 58}
     loading={eager ? 'eager' : 'lazy'}
-    fetchpriority={eager ? 'high' : 'auto'}
+    fetchpriority={eager ? 'high' : low ? 'low' : 'auto'}
     decoding={eager ? 'sync' : 'async'}
     style={`object-position:${pos}`}
   />
