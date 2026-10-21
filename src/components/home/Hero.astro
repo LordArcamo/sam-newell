@@ -1,31 +1,27 @@
 ---
 /**
- * Lehi Light hero (research-premium §4.2): a 10 px black frame, the view panel (Sam's own Wasatch sunset as the
- * film slot: a slow drift + light grade until the film loop exists) and the swatch nav column.
+ * Lehi Light hero (research-premium §4.2): a 10 px black frame, the view panel (Sam's own Wasatch view as a film
+ * that follows Lehi's clock) and the swatch nav column.
  * The still is the LCP: preloaded in <head>, never hidden. The opening sequence (letterbox, mark, title) is CSS
  * under html.op, set once per session in <head>; any input skips it; reduced motion never sees it.
- * FILM SLOT: when a real clip exists, add <video muted playsinline loop preload="none" poster=…> inside .still,
- * started after LCP (see the TODO in the script below).
+ * The film is laid over the poster after load (it is frame 0 of the loop, so the cut is invisible).
  */
 import { getImage } from 'astro:assets';
 import Logo from '../Logo.astro';
 import { ZILLOW, CONTACT, BOOKING_URL, bookingAttrs, PODCAST } from '../../data/site';
-import dusk from '../../assets/photos/wasatch-dusk.jpg';
-import dayDesk from '../../assets/film/hero-desktop.jpg';
-import dayPhone from '../../assets/film/hero-phone.jpg';
+import { HERO_VIEWS } from './hero-views';
 
-// Film by Lehi time (research §4.2 rotation): by day (dawn / noon) Sam's real reel 01 — a new build's deck
-// panning over the valley to the mountains — loops in the view; at golden hour, blue hour and night the view is
-// Sam's own Wasatch sunset photograph with a slow drift. The poster/still is always the LCP.
+// Film by Lehi time (film-plan §1.4, sun altitude from <head>). All four states are Sam's own Wasatch view
+// (IG #13), animated or relit from his photograph (assets-gen/MEDIA-NOTES.md):
+//   dawn, day, early golden → "Wasatch, golden light" loop (desktop 16:9, phone 9:16)
+//   late golden (sun under 4°) → alpenglow still · blue hour → blue-hour still
+//   night → night loop on desktop, the night still on phones (phone alternates are poster-only)
+// Every still settles from 1.06 to 1.0 in code. The poster/still is always the LCP.
 const set = async (src: ImageMetadata, ws: number[], format: 'avif' | 'webp') =>
   (await Promise.all(ws.filter((w) => w <= src.width).map(async (w) => `${(await getImage({ src, width: w, format, quality: 66 })).src} ${w}w`))).join(', ');
-const HERO_SETS = {
-  dusk: { avif: await set(dusk, [720, 1080, 1440, 1920, 2400], 'avif'), webp: await set(dusk, [720, 1080, 1440, 1920, 2400], 'webp') },
-  day: { avif: await set(dayDesk, [720, 1080], 'avif'), webp: await set(dayDesk, [720, 1080], 'webp') },
-  dayPhone: { avif: await set(dayPhone, [480, 720], 'avif'), webp: await set(dayPhone, [480, 720], 'webp') },
-};
-const fallback = (await getImage({ src: dusk, width: 1440, format: 'jpg', quality: 70 })).src;
-const sets = HERO_SETS;
+const sets: Record<string, { avif: string; webp: string; alt: string; film?: string }> = {};
+for (const [k, v] of Object.entries(HERO_VIEWS)) sets[k] = { avif: await set(v.src, v.ws, 'avif'), webp: await set(v.src, v.ws, 'webp'), alt: v.alt, film: v.film };
+const fallback = (await getImage({ src: HERO_VIEWS.golden.src, width: 1440, format: 'jpg', quality: 70 })).src;
 
 const swatches = [
   { href: '/buy/', t: 'Buy', p: 'Know what you’re buying' },
@@ -40,25 +36,28 @@ const swatches = [
       <picture>
         <source type="image/avif" data-k="avif" sizes="(max-width: 900px) 100vw, 84vw" />
         <source type="image/webp" data-k="webp" sizes="(max-width: 900px) 100vw, 84vw" />
-        <img width="2560" height="1920" alt="" fetchpriority="high" loading="eager" decoding="async" data-hero-img />
+        <img width="1920" height="1080" alt="" fetchpriority="high" loading="eager" decoding="async" data-hero-img />
       </picture>
       <script is:inline define:vars={{ sets }}>
         // pick the still for Lehi's time of day before anything is fetched (html[data-sun] is set in <head>)
         (function () {
-          var s = document.documentElement.dataset.sun, day = s === 'noon' || s === 'dawn', phone = matchMedia('(max-width: 900px)').matches;
-          var k = day ? (phone ? 'dayPhone' : 'day') : 'dusk', p = document.currentScript.previousElementSibling, img = p.querySelector('img');
+          var h = document.documentElement, s = h.dataset.sun, a = +h.dataset.alt, phone = matchMedia('(max-width: 900px)').matches;
+          var v = s === 'night' ? 'night' : s === 'blue' ? 'blue' : s === 'golden' && a < 4 ? 'alpen' : 'golden';
+          var k = (v === 'golden' || v === 'night') && phone ? v + 'Phone' : v, p = document.currentScript.previousElementSibling, img = p.querySelector('img');
           p.querySelectorAll('source').forEach(function (el) { el.srcset = sets[k][el.dataset.k]; });
-          img.alt = day ? 'A new build’s deck looking over the valley to the Wasatch, from Sam’s own reel' : 'Sunset over the Wasatch from a Utah County field, photographed by Sam';
-          document.documentElement.dataset.view = day ? 'day' : 'dusk';
-          p.closest('[data-still]').dataset.view = day ? 'day' : 'dusk';
+          img.alt = sets[k].alt;
+          h.dataset.view = v;
+          var st = p.closest('[data-still]');
+          st.dataset.view = v;
+          if (sets[k].film) st.dataset.heroFilm = sets[k].film;
         })();
       </script>
-      <noscript><img class="ns" src={fallback} alt="Sunset over the Wasatch from a Utah County field, photographed by Sam" width="2560" height="1920" /></noscript>
+      <noscript><img class="ns" src={fallback} alt={HERO_VIEWS.golden.alt} width="1920" height="1080" /></noscript>
     </div>
     <div class="shade" aria-hidden="true"></div>
     <a class="logo" href="/" aria-label="Sam Newell, home"><Logo variant="caps" title="Sam Newell" /></a>
     <h1 class="title" id="hero-title"><span class="ln"><span>Sam</span></span> <span class="ln"><span>Newell</span></span></h1>
-    <p class="sub">Real estate broker in Lehi, Utah. Buying, selling and investing on the Wasatch Front: <b class="num">{ZILLOW.sold}</b> homes sold, <b class="num">{ZILLOW.rating}</b> on <b class="num">{ZILLOW.reviews}</b> Zillow reviews.</p>
+    <p class="sub">Realtor in Lehi, Utah. Buying, selling and investing on the Wasatch Front: <b class="num">{ZILLOW.sold}</b> homes sold, <b class="num">{ZILLOW.rating}</b> on <b class="num">{ZILLOW.reviews}</b> Zillow reviews.</p>
     <a class="btn act" href={BOOKING_URL} {...bookingAttrs}>Book a call with Sam <span class="arrow" aria-hidden="true">→</span></a>
     <p class="clock num" data-clock>Lehi, Utah</p>
     <!-- opening sequence (html.op only) -->
@@ -96,11 +95,13 @@ const swatches = [
   tick();
   setInterval(tick, 30_000);
 
-  // The day film: Sam's reel 01 as a muted, seamless loop, started only after the poster (LCP) has painted and
-  // the page has loaded; never with reduced motion or Save-Data; paused off-screen and in hidden tabs.
+  // The film for this hour: a muted, seamless loop (AV1 where the browser plays it, else H.264), started only after
+  // the poster (LCP) has painted and the page has loaded; never with reduced motion or Save-Data; paused off-screen
+  // and in hidden tabs. Its frame 0 is the poster, so it fades in without a cut.
   const still = document.querySelector<HTMLElement>('[data-still]');
   const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
-  if (still?.dataset.view === 'day' && !matchMedia('(prefers-reduced-motion: reduce)').matches && !nav.connection?.saveData) {
+  const film = still?.dataset.heroFilm;
+  if (still && film && !matchMedia('(prefers-reduced-motion: reduce)').matches && !nav.connection?.saveData) {
     const start = () => {
       const v = document.createElement('video');
       v.muted = true;
@@ -110,7 +111,8 @@ const swatches = [
       v.setAttribute('aria-hidden', 'true');
       v.preload = 'auto';
       v.className = 'film';
-      v.src = matchMedia('(max-width: 900px)').matches ? '/film/hero-phone.mp4' : '/film/hero-desktop.mp4';
+      const av1 = v.canPlayType('video/mp4; codecs="av01.0.08M.08"') === 'probably';
+      v.src = `${film}${av1 ? '.av1' : ''}.mp4`;
       v.addEventListener('playing', () => v.classList.add('on'), { once: true });
       still.appendChild(v);
       v.play().catch(() => {});
@@ -160,37 +162,34 @@ const swatches = [
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 50% 62%;
-    transform-origin: 46% 60%;
+    object-position: 50% 60%;
   }
   .still :global(.ns) {
     position: absolute;
     inset: 0;
   }
-  .still[data-view='day'] :global(img) {
-    object-position: 50% 50%;
-  }
   .still :global(.film) {
     position: absolute;
     inset: 0;
-    object-position: 50% 50%;
     opacity: 0;
     transition: opacity 1.4s var(--ease-io);
   }
   .still :global(.film.on) {
     opacity: 1;
   }
-  /* the film feeling until the film exists: a 28 s drift, never paused by anything but reduced motion */
+  /* the settle (film-plan §1.0): the whole view, poster and film together, eases from 1.06 to 1.0; with the
+     opening it lands as the letterbox opens. The camera in the films is locked off, so nothing else moves it. */
   @media (prefers-reduced-motion: no-preference) {
-    .still[data-view='dusk'] :global(img) {
-      animation: drift 28s ease-in-out infinite alternate;
+    .still {
+      transform-origin: 50% 60%;
+      animation: settle 3.2s var(--ease-expo) 0.1s both;
     }
-    @keyframes drift {
+    :global(html.op) .still {
+      animation-delay: 0.9s;
+    }
+    @keyframes settle {
       from {
-        transform: scale(1.03) translate3d(0, 0, 0);
-      }
-      to {
-        transform: scale(1.12) translate3d(-1.6%, -1.2%, 0);
+        transform: scale(1.06);
       }
     }
   }

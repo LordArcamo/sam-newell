@@ -1,7 +1,6 @@
 // Films for Lehi Light, cut from Sam's own reels (assets-gen/instagram/video, The Hunter 2026-10-21).
 // Muted H.264 loops + matching poster frames (the poster is the LCP; the film starts after it).
-//   hero-*.mp4   reel 01 (new-build deck panning over the valley to the mountains), 1.6–6.6 s, ping-pong
-//                loop (seamless), graded down toward dusk. Desktop 1080x720 crop, phone 720x960 crop.
+//   (hero-*.mp4 now come from the Higgsfield run via scripts/import-media.mjs; reel 01 is no longer the hero)
 //   studio.mp4   reel 04 (Sam in the Get Leveraged studio), 16.0–21.5 s, 16:10 crop around Sam.
 //   keys.mp4     reel 05 (closing confetti under the "Congrats!" neon), 1.0–4.5 s, square crop
 //                (client + guest consent confirmed by the user, 2026-10-21).
@@ -21,8 +20,6 @@ function film({ src, ss, t, crop, scale, out, crf, pingpong, poster }) {
   run(['-i', `public/film/${out}`, '-frames:v', '1', '-q:v', '2', `src/assets/film/${poster}`]);
 }
 
-film({ src: '01-new-build-deck-valley-view-kitchen-lehi-2026-08.mp4', ss: 1.6, t: 5, crop: '1080:720:0:600', scale: '1080:720', out: 'hero-desktop.mp4', crf: 27, pingpong: true, poster: 'hero-desktop.jpg' });
-film({ src: '01-new-build-deck-valley-view-kitchen-lehi-2026-08.mp4', ss: 1.6, t: 5, crop: '1080:1440:0:240', scale: '720:960', out: 'hero-phone.mp4', crf: 29, pingpong: true, poster: 'hero-phone.jpg' });
 film({ src: '04-sam-get-leveraged-podcast-studio-2024-06.mp4', ss: 16.0, t: 5.5, crop: '720:450:0:150', scale: '720:450', out: 'studio.mp4', crf: 27, pingpong: false, poster: 'studio.jpg' });
 film({ src: '05-closing-confetti-congrats-neon-office-2026-06.mp4', ss: 1.0, t: 3.5, crop: '720:720:0:280', scale: '720:720', out: 'keys.mp4', crf: 27, pingpong: false, poster: 'keys.jpg' });
 console.log(execFileSync('ls', ['-la', 'public/film', 'src/assets/film']).toString());

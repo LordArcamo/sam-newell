@@ -136,6 +136,7 @@ void ZILLOW;
           alt = Math.asin(Math.sin(f) * Math.sin(dec) + Math.cos(f) * Math.cos(dec) * Math.cos(H)) / r,
           az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(f) - Math.tan(dec) * Math.cos(f));
         h.dataset.sun = alt < -6 ? 'night' : alt < 0 ? 'blue' : alt <= 10 ? (az < 0 ? 'dawn' : 'golden') : 'noon';
+        h.dataset.alt = alt.toFixed(1);
         h.dataset.t = String(t);
         if (/[?&]gl=off/.test(q)) h.dataset.gl = 'off';
         // Motion flags (Lehi Light): the opening plays once per session on the home page; a page arrived at

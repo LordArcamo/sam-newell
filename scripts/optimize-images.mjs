@@ -30,10 +30,9 @@ const JOBS = [
   [`${IG}/20-family-brighton-fall-sam-kids-2026-10.jpg`, 'photos/family-brighton-2026-10.jpg', 'photo'],
   [`${HI}/22-family-kenai-river-alaska-2026-07.jpg`, 'photos/family-kenai-sockeye.jpg', 'photo'],
   // Photos already on the current site (Sam's own)
-  [`${OLD}/framing-hero.jpg`, 'photos/framed-house-wasatch.jpg', 'photo'],
+  // photos/framed-house-wasatch.jpg + photos/family-river.jpg now come from the 4K upscales (scripts/import-media.mjs)
   [`${OLD}/sam-hero.jpg`, 'photos/sam-heidi-liam.jpg', 'photo'],
   [`${OLD}/parenting-1.jpg`, 'photos/family-easter.jpg', 'photo'],
-  [`${OLD}/parenting-2.jpg`, 'photos/family-river.jpg', 'photo'],
   // Live listings (Zillow p_h files, small slots only until Sam sends MLS originals)
   [`${CONCEPT}/lehi-1714.jpg`, 'listings/1714-n-3870-w-lehi.jpg', 'listing'],
   [`${CONCEPT}/lehi-country.jpg`, 'listings/1872-s-country-ln-w-lehi.jpg', 'listing'],
