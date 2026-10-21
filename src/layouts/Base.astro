@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE, BROKERAGE, SOCIALS, ZILLOW } from '../data/site';
+import { SITE, BROKERAGE, SOCIALS, ZILLOW, LICENCE } from '../data/site';
 import towns from '../data/towns.json';
 
 interface Crumb { name: string; path: string }
@@ -47,6 +47,14 @@ const graph: Record<string, unknown>[] = [
     telephone: '+1-801-995-2220',
     knowsLanguage: ['en', 'es'],
     worksFor: { '@id': `${site}/#brokerage` },
+    memberOf: { '@id': `${site}/#brokerage` },
+    hasCredential: {
+      '@type': 'EducationalOccupationalCredential',
+      credentialCategory: 'license',
+      name: `${LICENCE.state} real estate licence ${LICENCE.number}`,
+      identifier: LICENCE.number,
+      recognizedBy: { '@type': 'GovernmentOrganization', name: LICENCE.issuer, url: LICENCE.issuerUrl },
+    },
     sameAs: SOCIALS.map((s) => s.href),
     image: `${site}/og/home.jpg`,
   },

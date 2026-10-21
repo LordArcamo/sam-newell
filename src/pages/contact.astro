@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import InnerHero from '../components/InnerHero.astro';
 import Pic from '../components/Pic.astro';
 import { img } from '../lib/images';
-import { CONTACT, BROKERAGE, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site';
+import { CONTACT, BROKERAGE, LICENCE, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site';
 ---
 <Base
   title="Contact Sam Newell | Call or Text (801) 995-2220"
@@ -26,6 +26,7 @@ import { CONTACT, BROKERAGE, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site'
       <dl class="ct-facts" data-rv style="--i:2">
         <div><dt>Call or text</dt><dd><a href={CONTACT.phoneHref}>{CONTACT.phone}</a></dd></div>
         <div><dt>Brokerage</dt><dd>{BROKERAGE.name}<br />{BROKERAGE.street}<br />{BROKERAGE.city}, {BROKERAGE.region} {BROKERAGE.zip}</dd></div>
+        <div><dt>Licence</dt><dd>{LICENCE.state} licence #{LICENCE.number}</dd></div>
         <div><dt>Speaks</dt><dd>English and Spanish</dd></div>
       </dl>
     </div>

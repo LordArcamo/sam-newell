@@ -4,7 +4,7 @@ import InnerHero from '../components/InnerHero.astro';
 import Pic from '../components/Pic.astro';
 import { img } from '../lib/images';
 import { review, reviewDate } from '../data/reviews';
-import { SAM_SAYS, FRAMING, FRAMING_QUOTE, ZILLOW, PODCAST, MFI, BROKERAGE, SITE, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site';
+import { SAM_SAYS, FRAMING, FRAMING_QUOTE, ZILLOW, PODCAST, MFI, BROKERAGE, LICENCE, SITE, BOOKING_URL, BOOKING_EXTERNAL } from '../data/site';
 import { CONFIRM } from '../data/confirm';
 import { EPISODES } from '../lib/podcast';
 
@@ -45,6 +45,12 @@ const timeline = [
         </li>
       ))}
     </ol>
+    <dl class="ab-facts" data-rv>
+      <div><dt>Licence</dt><dd>{LICENCE.state} licence #{LICENCE.number}</dd></div>
+      <div><dt>Brokerage</dt><dd>{BROKERAGE.name}, {BROKERAGE.street}, {BROKERAGE.city}, {BROKERAGE.region} {BROKERAGE.zip}</dd></div>
+      <div><dt>On Zillow since</dt><dd>January 2014</dd></div>
+      <div><dt>Speaks</dt><dd>English and Spanish</dd></div>
+    </dl>
   </section>
 
   <section class="be dark sec wrap" id="builders-eye" aria-labelledby="be-h">
@@ -83,6 +89,24 @@ const timeline = [
   .tl .h {
     margin-bottom: 64px;
     max-width: 16ch;
+  }
+  .ab-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px var(--gap);
+    margin-top: 96px;
+  }
+  .ab-facts dt {
+    opacity: 0.6;
+    margin-bottom: 6px;
+  }
+  .ab-facts dd {
+    max-width: 30ch;
+  }
+  @media (max-width: 900px) {
+    .ab-facts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
   .tl-list {
     display: grid;

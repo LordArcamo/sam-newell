@@ -1,7 +1,7 @@
 ---
 import Logo from './Logo.astro';
 import towns from '../data/towns.json';
-import { FOOTER_SAM, SOCIALS, BROKERAGE, CONTACT, SITE } from '../data/site';
+import { FOOTER_SAM, SOCIALS, BROKERAGE, CONTACT, SITE, LICENCE_LINE } from '../data/site';
 const year = 2026;
 ---
 <footer class="foot dark" data-foot>
@@ -37,7 +37,7 @@ const year = 2026;
     <p class="small">Call or text. English and Spanish.</p>
   </div>
   <p class="legal wrap small">
-    Sam Newell, {SITE.title.toLowerCase()}, with {BROKERAGE.name}, {BROKERAGE.street}, {BROKERAGE.city}, {BROKERAGE.region} {BROKERAGE.zip}, {BROKERAGE.phone}.
+    Sam Newell, {SITE.title.toLowerCase()}. {LICENCE_LINE}, {BROKERAGE.phone}.
     Equal Housing Opportunity. Reviews quoted word for word from Zillow and Apple Podcasts. Elevation: USGS 3DEP (public domain). I-15: © OpenStreetMap contributors, ODbL.
     © {year} Sam Newell. <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a>
   </p>

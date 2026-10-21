@@ -80,6 +80,20 @@ export const MFI = {
   founded: 2018,
 };
 
+/**
+ * Sam's Utah licence, exactly as his Zillow profile shows it (inspo/zillow.md "Profile facts", read 2026-10-21).
+ * The user asked for it on the site (2026-10-21). Utah ad rules: always show the brokerage name with it.
+ * Never label it "broker licence": the SA suffix means sales agent.
+ */
+export const LICENCE = {
+  number: '6862779-SA00',
+  state: 'UT',
+  issuer: 'Utah Division of Real Estate',
+  issuerUrl: 'https://realestate.utah.gov/',
+};
+/** "UT licence #6862779-SA00 · KW Utah Realtors Keller Williams (Brickyard), 1245 E Brickyard Rd #500, Salt Lake City, UT 84106" */
+export const LICENCE_LINE = `${LICENCE.state} licence #${LICENCE.number} · ${BROKERAGE.name}, ${BROKERAGE.street}, ${BROKERAGE.city}, ${BROKERAGE.region} ${BROKERAGE.zip}`;
+
 export const FRAMING = {
   name: 'A Framing Company',
   url: 'https://aframingcompany.com/',
@@ -90,11 +104,12 @@ export const NAV = [
   { href: '/sell/', label: 'Sell' },
   { href: '/invest/', label: 'Invest' },
   { href: '/podcast/', label: 'Podcast' },
+  { href: '/reviews/', label: 'Reviews' },
   { href: '/about/', label: 'About' },
 ];
 
 export const FOOTER_SAM = [
-  ...NAV.slice(0, 4),
+  ...NAV.slice(0, 5),
   { href: '/blog/', label: 'Blog' },
   { href: '/about/', label: 'About' },
   { href: '/contact/', label: 'Contact' },
