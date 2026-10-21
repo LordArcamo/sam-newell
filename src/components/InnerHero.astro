@@ -29,7 +29,11 @@ const nar = (image.width / image.height).toFixed(3);
 // The picture is the LCP, so it is built here rather than through Pic: its own `sizes` per layout (a phone must not
 // fetch a desktop file), a lighter AVIF for phones (q38: 40-100 KB at 390 px x 3; desktop q50, as Pic produced), and
 // the same AVIF sets preloaded in <head> (Base lifts the two data-ih-pre links there).
-const PHONE = '(max-width: 1023px)';
+// Phones and portrait tablets stack the picture over the words; landscape screens from 768 px (short laptops at
+// 1000×540 included) take the desktop split, so the title is always on the first screen. DESK is the exact complement:
+// the <source media>, the preloads and `sizes` all use these two, so a page downloads one hero file.
+const PHONE = '(max-width: 767px), (max-width: 1023px) and (orientation: portrait)';
+const DESK = '(min-width: 1024px), (min-width: 768px) and (orientation: landscape)';
 const fit = (ws: number[]) => {
   const out = ws.filter((w) => w <= image.width);
   if (!out.length || (out[out.length - 1] < image.width && image.width < ws[ws.length - 1])) out.push(image.width);
@@ -43,14 +47,14 @@ const deskWs = fit([720, 960, 1280, 1600, 2000]);
 // portrait photo stands at its own shape on the right, at most 62% of the panel and the panel's height (≤ 100svh).
 const phoneSizes = 'calc(100vw - 16px)';
 const deskSizes = portrait ? `min(62vw, ${(image.width / image.height * 100).toFixed(1)}vh)` : 'min(100vw - 20px, 1536px)';
-const sizes = `${PHONE} ${phoneSizes}, ${deskSizes}`;
+const sizes = `(max-width: 767px) ${phoneSizes}, (max-width: 1023px) and (orientation: portrait) ${phoneSizes}, ${deskSizes}`;
 const phoneAvif = await set(phoneWs, 'avif', 38);
 const deskAvif = await set(deskWs, 'avif', 50);
 const webp = await set([...new Set([...phoneWs, ...deskWs])].sort((a, b) => a - b), 'webp', 58);
 const fallback = await getImage({ src: image, width: Math.min(1280, image.width), format: 'webp', quality: 58 });
 ---
 <link rel="preload" as="image" type="image/avif" media={PHONE} imagesrcset={phoneAvif} imagesizes={phoneSizes} fetchpriority="high" data-ih-pre />
-<link rel="preload" as="image" type="image/avif" media="(min-width: 1024px)" imagesrcset={deskAvif} imagesizes={deskSizes} fetchpriority="high" data-ih-pre />
+<link rel="preload" as="image" type="image/avif" media={DESK} imagesrcset={deskAvif} imagesizes={deskSizes} fetchpriority="high" data-ih-pre />
 <section class:list={['ih', { portrait }]} aria-labelledby="ih-h" data-ih style={`--ar:${ar};--nar:${nar}`}>
   <div class="ih-p" data-cursor={cursor}>
     <div class="ph">
@@ -81,7 +85,7 @@ const fallback = await getImage({ src: image, width: Math.min(1280, image.width)
   .ih {
     position: relative;
     height: calc(100svh - var(--bar));
-    min-height: 600px;
+    min-height: min(600px, calc(100svh - var(--bar))); /* a short laptop (1000×540) gets the whole panel on screen */
     max-height: 1100px;
     overflow: hidden;
     background: #0a0a0a;
@@ -237,7 +241,7 @@ const fallback = await getImage({ src: image, width: Math.min(1280, image.width)
   }
   .ih-h {
     font-weight: 300;
-    font-size: clamp(56px, 6vw, 96px);
+    font-size: clamp(48px, min(6vw, 11svh), 96px);
     letter-spacing: -0.045em;
     line-height: 0.98;
     max-width: 12ch;
@@ -268,7 +272,21 @@ const fallback = await getImage({ src: image, width: Math.min(1280, image.width)
     display: inline-flex;
     align-items: center;
   }
-  @media (max-width: 1023px) {
+  /* very short landscape screens (a phone on its side, 844×390): a smaller title and a wider text column, so the
+     whole block fits the panel */
+  @media (max-height: 500px) and (orientation: landscape) and (min-width: 768px) {
+    .ih-h {
+      font-size: 40px;
+    }
+    .ih-t {
+      gap: 12px;
+      bottom: 20px;
+    }
+    .ih.portrait .ih-t {
+      max-width: 48%;
+    }
+  }
+  @media (max-width: 767px), (max-width: 1023px) and (orientation: portrait) {
     .ih {
       height: auto;
       min-height: 0;
@@ -283,6 +301,9 @@ const fallback = await getImage({ src: image, width: Math.min(1280, image.width)
       width: auto;
       height: auto;
       max-width: none;
+      /* a tall photo on a portrait tablet (820×1180) leaves room for the title on the first screen; the crop is
+         cover from the page's object-position, a few percent off top and bottom, faces whole */
+      max-height: max(240px, calc(100svh - var(--bar) - 220px));
       overflow: hidden;
     }
     .ih.portrait .ih-t {
