@@ -116,6 +116,8 @@ const count = (k: ReviewKind | 'all') => (k === 'all' ? list.length : list.filte
       });
       pics.forEach((p) => (p.hidden = k !== 'all'));
       if (status) status.textContent = `${n} review${n === 1 ? '' : 's'} shown`;
+      // the page got shorter or longer: let the scroll triggers re-measure
+      window.dispatchEvent(new Event('resize'));
     });
   }
 </script>
@@ -213,6 +215,11 @@ const count = (k: ReviewKind | 'all') => (k === 'all' ? list.length : list.filte
     display: grid;
     grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
     gap: 5vw;
+  }
+  /* the filter sets [hidden]; the display: grid above would otherwise override it */
+  .rv-i[hidden],
+  .rv-pic[hidden] {
+    display: none;
   }
   .rv-pic figure {
     grid-column: 2;
