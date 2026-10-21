@@ -67,3 +67,7 @@ for (const [src, dest, kind] of JOBS) {
   const m = await sharp(out).metadata();
   console.log(`${dest}  ${m.width}×${m.height}`);
 }
+
+// Square crop of the Brighton photo for the /about/ hero (a light LCP image on phones).
+await sharp(path.join(OUT, 'photos/family-brighton-2026-10.jpg')).extract({ left: 0, top: 330, width: 1080, height: 1080 })
+  .jpeg({ quality: 88, mozjpeg: true }).toFile(path.join(OUT, 'photos/family-brighton-2026-10-square.jpg'));
