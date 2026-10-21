@@ -114,7 +114,8 @@ void ZILLOW;
       (function (d) {
         var h = d.documentElement, q = location.search;
         h.classList.add('js');
-        var t = Date.now(), m = /[?&]t=([^&]+)/.exec(q);
+        // ?record without ?t freezes the same instant as the engine and the golden poster (17:45 MDT)
+        var t = /[?&]record/.test(q) ? Date.parse('2026-10-21T17:45:00-06:00') : Date.now(), m = /[?&]t=([^&]+)/.exec(q);
         if (m) { var p = Date.parse(decodeURIComponent(m[1])); if (!isNaN(p)) t = p; }
         var r = Math.PI / 180, D = t / 864e5 - 0.5 + 2440588 - 2451545,
           M = r * (357.5291 + 0.98560028 * D),

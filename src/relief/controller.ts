@@ -55,7 +55,7 @@ export class Controller {
     const data: { pins: PinData[]; towns: TownData[] } = json ? JSON.parse(json) : { pins: [], towns: [] };
     const tParam = q.get('t');
     const parsed = tParam ? Date.parse(tParam) : NaN;
-    const timeOverride = Number.isFinite(parsed) ? parsed : RECORD || CAPTURE ? Date.parse('2026-10-21T17:35:00-06:00') : null;
+    const timeOverride = Number.isFinite(parsed) ? parsed : RECORD || CAPTURE ? Date.parse('2026-10-21T17:45:00-06:00') : null; // = Base.astro boot default and the golden poster
     this.engine = new Engine({ tier: this.tier, pins: data.pins, towns: data.towns, record: RECORD || !!CAPTURE, timeOverride, onFallback: () => this.fallback() });
     await this.engine.load();
     const e = this.engine;
@@ -161,19 +161,18 @@ export class Controller {
       const pose = e.heroPose(rig, pb === undefined ? e.bearing : pb + (e.bearing - pb) * ease);
       const r = v.el.getBoundingClientRect();
       const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height)));
-      if (!reduce) {
-        pose.dist *= 1 - (innerWidth < 768 ? 0.1 : 0.14) * p;
-        pose.elev += 3 * p;
-      }
       // drift ±0.6° on a 20 s sine, starting only after the hand-off so the crossfade frame matches the poster
       const t = RECORD ? e.frame / 60 : this.readyAt ? (now - this.readyAt) / 1000 : 0;
       if (!reduce && innerWidth >= 1024 && t > 1.5) pose.bearing += 0.6 * Math.sin(((t - 1.5) / 20) * Math.PI * 2);
+      // scroll dolly, applied after the composition so it really moves in
+      const dolly = (q: CamPose): CamPose => (reduce ? q : { ...q, dist: q.dist * (1 - (innerWidth < 768 ? 0.1 : 0.14) * p), elev: q.elev + 3 * p });
       const key = `hero:${rig}:${e.state}`;
       if (key !== this.shadowKey) {
         e.fitShadow(new Vector3(pose.tx, 0.5, pose.tz), 38);
         this.shadowKey = key;
       }
-      e.setView(pose, W, H, RIGS[rig]);
+      e.setView(pose, W, H, RIGS[rig], undefined, dolly);
+      e.occlude(this.titleBox(v), reduce || !v.shown ? 1 : Math.min(1, (now - this.lastFrame) / 200));
       e.render();
       drew = true;
     } else if (this.mapDirty || this.flying) {
@@ -187,6 +186,7 @@ export class Controller {
         this.shadowKey = key;
       }
       e.setView(pose, W, H, null, shift);
+      e.occlude(null, 1);
       e.render();
       drew = true;
       this.mapDirty = false;
@@ -209,14 +209,24 @@ export class Controller {
     requestAnimationFrame(this.tick);
   };
 
+  /** The hero title's box in fractions of the canvas, padded 16 px. */
+  titleBox(v: View): [number, number, number, number] | null {
+    const title = v.el.closest('[data-hero]')?.querySelector<HTMLElement>('.title');
+    if (!title) return null;
+    const c = v.el.getBoundingClientRect();
+    const r = title.getBoundingClientRect();
+    if (!c.width || !c.height) return null;
+    return [(r.left - 16 - c.left) / c.width, (r.top - 16 - c.top) / c.height, (r.right + 16 - c.left) / c.width, (r.bottom + 16 - c.top) / c.height];
+  }
+
   /** The hero keeps its poster's bearing (identical geometry for the hand-off); only the light is live. */
   posterBearing(rig: Rig): number | undefined {
-    if (RECORD || CAPTURE) return undefined;
+    if (CAPTURE) return undefined; // ?record uses the bucket bearing exactly like a visit: no double image
     const st = document.documentElement.dataset.sun as keyof (typeof posters.rigs)['desktop'] | undefined;
     return st ? posters.rigs[rig]?.[st]?.bearing : undefined;
   }
 
-  /** I-1 safety: if the title's 5th-percentile contrast over the live frame drops below 4.5:1, show its plate. */
+  /** I-1 safety: if the title's 5th-percentile contrast over the live frame drops below 3:1, show its plate. */
   checkTitle(v: View) {
     const title = v.el.closest('[data-hero]')?.querySelector<HTMLElement>('.title');
     if (!title || this.dead || this.active !== v) return;
@@ -238,7 +248,8 @@ export class Controller {
     lum.sort((a, b) => a - b);
     const l5 = lum[Math.floor(lum.length * 0.05)] ?? 1;
     const contrast = (l5 + 0.05) / (0.003 + 0.05);
-    title.closest('[data-hero]')!.classList.toggle('plate', contrast < 4.5 && e.state !== 'night');
+    // display type at ~219 px: WCAG large-text 3:1 applies (design review #1)
+    title.closest('[data-hero]')!.classList.toggle('plate', contrast < 3 && e.state !== 'night');
   }
 
   watchdog(now: number, measuring: boolean) {
@@ -334,25 +345,29 @@ export class Controller {
   capture() {
     const e = this.engine;
     const rig = (q.get('rig') as Rig) || 'desktop';
-    const ref = CAPTURE === 'overview' ? { w: 2560, h: 1440 } : RIGS[rig];
+    const ref = RIGS[rig];
+    const size = CAPTURE === 'overview' ? { w: 2560, h: 1440 } : { w: ref.w, h: ref.h };
     e.renderer.setPixelRatio(1);
-    e.renderer.setSize(ref.w, ref.h, false);
+    e.renderer.setSize(size.w, size.h, false);
     let pose: CamPose;
     if (CAPTURE === 'overview') {
       pose = { ...this.overviewPose(), dist: 190, bearing: 200, elev: 50 };
       e.fitShadow(new Vector3(pose.tx, 0.5, pose.tz), 60);
-      e.setView(pose, ref.w, ref.h, null);
+      e.setView(pose, size.w, size.h, null);
+      e.occlude(null, 1);
     } else {
       pose = e.heroPose(rig);
       e.fitShadow(new Vector3(pose.tx, 0.5, pose.tz), 38);
       e.setView(pose, ref.w, ref.h, ref);
+      const t = ref.title;
+      e.occlude([t[0] - 0.01, t[1] - 0.02, t[2] + 0.01, t[3] + 0.02], 1);
     }
     e.render();
     e.render();
-    const sn = e.project('sn', ref.w, ref.h);
+    const sn = e.project('sn', size.w, size.h);
     (window as unknown as { __capture: unknown }).__capture = {
       png: e.canvas.toDataURL('image/png'),
-      sn: sn ? { fx: sn.x / ref.w, fy: sn.y / ref.h } : null,
+      sn: sn ? { fx: sn.x / size.w, fy: sn.y / size.h } : null,
       state: e.state,
       bearing: e.bearing,
     };

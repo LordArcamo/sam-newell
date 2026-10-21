@@ -43,17 +43,22 @@ export function lookFor(altDeg: number, az: number): Look {
 
 // ——— rigs (reference frames for poster parity) and poses ———
 export type Rig = 'desktop' | 'tablet' | 'phone';
-export const RIGS: Record<Rig, { w: number; h: number; dist: number; elev: number; vfov: number; beyond: number }> = {
-  desktop: { w: 2560, h: 1440, dist: 54, elev: 14, vfov: 17, beyond: 4 },
-  tablet: { w: 1536, h: 2048, dist: 50, elev: 16, vfov: 22, beyond: 3.5 },
-  phone: { w: 1170, h: 2532, dist: 44, elev: 18, vfov: 24, beyond: 3 },
+export interface RigSpec { w: number; h: number; dist: number; elev: number; vfov: number; beyond: number; lake: [number, number]; snMaxY: number; title: [number, number, number, number] }
+/**
+ * lake = where the Utah Lake north-half centroid sits in the reference frame (the calm band under the title);
+ * snMaxY = the SN pin must stay above this (upper frame); title = the title's box in reference-frame fractions
+ * (x0, y0, x1, y1), used to fade pins/labels that would sit under the name (design review #2).
+ */
+export const RIGS: Record<Rig, RigSpec> = {
+  desktop: { w: 2560, h: 1440, dist: 54, elev: 14, vfov: 17, beyond: 4, lake: [0.3, 0.84], snMaxY: 0.42, title: [0.0, 0.5, 0.5, 1.0] },
+  tablet: { w: 1536, h: 2048, dist: 64, elev: 18, vfov: 27, beyond: 4, lake: [0.3, 0.82], snMaxY: 0.45, title: [0.0, 0.62, 0.86, 0.98] },
+  phone: { w: 1170, h: 2532, dist: 44, elev: 18, vfov: 24, beyond: 3, lake: [0.36, 0.74], snMaxY: 0.5, title: [0.0, 0.6, 0.9, 0.86] },
 };
 /** Same thresholds as the <picture> media queries in Hero.astro (viewport aspect). */
 export const rigFor = (aspect: number): Rig => (aspect >= 1.2 ? 'desktop' : aspect >= 0.75 ? 'tablet' : 'phone');
 
-// The visible north bay of Utah Lake (its bbox centre lies 19 km south, behind the camera at hero framing).
-const LAKE = new Vector3(0.8, 0.16, 9.0);
-const TITLE_SPOT = new Vector2(0.32, 0.8); // I-1: the calm band under the title
+// Utah Lake north-half centroid, ≈ 40.30 N 111.80 W (scene km: 4.3 E, 10.2 S), on the inlay surface.
+const LAKE = new Vector3(4.3, 0.16, 10.2);
 const deg = Math.PI / 180;
 
 /** Compass bearing (from north, clockwise) in [195, 235] that puts the sun ~100° off the camera axis (I-1). */
@@ -306,13 +311,15 @@ export class Engine {
       g.name = `pin:${p.id}`;
       const head = (p.s === 'for-sale' ? proto.live : proto.past).clone();
       const needle = proto.needle.clone();
-      head.traverse((o) => { if ((o as Mesh).isMesh) { (o as Mesh).castShadow = false; this.pinMats.push((o as Mesh).material as Material); } });
-      needle.traverse((o) => { if ((o as Mesh).isMesh) (o as Mesh).castShadow = false; });
+      // own materials per pin, so each can fade on its own (title occlusion)
+      head.traverse((o) => { const m = o as Mesh; if (m.isMesh) { m.castShadow = false; m.material = (m.material as Material).clone(); this.pinMats.push(m.material as Material); } });
+      needle.traverse((o) => { const m = o as Mesh; if (m.isMesh) { m.castShadow = false; m.material = (m.material as Material).clone(); } });
       g.add(head, needle);
       // map data y = SVG y = −north = scene z (+z south)
       const y = this.heightAt(p.x, p.y);
       g.position.set(p.x, y, p.y);
-      const streak = new Mesh(new PlaneGeometry(0.09, 1), streakMat);
+      const streak = new Mesh(new PlaneGeometry(0.09, 1), streakMat.clone());
+      g.userData.streak = streak;
       streak.rotation.x = -Math.PI / 2;
       streak.position.set(p.x, y + 0.006, p.y);
       this.pinStreaks.push(streak);
@@ -324,6 +331,7 @@ export class Engine {
       const m = o as Mesh;
       if (!m.isMesh) return;
       m.castShadow = o.name.includes('mark'); // the SN plate's shadow on Lehi stays; the needle's ruled line does not // taste-skill-ignore: WebGL sun shadow, not a CSS shadow
+      if (o.name.includes('mark')) this.pinMats.push(m.material as Material); // night: the plate's face glows white // taste-skill-ignore: WebGL sun shadow, not a CSS shadow
     });
     this.snPin.position.set(0, this.heightAt(0, 0), 0);
     this.scene.add(this.snPin);
@@ -404,26 +412,79 @@ export class Engine {
    * Render a view: the reference frame (refW×refH) gets the I-1 lens shift, then the element shows a cover crop of it
    * (object-position 50% 50%) — identical to the poster <img> with object-fit: cover.
    */
-  setView(pose: Pose, W: number, H: number, ref: { w: number; h: number } | null, shiftToFree?: { cx: number; cy: number }) {
-    const cam = this.camera;
-    camFromPose(cam, pose);
-    cam.aspect = W / H;
-    cam.clearViewOffset();
-    if (ref) {
-      cam.aspect = ref.w / ref.h;
+  private composeCache = new Map<string, Pose>();
+  /** Solve target (x, z) and distance so LAKE → rig.lake and SN head → y = rig.snMaxY, for this bearing/elev. */
+  composeHero(pose: Pose, ref: RigSpec): Pose {
+    const key = `${ref.w}:${pose.bearing.toFixed(2)}:${pose.elev.toFixed(2)}:${pose.dist.toFixed(2)}`;
+    const hit = this.composeCache.get(key);
+    if (hit) return hit;
+    const cam = new PerspectiveCamera(pose.vfov, ref.w / ref.h, 0.5, 900);
+    const sn = (this.snPin?.position.clone() ?? new Vector3()).add(new Vector3(0, 2, 0));
+    const proj = (q: Pose) => {
+      camFromPose(cam, q);
       cam.updateProjectionMatrix();
       cam.updateMatrixWorld();
-      const p = LAKE.clone().project(cam);
-      const cx = (p.x + 1) / 2, cy = (1 - p.y) / 2;
-      const sx = Math.max(-0.18, Math.min(0.18, cx - TITLE_SPOT.x));
-      const sy = Math.max(-0.02, Math.min(0.12, cy - TITLE_SPOT.y)); // never open a void above the crest
+      const a = LAKE.clone().project(cam), b = sn.clone().project(cam);
+      // lx carries the SN pin's x (kept in frame, left third, over the lake's north shore); the lake's own x follows
+      return { lx: (b.x + 1) / 2, ly: (1 - a.y) / 2, sy: (1 - b.y) / 2 };
+    };
+    const want = { lx: ref.lake[0], ly: ref.lake[1], sy: ref.snMaxY - 0.02 };
+    let q = { ...pose };
+    const b = pose.bearing * deg;
+    const fwd = new Vector3(-Math.sin(b), 0, Math.cos(b)); // ground direction away from the camera
+    const right = new Vector3(Math.cos(b), 0, Math.sin(b));
+    for (let i = 0; i < 40; i++) {
+      const r = proj(q);
+      const e = [r.lx - want.lx, r.ly - want.ly, r.sy - want.sy];
+      if (Math.hypot(...e) < 0.002) break;
+      // numeric Jacobian over (pan right, pan forward, log distance)
+      const h = [0.05, 0.05, 0.01];
+      const vars = (d: number[]) => ({ ...q, tx: q.tx + right.x * d[0] + fwd.x * d[1], tz: q.tz + right.z * d[0] + fwd.z * d[1], dist: q.dist * Math.exp(d[2]) });
+      const J = [0, 1, 2].map((k) => {
+        const d = [0, 0, 0]; d[k] = h[k];
+        const rr = proj(vars(d));
+        return [(rr.lx - r.lx) / h[k], (rr.ly - r.ly) / h[k], (rr.sy - r.sy) / h[k]];
+      });
+      // solve J^T columns: A x = -e, A[i][k] = J[k][i]
+      const A = [0, 1, 2].map((i) => [J[0][i], J[1][i], J[2][i]]);
+      const x = solve3(A, e.map((v) => -v));
+      if (!x) break;
+      const step = x.map((v, k) => Math.max(-[2, 2, 0.15][k], Math.min([2, 2, 0.15][k], v)));
+      q = vars(step);
+      q.dist = Math.max(46, Math.min(110, q.dist)); // never closer than the model check's lens
+    }
+    if (this.composeCache.size > 64) this.composeCache.clear();
+    this.composeCache.set(key, q);
+    return q;
+  }
+
+  /** Lens shift (fractions of the reference frame) that puts the lake centroid on the rig's calm-band spot. */
+  lensShift(rig: RigSpec) {
+    const cam = this.camera;
+    const p = LAKE.clone().project(cam);
+    const cx = (p.x + 1) / 2, cy = (1 - p.y) / 2;
+    return { sx: Math.max(-0.12, Math.min(0.12, cx - rig.lake[0])), sy: Math.max(-0.12, Math.min(0.12, cy - rig.lake[1])) };
+  }
+
+  setView(pose: Pose, W: number, H: number, ref: RigSpec | null, shiftToFree?: { cx: number; cy: number }, after?: (p: Pose) => Pose) {
+    const cam = this.camera;
+    cam.clearViewOffset();
+    if (ref) {
+      // Compose like the concept (design review #2): solve the aim (target pan + distance) so the Utah Lake
+      // north-half centroid lands on the calm band under the title and the SN pin stands in the upper frame.
+      let p = this.composeHero(pose, ref);
+      if (after) p = after(p);
+      camFromPose(cam, p);
+      cam.aspect = ref.w / ref.h;
+      cam.updateProjectionMatrix();
       const s = Math.max(W / ref.w, H / ref.h);
       const fw = ref.w * s, fh = ref.h * s;
-      cam.setViewOffset(fw, fh, (fw - W) / 2 + sx * fw, (fh - H) / 2 + sy * fh, W, H);
-    } else if (shiftToFree) {
-      cam.setViewOffset(W, H, W / 2 - shiftToFree.cx, H / 2 - shiftToFree.cy, W, H);
+      cam.setViewOffset(fw, fh, (fw - W) / 2, (fh - H) / 2, W, H);
     } else {
-      cam.updateProjectionMatrix();
+      camFromPose(cam, pose);
+      cam.aspect = W / H;
+      if (shiftToFree) cam.setViewOffset(W, H, W / 2 - shiftToFree.cx, H / 2 - shiftToFree.cy, W, H);
+      else cam.updateProjectionMatrix();
     }
     cam.updateMatrixWorld();
     // billboard the SN plate to the camera (vertical axis only)
@@ -431,11 +492,46 @@ export class Engine {
     // labels: printed type, faded with distance (60–75 units)
     for (const l of this.labels) {
       const d = cam.position.distanceTo(l.getWorldPosition(new Vector3()));
-      const a = 1 - Math.min(1, Math.max(0, (d - 60) / 15));
-      (l.material as MeshStandardMaterial).opacity = a;
-      l.visible = a > 0.01;
+      l.userData.distA = 1 - Math.min(1, Math.max(0, (d - 60) / 15));
     }
   }
+
+  /**
+   * Fade listing pins and town labels whose projected anchor falls inside `box` (fractions of the current view,
+   * already padded) — nothing pokes through "Sam Newell". k = 1 jumps straight to the target (posters, reduced motion).
+   */
+  occlude(box: [number, number, number, number] | null, k: number) {
+    const cam = this.camera;
+    const inside = (v: Vector3) => {
+      if (!box) return false;
+      const p = v.project(cam);
+      const x = (p.x + 1) / 2, y = (1 - p.y) / 2;
+      return x >= box[0] && x <= box[2] && y >= box[1] && y <= box[3];
+    };
+    for (const [, g] of this.pinRoots) {
+      const head = g.position.clone().add(new Vector3(0, 1.05, 0));
+      const base = g.position.clone();
+      const target = inside(head) || inside(base) ? 0 : 1;
+      const a = (g.userData.a ?? 1) + (target - (g.userData.a ?? 1)) * k;
+      g.userData.a = a;
+      g.visible = a > 0.01;
+      g.traverse((o) => {
+        const m = (o as Mesh).material as MeshStandardMaterial | undefined;
+        if (m) { m.transparent = a < 0.999; m.opacity = a; }
+      });
+      const st = g.userData.streak as Mesh | undefined;
+      if (st) (st.material as MeshBasicMaterial).opacity = a;
+    }
+    for (const l of this.labels) {
+      const target = box && inside(l.getWorldPosition(new Vector3())) ? 0 : 1;
+      const a = (l.userData.occA ?? 1) + (target - (l.userData.occA ?? 1)) * k;
+      l.userData.occA = a;
+      const total = a * (l.userData.distA ?? 1);
+      (l.material as MeshStandardMaterial).opacity = total;
+      l.visible = total > 0.01;
+    }
+  }
+
 
   render() {
     this.frame++;
@@ -469,6 +565,22 @@ export class Engine {
     this.renderer.forceContextLoss();
     this.canvas.remove();
   }
+}
+
+function solve3(A: number[][], b: number[]): number[] | null {
+  const m = A.map((r, i) => [...r, b[i]]);
+  for (let c = 0; c < 3; c++) {
+    let p = c;
+    for (let r = c + 1; r < 3; r++) if (Math.abs(m[r][c]) > Math.abs(m[p][c])) p = r;
+    if (Math.abs(m[p][c]) < 1e-9) return null;
+    [m[c], m[p]] = [m[p], m[c]];
+    for (let r = 0; r < 3; r++) {
+      if (r === c) continue;
+      const f = m[r][c] / m[c][c];
+      for (let k = c; k < 4; k++) m[r][k] -= f * m[c][k];
+    }
+  }
+  return [m[0][3] / m[0][0], m[1][3] / m[1][1], m[2][3] / m[2][2]];
 }
 
 export const MODEL_BOX = new Box3(new Vector3(-20.97, -1.8, -56.43), new Vector3(25.32, 4.6, 41.19));

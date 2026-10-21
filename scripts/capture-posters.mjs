@@ -49,7 +49,7 @@ for (const [rig, [w, h]] of Object.entries(RIGS)) {
     lum.sort((a, c) => a - c);
     const l5 = lum[Math.floor(lum.length * 0.05)];
     const contrast = state === 'night' ? (1.05) / (l5 + 0.05) : (l5 + 0.05) / 0.053;
-    manifest.rigs[rig][state] = { sn: cap.sn, bearing: cap.bearing, titleContrastP5: +contrast.toFixed(2), plate: contrast < 4.5 };
+    manifest.rigs[rig][state] = { sn: cap.sn, bearing: cap.bearing, titleContrastP5: +contrast.toFixed(2), plate: contrast < 3 }; // display type: large-text 3:1
     console.log(rig, state, cap.bearing, 'contrast p5', contrast.toFixed(2), cap.sn);
   }
 }

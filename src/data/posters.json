@@ -1,5 +1,5 @@
 {
- "captured": "2026-10-21T00:20:04.027Z",
+ "captured": "2026-10-21T01:17:40.447Z",
  "states": {
   "dawn": "08:20",
   "noon": "13:12",
@@ -11,102 +11,102 @@
   "desktop": {
    "dawn": {
     "sn": {
-     "fx": 0.3199999999999999,
-     "fy": 0.47122694777032315
+     "fx": 0.3482972223120132,
+     "fy": 0.42414861115600744
     },
     "bearing": 209,
-    "titleContrastP5": 3.66,
-    "plate": true
+    "titleContrastP5": 3.83,
+    "plate": false
    },
    "noon": {
     "sn": {
-     "fx": 0.32000000000000034,
-     "fy": 0.47122694777032326
+     "fx": 0.3799370002275231,
+     "fy": 0.434190571803298
     },
     "bearing": 235,
-    "titleContrastP5": 9.55,
+    "titleContrastP5": 10.1,
     "plate": false
    },
    "golden": {
     "sn": {
-     "fx": 0.32000000000000006,
-     "fy": 0.47122694777032287
+     "fx": 0.326846497156254,
+     "fy": 0.4134232485781228
     },
     "bearing": 195,
     "titleContrastP5": 3.72,
-    "plate": true
+    "plate": false
    },
    "blue": {
     "sn": {
-     "fx": 0.32000000000000006,
-     "fy": 0.47122694777032287
+     "fx": 0.326846497156254,
+     "fy": 0.4134232485781228
     },
     "bearing": 195,
-    "titleContrastP5": 4.79,
+    "titleContrastP5": 5.64,
     "plate": false
    },
    "night": {
     "sn": {
-     "fx": 0.32000000000000006,
-     "fy": 0.47122694777032287
+     "fx": 0.326846497156254,
+     "fy": 0.4134232485781228
     },
     "bearing": 195,
-    "titleContrastP5": 15.34,
+    "titleContrastP5": 13.98,
     "plate": false
    }
   },
   "tablet": {
    "dawn": {
     "sn": {
-     "fx": 0.32,
-     "fy": 0.48033588129312815
+     "fx": 0.37997194568662374,
+     "fy": 0.45799018160092164
     },
     "bearing": 209,
     "titleContrastP5": 3.66,
-    "plate": true
+    "plate": false
    },
    "noon": {
     "sn": {
-     "fx": 0.31999999999999895,
-     "fy": 0.4803358812931279
+     "fx": 0.5,
+     "fy": 0.493455471828736
     },
     "bearing": 235,
-    "titleContrastP5": 7.13,
+    "titleContrastP5": 8.93,
     "plate": false
    },
    "golden": {
     "sn": {
-     "fx": 0.31999999999999995,
-     "fy": 0.4803358812931283
+     "fx": 0.3591482795510948,
+     "fy": 0.4507018978428903
     },
     "bearing": 195,
-    "titleContrastP5": 3.56,
-    "plate": true
+    "titleContrastP5": 3.15,
+    "plate": false
    },
    "blue": {
     "sn": {
-     "fx": 0.31999999999999995,
-     "fy": 0.4803358812931283
+     "fx": 0.3591482795510948,
+     "fy": 0.4507018978428903
     },
     "bearing": 195,
-    "titleContrastP5": 5.42,
+    "titleContrastP5": 4.86,
     "plate": false
    },
    "night": {
     "sn": {
-     "fx": 0.31999999999999995,
-     "fy": 0.4803358812931283
+     "fx": 0.3591482795510948,
+     "fy": 0.4507018978428903
     },
     "bearing": 195,
-    "titleContrastP5": 14.37,
+    "titleContrastP5": 15.34,
     "plate": false
    }
   },
   "phone": {
    "dawn": {
     "sn": {
-     "fx": 0.31999999999999906,
-     "fy": 0.4776212085964374
+     "fx": 0.3599925877692052,
+     "fy": 0.48000008783422216
     },
     "bearing": 209,
     "titleContrastP5": 4.95,
@@ -114,38 +114,38 @@
    },
    "noon": {
     "sn": {
-     "fx": 0.32000000000000006,
-     "fy": 0.4776212085964376
+     "fx": 0.41237769771320243,
+     "fy": 0.4874825282209366
     },
     "bearing": 235,
-    "titleContrastP5": 11.12,
+    "titleContrastP5": 11.6,
     "plate": false
    },
    "golden": {
     "sn": {
-     "fx": 0.31999999999999956,
-     "fy": 0.4776212085964373
+     "fx": 0.36113025317450387,
+     "fy": 0.479850770072232
     },
     "bearing": 195,
-    "titleContrastP5": 5.16,
+    "titleContrastP5": 4,
     "plate": false
    },
    "blue": {
     "sn": {
-     "fx": 0.31999999999999956,
-     "fy": 0.4776212085964373
+     "fx": 0.36113025317450387,
+     "fy": 0.479850770072232
     },
     "bearing": 195,
-    "titleContrastP5": 6.74,
+    "titleContrastP5": 6.26,
     "plate": false
    },
    "night": {
     "sn": {
-     "fx": 0.31999999999999956,
-     "fy": 0.4776212085964373
+     "fx": 0.36113025317450387,
+     "fy": 0.479850770072232
     },
     "bearing": 195,
-    "titleContrastP5": 12.28,
+    "titleContrastP5": 13.02,
     "plate": false
    }
   }

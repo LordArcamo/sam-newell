@@ -8,7 +8,8 @@ const { Browser, sleep } = await import(lib);
 const [base = 'http://localhost:4345', w = '1440', h = '900', time = '17:35', out = ''] = process.argv.slice(2);
 const b = await Browser.launch({ width: +w, height: +h, extraArgs: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] });
 const p = await b.newPage({ width: +w, height: +h, mobile: +w < 768, reducedMotion: true });
-await p.goto(`${base}/?gl=force&debug&t=${encodeURIComponent('2026-10-21T' + time + ':00-06:00')}`, { settleMs: 500 });
+const qs = time === 'record' ? 'record' : time.startsWith('record@') ? `record&t=${encodeURIComponent('2026-10-21T' + time.slice(7) + ':00-06:00')}` : `debug&t=${encodeURIComponent('2026-10-21T' + time + ':00-06:00')}`;
+await p.goto(`${base}/?gl=force&${qs}`, { settleMs: 500 });
 for (let i = 0; i < 60; i++) { if (await p.eval(`!!document.querySelector('.relief-canvas.on')`)) break; await sleep(500); }
 await sleep(800);
 const rect = await p.eval(`(()=>{const r=document.querySelector('[data-relief-mount=hero]').getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}})()`);
