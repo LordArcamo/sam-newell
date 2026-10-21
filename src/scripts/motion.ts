@@ -40,30 +40,36 @@ export function initMotion() {
       const slides = [...scene.querySelectorAll<HTMLElement>('[data-slide]')];
       const idx = scene.querySelector<HTMLElement>('[data-scene-i]');
       scene.classList.add('live');
-      items.forEach((li, k) => {
-        li.inert = k !== 0;
-        li.toggleAttribute('aria-hidden', k !== 0);
-      });
-      // the next pictures are clipped away until their cut, so the browser would wait to load them: ask now
-      slides.forEach((f) => f.querySelectorAll('img').forEach((i) => (i.loading = 'eager')));
+      // the next pictures are clipped away until their cut, so the browser would wait to load them: ask now,
+      // and decode them ahead so the cut never waits
+      slides.forEach((f) => f.querySelectorAll('img').forEach((i) => {
+        i.loading = 'eager';
+        i.decode?.().catch(() => {});
+      }));
       let last = -1;
-      ScrollTrigger.create({
+      const show = (i: number) => {
+        if (i === last) return;
+        last = i;
+        items.forEach((li, k) => li.classList.toggle('on', k === i));
+        slides.forEach((f, k) => f.classList.toggle('in', k <= i));
+        if (idx) idx.textContent = String(i + 1);
+      };
+      const st = ScrollTrigger.create({
         trigger: scene,
         start: 'top top',
         end: 'bottom bottom',
-        onUpdate: (st) => {
-          const i = Math.min(items.length - 1, Math.floor(st.progress * items.length * 0.999));
-          if (i === last) return;
-          last = i;
-          items.forEach((li, k) => {
-            li.classList.toggle('on', k === i);
-            // only the step on screen can be read or reached; the others are hidden, not ghosted
-            li.inert = k !== i;
-            li.toggleAttribute('aria-hidden', k !== i);
-          });
-          slides.forEach((f, k) => f.classList.toggle('in', k <= i));
-          if (idx) idx.textContent = String(i + 1);
-        },
+        onUpdate: (t) => show(Math.min(items.length - 1, Math.floor(t.progress * items.length * 0.999))),
+      });
+      // every step stays in the accessibility tree and the tab order (the inactive ones are only transparent);
+      // focusing one scrolls the scene to it, so what has focus is always the step on screen
+      items.forEach((li, k) => {
+        li.addEventListener('focusin', () => {
+          const y = st.start + (st.end - st.start) * ((k + 0.5) / items.length);
+          const lenis = (window as any).__lenis;
+          if (lenis) lenis.scrollTo(y, { immediate: true });
+          else scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+          show(k);
+        });
       });
     });
   }

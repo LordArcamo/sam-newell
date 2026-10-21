@@ -458,17 +458,24 @@ const jsonld = [
   .scene:global(.live) li:not(:global(.on)) .st-note,
   .scene:global(.live) li:not(:global(.on)) .sb-cap {
     opacity: 0;
-    visibility: hidden;
+  }
+  /* fail-safe: a focused step always shows */
+  .scene:global(.live) li:focus-within .st-a,
+  .scene:global(.live) li:focus-within .st-note {
+    opacity: 1;
+  }
+  .scene:global(.live) li:not(:global(.on)) {
+    pointer-events: none;
   }
   .scene:global(.live) .st-a {
-    transition: opacity 0.6s var(--ease-expo), transform 0.7s var(--ease-expo), visibility 0.6s;
+    transition: opacity 0.6s var(--ease-expo), transform 0.7s var(--ease-expo);
   }
   .scene:global(.live) li:not(:global(.on)) .st-a {
     transform: translateX(-50%) scale(0.94);
   }
   .scene:global(.live) .st-note,
   .scene:global(.live) .sb-cap {
-    transition: opacity 0.5s var(--ease-out), visibility 0.5s;
+    transition: opacity 0.5s var(--ease-out);
   }
   /* before motion runs (or if it never does), every statement is listed at full strength over the first picture */
   .scene:not(:global(.live)) .stack {
