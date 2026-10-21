@@ -2,7 +2,6 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/home/Hero.astro';
 import MapSection from '../components/home/MapSection.astro';
-import ReliefDefs from '../components/ReliefDefs.astro';
 import Pic from '../components/Pic.astro';
 import Logo from '../components/Logo.astro';
 import EpisodeRow from '../components/EpisodeRow.astro';
@@ -38,7 +37,6 @@ const jsonld = [
   description="Buy, sell or invest on the Wasatch Front with Lehi broker Sam Newell. 235 homes sold, 4.9 from 45 Zillow reviews. Call (801) 995-2220."
   jsonld={jsonld}
 >
-  <ReliefDefs />
   <Hero />
 
   <!-- 2 · Intro: the statement, photos pass in the side columns -->
@@ -78,7 +76,7 @@ const jsonld = [
             <Pic src={img(`listings/${h.photo}`)} alt="" sizes="26vw" ratio="r45" rv={false} widths={[360, 550]} />
           ) : (
             <div class="pv-map r45">
-              <svg viewBox={`${h.xy ? h.xy.x - 3 : lehi.x - 3} ${h.xy ? -h.xy.north - 3.75 : -lehi.north - 3.75} 6 7.5`} preserveAspectRatio="xMidYMid slice"><use href="#relief-geo" /></svg>
+              <svg viewBox={`${h.xy ? h.xy.x - 3 : lehi.x - 3} ${h.xy ? -h.xy.north - 3.75 : -lehi.north - 3.75} 6 7.5`} preserveAspectRatio="xMidYMid slice"><use href="/map/relief.svg#relief-geo" /></svg>
               {h.xy && <i></i>}
             </div>
           )}
@@ -163,7 +161,7 @@ const jsonld = [
     </div>
     <div class="tile">
       <div class="tile-map" aria-hidden="true">
-        <svg viewBox="-21 -56.4 46.3 97.6" preserveAspectRatio="xMidYMid meet"><use href="#relief-geo" /></svg>
+        <svg viewBox="-21 -56.4 46.3 97.6" preserveAspectRatio="xMidYMid meet"><use href="/map/relief.svg#relief-geo" /></svg>
         <span class="tile-sn" style={`left:${((lehi.x + 21) / 46.3) * 100}%;top:${((-lehi.north + 56.4) / 97.6) * 100}%`}><Logo variant="mark" title="" /> Lehi</span>
       </div>
       <dl class="facts">
@@ -231,8 +229,15 @@ const jsonld = [
   // Hero GL takeover (resolves null until the model ships; the poster stays as the hero).
   const heroMount = document.querySelector<HTMLElement>('[data-relief-mount="hero"]');
   if (heroMount) {
-    const start = () => mountRelief(heroMount, { role: 'hero' });
-    if (matchMedia('(min-width: 768px)').matches) addEventListener('load', () => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 2000 }) : setTimeout(start, 800)), { once: true });
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      mountRelief(heroMount, { role: 'hero' });
+    };
+    const now = /[?&](record|capture)/.test(location.search);
+    if (now) start();
+    else if (matchMedia('(min-width: 768px)').matches) addEventListener('load', () => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 2000 }) : setTimeout(start, 800)), { once: true });
     else ['touchstart', 'scroll', 'keydown'].forEach((ev) => addEventListener(ev, start, { once: true, passive: true }));
   }
 </script>

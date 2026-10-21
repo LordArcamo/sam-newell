@@ -1,0 +1,153 @@
+{
+ "captured": "2026-10-21T00:20:04.027Z",
+ "states": {
+  "dawn": "08:20",
+  "noon": "13:12",
+  "golden": "17:45",
+  "blue": "18:50",
+  "night": "21:30"
+ },
+ "rigs": {
+  "desktop": {
+   "dawn": {
+    "sn": {
+     "fx": 0.3199999999999999,
+     "fy": 0.47122694777032315
+    },
+    "bearing": 209,
+    "titleContrastP5": 3.66,
+    "plate": true
+   },
+   "noon": {
+    "sn": {
+     "fx": 0.32000000000000034,
+     "fy": 0.47122694777032326
+    },
+    "bearing": 235,
+    "titleContrastP5": 9.55,
+    "plate": false
+   },
+   "golden": {
+    "sn": {
+     "fx": 0.32000000000000006,
+     "fy": 0.47122694777032287
+    },
+    "bearing": 195,
+    "titleContrastP5": 3.72,
+    "plate": true
+   },
+   "blue": {
+    "sn": {
+     "fx": 0.32000000000000006,
+     "fy": 0.47122694777032287
+    },
+    "bearing": 195,
+    "titleContrastP5": 4.79,
+    "plate": false
+   },
+   "night": {
+    "sn": {
+     "fx": 0.32000000000000006,
+     "fy": 0.47122694777032287
+    },
+    "bearing": 195,
+    "titleContrastP5": 15.34,
+    "plate": false
+   }
+  },
+  "tablet": {
+   "dawn": {
+    "sn": {
+     "fx": 0.32,
+     "fy": 0.48033588129312815
+    },
+    "bearing": 209,
+    "titleContrastP5": 3.66,
+    "plate": true
+   },
+   "noon": {
+    "sn": {
+     "fx": 0.31999999999999895,
+     "fy": 0.4803358812931279
+    },
+    "bearing": 235,
+    "titleContrastP5": 7.13,
+    "plate": false
+   },
+   "golden": {
+    "sn": {
+     "fx": 0.31999999999999995,
+     "fy": 0.4803358812931283
+    },
+    "bearing": 195,
+    "titleContrastP5": 3.56,
+    "plate": true
+   },
+   "blue": {
+    "sn": {
+     "fx": 0.31999999999999995,
+     "fy": 0.4803358812931283
+    },
+    "bearing": 195,
+    "titleContrastP5": 5.42,
+    "plate": false
+   },
+   "night": {
+    "sn": {
+     "fx": 0.31999999999999995,
+     "fy": 0.4803358812931283
+    },
+    "bearing": 195,
+    "titleContrastP5": 14.37,
+    "plate": false
+   }
+  },
+  "phone": {
+   "dawn": {
+    "sn": {
+     "fx": 0.31999999999999906,
+     "fy": 0.4776212085964374
+    },
+    "bearing": 209,
+    "titleContrastP5": 4.95,
+    "plate": false
+   },
+   "noon": {
+    "sn": {
+     "fx": 0.32000000000000006,
+     "fy": 0.4776212085964376
+    },
+    "bearing": 235,
+    "titleContrastP5": 11.12,
+    "plate": false
+   },
+   "golden": {
+    "sn": {
+     "fx": 0.31999999999999956,
+     "fy": 0.4776212085964373
+    },
+    "bearing": 195,
+    "titleContrastP5": 5.16,
+    "plate": false
+   },
+   "blue": {
+    "sn": {
+     "fx": 0.31999999999999956,
+     "fy": 0.4776212085964373
+    },
+    "bearing": 195,
+    "titleContrastP5": 6.74,
+    "plate": false
+   },
+   "night": {
+    "sn": {
+     "fx": 0.31999999999999956,
+     "fy": 0.4776212085964373
+    },
+    "bearing": 195,
+    "titleContrastP5": 12.28,
+    "plate": false
+   }
+  }
+ }
+}

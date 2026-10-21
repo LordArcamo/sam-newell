@@ -26,14 +26,14 @@ const pins = HOMES.filter((h) => h.xy).sort((a, b) => b.xy!.north - a.xy!.north)
 const lehi = TOWNS.find((t) => t.slug === 'lehi')!;
 const mapData = {
   towns: TOWNS.map((t) => ({ slug: t.slug, x: t.x, y: -t.north })),
-  pins: pins.map((h) => ({ id: h.id, town: h.group, x: h.xy!.x, y: -h.xy!.north })),
+  pins: pins.map((h) => ({ id: h.id, town: h.group, x: h.xy!.x, y: -h.xy!.north, s: h.status })),
   sn: { x: lehi.x, y: -lehi.north },
 };
 ---
 <section class="map" id="map" aria-labelledby="map-h" data-map>
   <div class="stage" data-relief-mount="map" data-stage>
     <svg class="relief" viewBox="-30 -56 64 40" preserveAspectRatio="none" data-ui data-map-svg role="img" aria-label="Contour map of the Wasatch Front from North Salt Lake to Provo, with Utah Lake and the Great Salt Lake">
-      <use href="#relief-geo" />
+      <use href="/map/relief.svg#relief-geo" />
     </svg>
     <div class="overlay" aria-hidden="true" data-labels>
       {TOWNS.map((t) => <span class="tl small" data-label={t.slug}>{t.name}</span>)}
@@ -70,7 +70,7 @@ const mapData = {
           <Pic src={img(`listings/${c.lead.photo}`)} alt={`${c.lead.shown}, ${c.lead.townName}`} sizes="380px" ratio="r32" rv={false} widths={[380, 550, 760]} />
         ) : (
           <div class="macro r32" aria-hidden="true">
-            <svg viewBox={`${c.x - 4} ${-c.north - 2.67} 8 5.33`} preserveAspectRatio="xMidYMid slice"><use href="#relief-geo" /></svg>
+            <svg viewBox={`${c.x - 4} ${-c.north - 2.67} 8 5.33`} preserveAspectRatio="xMidYMid slice"><use href="/map/relief.svg#relief-geo" /></svg>
             {c.homes.filter((h) => h.xy).map((h) => (
               <i style={`left:${((h.xy!.x - (c.x - 4)) / 8) * 100}%;top:${((-h.xy!.north - (-c.north - 2.67)) / 5.33) * 100}%`}></i>
             ))}
@@ -142,6 +142,7 @@ const mapData = {
     position: absolute;
     inset: 0;
     pointer-events: none;
+    z-index: 2;
   }
   .tl {
     position: absolute;
@@ -173,9 +174,9 @@ const mapData = {
     position: absolute;
     left: 0;
     top: 0;
-    width: 44px;
-    height: 44px;
-    margin: -22px 0 0 -22px;
+    width: 26px;
+    height: 26px;
+    margin: -13px 0 0 -13px;
     display: grid;
     place-items: center;
     pointer-events: auto;
@@ -201,7 +202,7 @@ const mapData = {
   }
   .pin:focus-visible {
     outline: 3px solid var(--ink);
-    outline-offset: -6px;
+    outline-offset: 1px;
     border-radius: 50%;
   }
   .tag {
@@ -224,8 +225,20 @@ const mapData = {
     opacity: 1;
     transform: translate(-50%, 0);
   }
-  .no-js-hide {
+  /* live relief: labels and the SN mark are in the model; the SVG stays underneath as the poster */
+  .map.is-gl .overlay {
     display: none;
+  }
+  .map.is-gl .pin i {
+    opacity: 0;
+  }
+  .map.is-gl .pin:hover i,
+  .map.is-gl .pin:focus-visible i,
+  .map.is-gl .pin.on i {
+    opacity: 0;
+  }
+  .map.is-gl .pin:focus-visible {
+    outline-color: var(--ink);
   }
 
   .panel {

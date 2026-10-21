@@ -3,7 +3,7 @@
 //   scripts/data/lakes.geojson    (shorelines at 1368.5 m / 1281.5 m from the same DEM)
 // Output: src/data/map-geo.json (paths in km, x east, y = −north, origin GNIS Lehi).
 // Run: npm run contours
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 
@@ -60,5 +60,16 @@ const out = {
   lakes: lakePaths,
 };
 await writeFile('src/data/map-geo.json', JSON.stringify(out));
+// The same geometry as an external SVG symbol (presentation attributes only: page CSS does not reach <use> trees).
+const b = out.bounds;
+const svg = `<svg xmlns="http://www.w3.org/2000/svg"><defs><g id="relief-geo">` +
+  `<rect x="${b.x0}" y="${b.y0 + 1.2}" width="${(b.x1 - b.x0).toFixed(2)}" height="${(b.y1 - b.y0).toFixed(2)}" fill="#0a0a0a"/>` +
+  `<rect x="${b.x0}" y="${b.y0}" width="${(b.x1 - b.x0).toFixed(2)}" height="${(b.y1 - b.y0).toFixed(2)}" fill="#ffffff"/>` +
+  `<path d="${out.lakes['great-salt-lake']}" fill="#d9d9d9"/><path d="${out.lakes['utah-lake']}" fill="#d9d9d9"/>` +
+  `<path d="${out.minor}" fill="none" stroke="#0a0a0a" stroke-opacity="0.32" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>` +
+  `<path d="${out.index}" fill="none" stroke="#0a0a0a" stroke-opacity="0.6" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>` +
+  `</g></defs></svg>`;
+await mkdir('public/map', { recursive: true });
+await writeFile('public/map/relief.svg', svg);
 const kb = (Buffer.byteLength(JSON.stringify(out)) / 1024).toFixed(0);
 console.log(`map-geo.json: ${lines.minor.length + lines.index.length} contours, ${n} points, ${kb} KB`);

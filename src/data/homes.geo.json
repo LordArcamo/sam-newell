@@ -2,6 +2,12 @@
  "source": "US Census Geocoder, Public_AR_Current",
  "fetched": "2026-10-20",
  "points": {
+  "1714-n-3870-w-lehi": {
+   "query": "1714 N 3870 W, Lehi, UT 84043",
+   "lat": 40.408323,
+   "lon": -111.911448,
+   "matched": "1714 N 3870 W, LEHI 84048 (UGRC Utah Address Points)"
+  },
   "1056-w-stonehaven-dr-north-salt-lake": {
    "query": "1056 W Stonehaven Dr, North Salt Lake, UT 84054",
    "lat": 40.856901,

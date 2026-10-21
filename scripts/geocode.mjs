@@ -11,10 +11,15 @@ TOWN_NAMES['cedar-hills'] = 'Cedar Hills';
 let cache = {};
 try { cache = JSON.parse(await readFile('src/data/homes.geo.json', 'utf8')).points; } catch {}
 
+// Addresses the Census geocoder misses, resolved from UGRC Utah Address Points (gis.utah.gov, public).
+const MANUAL = {
+  '1714-n-3870-w-lehi': { lat: 40.408323, lon: -111.911448, matched: '1714 N 3870 W, LEHI 84048 (UGRC Utah Address Points)' },
+};
 const out = {};
 let failed = 0;
 for (const h of homes) {
   const q = `${h.address}, ${TOWN_NAMES[h.town] ?? h.town}, UT ${h.zip}`;
+  if (MANUAL[h.id]) { out[h.id] = { query: q, ...MANUAL[h.id] }; console.log(`man  ${q} -> ${MANUAL[h.id].matched}`); continue; }
   if (cache[h.id]?.query === q) { out[h.id] = cache[h.id]; continue; }
   const url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(q)}&benchmark=Public_AR_Current&format=json`;
   try {

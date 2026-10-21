@@ -1,0 +1,230 @@
+{
+ "hi": {
+  "lod": "hi",
+  "units": "1 unit = 1 km",
+  "axes_gltf": "+x east, +y up, +z south",
+  "origin": "GNIS Lehi 40.3916, -111.8508",
+  "projection": "+proj=tmerc +lat_0=40.3916 +lon_0=-111.8508 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs",
+  "exaggeration": 2.0,
+  "base_elev_m": 1270.0,
+  "height_formula": "y = (elev_m - 1270) / 1000 * 2.0",
+  "bbox_gltf": {
+   "min": [
+    -20.97,
+    -1.8,
+    -56.43
+   ],
+   "max": [
+    25.32,
+    4.565464973449707,
+    41.19
+   ]
+  },
+  "footprint_km": [
+   46.29,
+   97.62
+  ],
+  "uv": "u = (x - west)/(east - west); v_gltf = (z_gltf + north)/(north - south) (north edge = v 0 = image top); flipY=false",
+  "lakes": {
+   "utah_surface_m": 1367.05,
+   "utah_inlay_y": 0.1640999999999999,
+   "gsl_level_m": 1280.726318359375,
+   "gsl_inlay_y": -0.008547363281249998
+  },
+  "label_font": "GeneralSans-Medium.otf",
+  "label_cap_height": 0.22,
+  "label_emboss": 0.003,
+  "chamfer": 0.04,
+  "plinth_bottom_y": -1.8,
+  "tris": {
+   "relief": 143781,
+   "plinth": 1724,
+   "lake_utah": 322,
+   "lake_gsl": 40,
+   "label_north-salt-lake": 400,
+   "label_millcreek": 184,
+   "label_murray": 137,
+   "label_south-jordan": 397,
+   "label_herriman": 242,
+   "label_lehi": 93,
+   "label_saratoga-springs": 703,
+   "label_eagle-mountain": 431,
+   "label_american-fork": 340,
+   "label_pleasant-grove": 467,
+   "label_orem": 146,
+   "label_provo": 127
+  },
+  "tris_total": 149534,
+  "terrain_error_vs_30m_dem": {
+   "rms_m": 3.17,
+   "p99_m": 11.0,
+   "max_m": 87.25,
+   "samples": 55936
+  },
+  "source": "USGS 3DEP 1/3 arc-second (public domain); I-15 \u00a9 OpenStreetMap contributors (ODbL)",
+  "textures": {
+   "grad": {
+    "file": "relief-grad-2048x4096.webp",
+    "decode_RG": "g = sign(2c-1)*pow(abs(2c-1),1.5)*5.0 for R (dy/dx) and G (dy/dz); n_obj = normalize(vec3(-gR, 1, -gG))",
+    "flat_blend": "n = normalize(mix(vertexNormal, n_obj, smoothstep(0.035, 0.10, trueSlope(vertexNormal))))",
+    "B": "contour-height residual for THIS LOD: yc = y + (B-0.5)*0.16",
+    "A": "I-15 distance d_m = (A-0.2)/0.8*250; groove = 1 - smoothstep(12, 18, d_m) (lo: 18..26); albedo *= 1 - 0.18*groove"
+   },
+   "cavity": {
+    "file": "relief-cavity-1024x2048.webp",
+    "L": "horizon occlusion -> aoMap (indirect only), golden 0.82 / noon 0.80 / blue 0.90"
+   },
+   "grain": {
+    "file": "detail-grain-256.webp",
+    "tangent_normal_strength": 0.22,
+    "tile_units": 0.2,
+    "alpha": "speckle s: albedo *= 1 + 0.05*(s-0.5); roughness = 0.90 + 0.08*(s-0.5)",
+    "fade": "1 - smoothstep(25, 40, viewDistance)"
+   },
+   "flipY": false
+  },
+  "contours": {
+   "height": "h_m = yc*500 + 1270",
+   "major": {
+    "interval_m": 100,
+    "darkness": 0.2
+   },
+   "index": {
+    "interval_m": 500,
+    "darkness": 0.3
+   },
+   "minor": {
+    "interval_m": 20,
+    "darkness": 0.08,
+    "only_below_m": 1600,
+    "fade_slope_deg": 30
+   },
+   "mask_below_m": 1375,
+   "major_fade_to_50pct_slope_deg": 45,
+   "aa": "analytic: d = abs(fract(h/I + 0.5) - 0.5) * I; fw = fwidth(h); line = 1 - smoothstep(0.4*fw, 1.2*fw, d) (~0.8 px); fade lines where fw/I > 0.08..0.20 (spacing < ~5-12 px)"
+  },
+  "labels": {
+   "print_height": 0.003,
+   "far_fade_units": [
+    60,
+    75
+   ],
+   "note": "flat print; use polygonOffset"
+  },
+  "shadow_normal_offset": 0.1
+ },
+ "lo": {
+  "lod": "lo",
+  "units": "1 unit = 1 km",
+  "axes_gltf": "+x east, +y up, +z south",
+  "origin": "GNIS Lehi 40.3916, -111.8508",
+  "projection": "+proj=tmerc +lat_0=40.3916 +lon_0=-111.8508 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs",
+  "exaggeration": 2.0,
+  "base_elev_m": 1270.0,
+  "height_formula": "y = (elev_m - 1270) / 1000 * 2.0",
+  "bbox_gltf": {
+   "min": [
+    -20.97,
+    -1.8,
+    -56.43
+   ],
+   "max": [
+    25.32,
+    4.569401264190674,
+    41.19
+   ]
+  },
+  "footprint_km": [
+   46.29,
+   97.62
+  ],
+  "uv": "u = (x - west)/(east - west); v_gltf = (z_gltf + north)/(north - south) (north edge = v 0 = image top); flipY=false",
+  "lakes": {
+   "utah_surface_m": 1367.05,
+   "utah_inlay_y": 0.1640999999999999,
+   "gsl_level_m": 1280.726318359375,
+   "gsl_inlay_y": -0.008547363281249998
+  },
+  "label_font": "GeneralSans-Medium.otf",
+  "label_cap_height": 0.22,
+  "label_emboss": 0.003,
+  "chamfer": 0.04,
+  "plinth_bottom_y": -1.8,
+  "tris": {
+   "relief": 34482,
+   "plinth": 234,
+   "lake_utah": 322,
+   "lake_gsl": 40,
+   "label_north-salt-lake": 268,
+   "label_millcreek": 124,
+   "label_murray": 97,
+   "label_south-jordan": 257,
+   "label_herriman": 162,
+   "label_lehi": 61,
+   "label_saratoga-springs": 447,
+   "label_eagle-mountain": 287,
+   "label_american-fork": 228,
+   "label_pleasant-grove": 303,
+   "label_orem": 94,
+   "label_provo": 83
+  },
+  "tris_total": 37489,
+  "terrain_error_vs_30m_dem": {
+   "rms_m": 8.42,
+   "p99_m": 27.73,
+   "max_m": 161.0,
+   "samples": 55936
+  },
+  "source": "USGS 3DEP 1/3 arc-second (public domain); I-15 \u00a9 OpenStreetMap contributors (ODbL)",
+  "textures": {
+   "grad": {
+    "file": "relief-grad-1024x2048.webp",
+    "decode_RG": "g = sign(2c-1)*pow(abs(2c-1),1.5)*5.0 for R (dy/dx) and G (dy/dz); n_obj = normalize(vec3(-gR, 1, -gG))",
+    "flat_blend": "n = normalize(mix(vertexNormal, n_obj, smoothstep(0.035, 0.10, trueSlope(vertexNormal))))",
+    "B": "contour-height residual for THIS LOD: yc = y + (B-0.5)*0.16",
+    "A": "I-15 distance d_m = (A-0.2)/0.8*250; groove = 1 - smoothstep(12, 18, d_m) (lo: 18..26); albedo *= 1 - 0.18*groove"
+   },
+   "cavity": {
+    "file": "relief-cavity-512x1024.webp",
+    "L": "horizon occlusion -> aoMap (indirect only), golden 0.82 / noon 0.80 / blue 0.90"
+   },
+   "grain": {
+    "file": "detail-grain-256.webp",
+    "tangent_normal_strength": 0.22,
+    "tile_units": 0.2,
+    "alpha": "speckle s: albedo *= 1 + 0.05*(s-0.5); roughness = 0.90 + 0.08*(s-0.5)",
+    "fade": "1 - smoothstep(25, 40, viewDistance)"
+   },
+   "flipY": false
+  },
+  "contours": {
+   "height": "h_m = yc*500 + 1270",
+   "major": {
+    "interval_m": 100,
+    "darkness": 0.2
+   },
+   "index": {
+    "interval_m": 500,
+    "darkness": 0.3
+   },
+   "minor": {
+    "interval_m": 20,
+    "darkness": 0.08,
+    "only_below_m": 1600,
+    "fade_slope_deg": 30
+   },
+   "mask_below_m": 1375,
+   "major_fade_to_50pct_slope_deg": 45,
+   "aa": "analytic: d = abs(fract(h/I + 0.5) - 0.5) * I; fw = fwidth(h); line = 1 - smoothstep(0.4*fw, 1.2*fw, d) (~0.8 px); fade lines where fw/I > 0.08..0.20 (spacing < ~5-12 px)"
+  },
+  "labels": {
+   "print_height": 0.003,
+   "far_fade_units": [
+    60,
+    75
+   ],
+   "note": "flat print; use polygonOffset"
+  },
+  "shadow_normal_offset": 0.1
+ }
+}

@@ -1,56 +1,71 @@
 ---
 /**
  * Hero, frame 0 (SSR, no JS needed): poster <img> = LCP, never hidden or animated in.
- * GL MOUNT POINT: [data-relief-mount="hero"] — mountRelief() (src/relief/mount.ts) puts the canvas over the
- * poster frame with the identical cover crop once the model ships.
- *
- * TODO(model): the posters below are TEMPORARY — the concept renders (inspo/concept-mockup/hero-*.png)
- * converted to neutral greyscale and named TEMP-*. Replace with blender/ posters
- * (/posters/hero-{state}-{rig}-{w}.avif, 5 states × 3 rigs) when the model check passes. Their pins are
- * baked in; the real posters carry no pins (pins become DOM markers).
+ * Posters are captured FROM THE LIVE three.js RENDERER (scripts/capture-posters.mjs): 5 sun states × 3 rigs,
+ * each rig a reference frame (desktop 2560×1440, tablet 1536×2048, phone 1170×2532) shown with a cover crop
+ * centred on the frame. The live canvas (src/relief) renders the same reference frame and crops it the same way,
+ * so the 1.2 s crossfade has no double image. GL MOUNT POINT: [data-relief-mount="hero"].
  */
 import { getImage } from 'astro:assets';
-import Logo from '../Logo.astro';
+import type { ImageMetadata } from 'astro';
 import { CONTACT, ZILLOW } from '../../data/site';
-import golden from '../../assets/posters/TEMP-concept-hero-golden-grey.jpg';
-import blue from '../../assets/posters/TEMP-concept-hero-blue-grey.jpg';
+import posters from '../../data/posters.json';
 
-const widths = [780, 1170, 1600, 2000, 2560];
-const make = async (src: ImageMetadata, format: 'avif' | 'webp' | 'jpg') =>
-  (await Promise.all(widths.map(async (w) => `${(await getImage({ src, width: w, format, quality: format === 'avif' ? 55 : 70 })).src} ${w}w`))).join(', ');
-const sets = {
-  golden: { avif: await make(golden, 'avif'), webp: await make(golden, 'webp') },
-  blue: { avif: await make(blue, 'avif'), webp: await make(blue, 'webp') },
-};
-const fallback = (await getImage({ src: golden, width: 1600, format: 'jpg', quality: 72 })).src;
-const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/posters/hero-*.jpg', { eager: true });
+const STATES = ['dawn', 'noon', 'golden', 'blue', 'night'] as const;
+const RIGS = {
+  desktop: { w: [1280, 1920, 2560], media: '(min-aspect-ratio: 6/5)', sizes: 'max(100vw, 178svh)' },
+  tablet: { w: [768, 1152, 1536], media: '(min-aspect-ratio: 3/4)', sizes: 'max(100vw, 75svh)' },
+  phone: { w: [780, 1170], media: '', sizes: '100vw' },
+} as const;
+type Rig = keyof typeof RIGS;
+const src = (state: string, rig: string) => files[`../../assets/posters/hero-${state}-${rig}.jpg`].default;
+const set = async (state: string, rig: Rig, format: 'avif' | 'webp') =>
+  (await Promise.all(RIGS[rig].w.map(async (w) => `${(await getImage({ src: src(state, rig), width: w, format, quality: format === 'avif' ? 50 : 68 })).src} ${w}w`))).join(', ');
+const sets: Record<string, Record<string, { avif: string; webp: string }>> = {};
+for (const st of STATES) {
+  sets[st] = {};
+  for (const rig of Object.keys(RIGS) as Rig[]) sets[st][rig] = { avif: await set(st, rig, 'avif'), webp: await set(st, rig, 'webp') };
+}
+const fallback = (await getImage({ src: src('noon', 'desktop'), width: 1920, format: 'jpg', quality: 72 })).src;
+const plates = Object.fromEntries(Object.entries(posters.rigs).map(([rig, v]) => [rig, Object.fromEntries(Object.entries(v).map(([st, x]) => [st, x.plate]))]));
+const sn = posters.rigs.desktop.golden.sn ?? { fx: 0.32, fy: 0.47 };
+const order: Rig[] = ['desktop', 'tablet', 'phone'];
 ---
-<section class="hero" data-hero aria-labelledby="hero-title">
+<section class="hero" data-hero aria-labelledby="hero-title" style={`--snx:${(sn.fx * 100).toFixed(2)}%;--sny:${(sn.fy * 100).toFixed(2)}%`}>
   <div class="hero-media" data-relief-mount="hero">
     <div class="frame" data-hero-frame>
       <picture data-hero-poster>
-        <source type="image/avif" srcset={sets.golden.avif} sizes={sizes} />
-        <source type="image/webp" srcset={sets.golden.webp} sizes={sizes} />
+        {order.map((rig) => (
+          <>
+            <source type="image/avif" sizes={RIGS[rig].sizes} media={RIGS[rig].media || undefined} data-rig={rig} />
+            <source type="image/webp" sizes={RIGS[rig].sizes} media={RIGS[rig].media || undefined} data-rig={rig} />
+          </>
+        ))}
         <img
-          src={fallback}
           width="2560"
-          height="1448"
+          height="1440"
           alt="A white plaster relief model of the Wasatch Front seen from above Utah Lake, with Sam's homes pinned and the SN mark standing at Lehi"
           fetchpriority="high"
           loading="eager"
-          decoding="sync"
+          decoding="async"
         />
       </picture>
-      <script is:inline define:vars={{ sets }}>
-        // Bucket poster by the real sun (html[data-sun], set in <head>). TEMP: two concept posters only.
+      <script is:inline define:vars={{ sets, plates, fallback }}>
+        // Bucket the poster by the real sun over Lehi (html[data-sun], set in <head>) before anything is fetched,
+        // so only one poster ever downloads.
         (function () {
-          var s = document.documentElement.dataset.sun, k = s === 'blue' || s === 'night' ? 'blue' : 'golden';
-          if (k === 'golden') return;
-          var p = document.currentScript.previousElementSibling, src = p.querySelectorAll('source');
-          src[0].srcset = sets[k].avif; src[1].srcset = sets[k].webp; p.querySelector('img').srcset = sets[k].webp;
+          var s = document.documentElement.dataset.sun || 'noon', p = document.currentScript.previousElementSibling;
+          p.querySelectorAll('source').forEach(function (el) {
+            el.srcset = sets[s][el.dataset.rig][el.type === 'image/avif' ? 'avif' : 'webp'];
+          });
+          p.querySelector('img').src = fallback;
+          var rig = matchMedia('(min-aspect-ratio: 6/5)').matches ? 'desktop' : matchMedia('(min-aspect-ratio: 3/4)').matches ? 'tablet' : 'phone';
+          if (plates[rig] && plates[rig][s]) p.closest('[data-hero]').classList.add('plate');
         })();
       </script>
-      <p class="pin-tag small" aria-hidden="true"><Logo variant="mark" class="pin-mark" title="" /> Lehi · home base</p>
+      <noscript><img class="noscript-poster" src={fallback} width="2560" height="1440" alt="A white plaster relief model of the Wasatch Front seen from above Utah Lake" /></noscript>
+      <p class="pin-tag small" aria-hidden="true">Lehi · home base</p>
     </div>
   </div>
   <p class="caption small" data-caption>Lehi, Utah</p>
@@ -63,7 +78,7 @@ const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
     })();
   </script>
   <div class="hero-foot">
-    <h1 class="title" id="hero-title">Sam<br /> Newell</h1>
+    <h1 class="title" id="hero-title"><span>Sam</span><br /> <span>Newell</span></h1>
     <div class="side">
       <p class="sentence">Real estate broker in Lehi, Utah. Buying, selling and investing on the Wasatch Front, with straight answers.</p>
       <p class="proof num"><b>{ZILLOW.rating}</b> from {ZILLOW.reviews} Zillow reviews · <b>{ZILLOW.sold}</b> homes sold</p>
@@ -86,8 +101,18 @@ const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
     inset: 0;
     overflow: hidden;
     container-type: size;
-    --r: 1.768; /* poster aspect 2560 / 1448 */
+    --r: 0.4621; /* phone rig 1170 × 2532 */
     --px: 0.5;
+  }
+  @media (min-aspect-ratio: 3/4) {
+    .hero-media {
+      --r: 0.75; /* tablet rig 1536 × 2048 */
+    }
+  }
+  @media (min-aspect-ratio: 6/5) {
+    .hero-media {
+      --r: 1.7778; /* desktop rig 2560 × 1440 */
+    }
   }
   /* The poster frame reproduces object-fit: cover with object-position (px, 60%), so DOM markers and the
      future GL view offset share one crop. */
@@ -96,17 +121,25 @@ const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
     width: max(100cqw, 100cqh * var(--r));
     height: max(100cqh, 100cqw / var(--r));
     left: clamp(100cqw - max(100cqw, 100cqh * var(--r)), 50cqw - var(--px) * max(100cqw, 100cqh * var(--r)), 0px);
-    top: calc((100cqh - max(100cqh, 100cqw / var(--r))) * 0.6);
-    transform-origin: 50% 60%;
+    top: calc((100cqh - max(100cqh, 100cqw / var(--r))) * 0.5);
   }
   .frame img {
     width: 100%;
     height: 100%;
   }
+  .frame img:not([src]) {
+    visibility: hidden;
+  }
+  .noscript-poster {
+    position: absolute;
+    inset: 0;
+  }
   .pin-tag {
     position: absolute;
-    left: 53%;
-    top: 57%;
+    z-index: 3;
+    left: var(--snx);
+    top: var(--sny);
+    margin: -38px 0 0 20px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -115,21 +148,22 @@ const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
     font-weight: 600;
     white-space: nowrap;
   }
-  .pin-tag :global(.pin-mark) {
-    width: 18px;
-    height: auto;
+  /* Gallery-white rule (model check I-1): a solid plate behind the title when the measured contrast < 4.5:1 */
+  .hero.plate .title span {
+    background: var(--paper);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding: 0 0.06em;
   }
-  :global([data-sun='blue']) .pin-tag,
-  :global([data-sun='night']) .pin-tag {
-    left: 40.6%;
-    top: 51.5%;
+  :global([data-sun='night']) .title {
+    color: var(--paper);
   }
-  :global([data-sun='blue']) .hero-media,
-  :global([data-sun='night']) .hero-media {
-    --px: 0.42;
+  :global([data-sun='night']) .hero {
+    background: var(--ink);
   }
   .caption {
     position: absolute;
+    z-index: 2;
     top: 20px;
     right: var(--m);
     background: var(--paper);
@@ -139,6 +173,7 @@ const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
   }
   .hero-foot {
     position: absolute;
+    z-index: 2;
     inset: auto 0 0 0;
     padding: 0 var(--m) 28px;
     display: grid;
@@ -192,7 +227,6 @@ const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
     .hero-media {
       position: relative;
       height: var(--hh);
-      --px: 0.53;
     }
     .pin-tag {
       display: none;
@@ -208,6 +242,7 @@ const sizes = '(max-width: 767px) 300vw, max(100vw, 177svh)';
     }
     .title {
       position: absolute;
+      z-index: 2;
       left: var(--m);
       top: calc(var(--hh) - 14px);
       transform: translateY(-100%);

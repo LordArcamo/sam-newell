@@ -351,3 +351,24 @@ p {
     transition-delay: calc(var(--i, 0) * 75ms);
   }
 }
+
+/* ——— the live relief canvas (src/relief) ——— */
+.relief-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.45, 0, 0.55, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+.relief-canvas.on {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .relief-canvas {
+    transition-duration: 0.15s;
+  }
+}

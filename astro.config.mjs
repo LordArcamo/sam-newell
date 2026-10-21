@@ -24,5 +24,10 @@ export default defineConfig({
     '/services/': { status: 301, destination: '/' },
   },
   devToolbar: { enabled: false },
+  vite: {
+    build: { sourcemap: true },
+    // pre-bundle the lazy chunks' deps so the dev server never re-optimises mid-session (504 Outdated Optimize Dep)
+    optimizeDeps: { include: ['three', 'three/examples/jsm/loaders/GLTFLoader.js', 'three/examples/jsm/libs/meshopt_decoder.module.js', 'gsap', 'gsap/ScrollTrigger', 'lenis'] },
+  },
   server: { port: 4345 },
 });

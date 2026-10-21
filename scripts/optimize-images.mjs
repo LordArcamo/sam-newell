@@ -41,9 +41,7 @@ const JOBS = [
   ...['cedar-hills', 'cedar-view', 'cosmos', 'lehi-1310', 'marrcrest', 'orem-1600', 'orem-900s', 'provo-1430', 'provo-1450', 'provo-300e', 'skyline'].map(
     (n) => [`${OLD}/listings/${n}.webp`, `listings/past-${n}.jpg`, 'listing'],
   ),
-  // TEMP hero/map posters: the concept renders, neutral greyscale, until blender/ ships the real posters.
-  [`${CONCEPT}/hero-golden.png`, 'posters/TEMP-concept-hero-golden-grey.jpg', 'poster'],
-  [`${CONCEPT}/hero-blue.png`, 'posters/TEMP-concept-hero-blue-grey.jpg', 'poster'],
+  // Hero/overview posters are NOT made here: scripts/capture-posters.mjs captures them from the live renderer.
 ];
 
 for (const [src, dest, kind] of JOBS) {

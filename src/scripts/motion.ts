@@ -8,13 +8,8 @@ export function initMotion() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   gsap.registerPlugin(ScrollTrigger);
 
-  // Hero: the poster settles (slow drift + dolly as the page leaves it). Transform only.
-  const poster = document.querySelector<HTMLElement>('[data-hero-frame]');
-  const hero = document.querySelector<HTMLElement>('[data-hero]');
-  if (poster && hero) {
-    gsap.fromTo(poster, { scale: 1.06 }, { scale: 1, duration: 2.4, ease: 'power2.out' });
-    gsap.to(poster, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
-  }
+  // The hero poster never moves: the live relief (src/relief) owns the hero's motion (drift + scroll dolly),
+  // and the poster under it must keep the identical crop for a clean hand-off.
 
   // Parallax drift on marked pictures (the moving-picture layer).
   document.querySelectorAll<HTMLElement>('[data-drift]').forEach((el) => {

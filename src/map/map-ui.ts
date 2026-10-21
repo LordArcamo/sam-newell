@@ -51,6 +51,15 @@ export function initMap() {
     return { x: b.cx - (f.l + f.w / 2) / s, y: b.cy - (f.t + f.h / 2) / s, s };
   }
 
+  // Pins closer than 26 px on screen would overlap as touch targets: show the first, hide the rest (every home
+  // stays reachable through the town card's list).
+  let placed: { x: number; y: number }[] = [];
+  const collides = (x: number, y: number) => {
+    if (placed.some((q) => Math.hypot(q.x - x, q.y - y) < 26)) return true;
+    placed.push({ x, y });
+    return false;
+  };
+
   function apply(v: typeof vb) {
     vb = v;
     const W = stage.clientWidth, H = stage.clientHeight;
@@ -59,10 +68,13 @@ export function initMap() {
     const place = (el: HTMLElement, p: Pt) => {
       const px = (p.x - v.x) * v.s, py = (p.y - v.y) * v.s;
       el.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px)`;
-      el.style.visibility = px < Math.max(-40, minX) || py < -40 || px > W + 40 || py > H + 40 ? 'hidden' : '';
+      const off = px < Math.max(-40, minX) || py < -40 || px > W + 40 || py > H + 40;
+      el.style.visibility = off || (el.classList.contains('pin') && collides(px, py)) ? 'hidden' : '';
     };
+    if (gl) return; // the live relief positions pins itself (glFrame)
+    placed = [];
     pins.forEach((el) => {
-      const p = gl ? null : pinPt[el.dataset.pin!];
+      const p = pinPt[el.dataset.pin!];
       if (p) place(el, p);
     });
     labels.forEach((el) => {
@@ -204,14 +216,38 @@ export function initMap() {
   select(startTown ?? 'lehi', { instant: true, overview: !startTown });
   void panel;
 
-  // The 3D: mount when the section nears the viewport (resolves null until the model ships).
+  // The 3D: mount when the section nears the viewport. In GL mode the town labels and the SN mark are part of
+  // the model, and the pin buttons follow the projected pin heads every rendered frame.
+  const glFrame = () => {
+    if (!gl) return;
+    const minX = free().l - 12;
+    const W = stage.clientWidth, H = stage.clientHeight;
+    placed = [];
+    pins.forEach((el) => {
+      const p = gl!.project(el.dataset.pin!);
+      if (!p) return;
+      el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)`;
+      el.style.visibility = !p.visible || p.x < Math.max(0, minX) || p.y < 0 || p.x > W || p.y > H || collides(p.x, p.y) ? 'hidden' : '';
+    });
+  };
   const io = new IntersectionObserver(
     async (es) => {
       if (!es.some((e) => e.isIntersecting)) return;
       io.disconnect();
-      gl = await mountRelief(stage, { role: 'map' });
+      const h = await mountRelief(stage, { role: 'map' });
+      if (!h) return;
+      gl = h;
+      root.classList.add('is-gl');
+      h.setFree(free);
+      h.onFrame(glFrame);
+      if (current) h.fly({ town: current });
     },
     { rootMargin: '200px' },
   );
   io.observe(root);
+  addEventListener('relief:fallback', () => {
+    gl = null;
+    root.classList.remove('is-gl');
+    layout();
+  });
 }

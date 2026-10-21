@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import Pic from '../components/Pic.astro';
 import { img } from '../lib/images';
 import { CONTACT } from '../data/site';
-// TODO(model): swap the TEMP poster for the C-OVERVIEW poster from blender/.
+// The overview poster, captured from the live renderer (scripts/capture-posters.mjs).
 ---
 <Base title="Page Not Found | Sam Newell" description="This page moved or never existed. Head home or book a call with Sam." robots="noindex, follow" noCanonical>
   <section class="nf">
@@ -16,7 +16,7 @@ import { CONTACT } from '../data/site';
       </p>
     </div>
     <div class="nf-p">
-      <Pic src={img('posters/TEMP-concept-hero-blue-grey.jpg')} alt="The Wasatch Front as a white relief model, seen from above Utah Lake" sizes="100vw" pos="40% 60%" eager />
+      <Pic src={img('posters/overview-golden.jpg')} alt="The Wasatch Front as a white relief model, seen from above Utah Lake" sizes="100vw" pos="62% 50%" eager />
     </div>
   </section>
 </Base>
