@@ -1,67 +1,67 @@
 ---
 import Base from '../layouts/Base.astro';
+import InnerHero from '../components/InnerHero.astro';
 import Pic from '../components/Pic.astro';
 import { img } from '../lib/images';
-import { BOOKING_URL, CONTACT, bookingAttrs } from '../data/site';
-// The overview poster, captured from the live renderer (scripts/capture-posters.mjs).
+
+const NEXT = [
+  { href: '/buy/', label: 'Buy', line: 'Know what you’re buying', src: img('photos/framing-custom-home.jpg'), alt: 'A custom home in framing' },
+  { href: '/sell/', label: 'Sell', line: 'Priced on numbers, not hope', src: img('photos/framed-house-wasatch.jpg'), alt: 'A framed house under the Wasatch' },
+  { href: '/invest/', label: 'Invest', line: 'Underwrite it like Sam', src: img('photos/valley-view-utah-county.jpg'), alt: 'Utah County from the hills' },
+  { href: '/podcast/', label: 'Podcast', line: 'Get Leveraged', src: img('photos/podcast-studio.jpg'), alt: 'The Get Leveraged interview room' },
+];
 ---
 <Base title="Page Not Found | Sam Newell" description="This page moved or never existed. Head home or book a call with Sam." robots="noindex, follow" noCanonical>
-  <section class="nf">
-    <div class="nf-t wrap">
-      <h1 class="h nf-h">Not on the map</h1>
-      <p class="lead">This page moved or never existed.</p>
-      <p class="nf-a">
-        <a class="btn" href="/">Home</a>
-        <a class="btn light-o" href={BOOKING_URL} {...bookingAttrs}>Book a call</a>
-        <a class="btn light-o" href={CONTACT.phoneHref}>Call {CONTACT.phone}</a>
-      </p>
-    </div>
-    <div class="nf-p">
-      <Pic src={img('posters/overview-golden.jpg')} alt="The Wasatch Front as a white relief model, seen from above Utah Lake" sizes="100vw" pos="62% 50%" eager />
-    </div>
-  </section>
+  <InnerHero
+    title="Not on the map"
+    lead="This page moved or never existed."
+    cta={{ href: '/', label: 'Back home' }}
+    image={img('photos/wasatch-dusk.jpg')}
+    alt="Sunset over the Wasatch from a Utah County field, photographed by Sam"
+  />
+  <nav class="next sec wrap" aria-label="Where to next">
+    <ul role="list">
+      {NEXT.map((n, i) => (
+        <li>
+          <a href={n.href} data-cursor="View">
+            <div data-shutter><Pic src={n.src} alt={n.alt} sizes="(max-width: 767px) 45vw, 22vw" ratio="r45" i={i} rv={false} /></div>
+            <span class="n-l">{n.label}</span>
+            <span class="n-s">{n.line}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
 </Base>
 <style>
-  .nf {
-    position: relative;
-    min-height: calc(100svh - var(--bar));
+  .next ul {
     display: grid;
-  }
-  .nf-p {
-    position: absolute;
-    inset: 0;
-  }
-  .nf-p :global(.ph) {
-    height: 100%;
-  }
-  .nf-t {
-    position: relative;
-    z-index: 1;
-    align-self: end;
-    justify-self: start;
-    background: var(--paper);
-    margin: 0 0 var(--m) var(--m);
-    padding: 32px;
-    display: grid;
-    gap: 16px;
-    max-width: 560px;
-  }
-  .nf-a {
-    display: flex;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
-    flex-wrap: wrap;
   }
-  .light-o {
-    background: var(--tone);
-    color: var(--ink);
+  .next a {
+    display: grid;
+    gap: 4px;
+    text-decoration: none;
   }
-  .light-o:hover {
-    background: #c4c4c4;
+  .next a :global(img) {
+    transition: transform 0.9s var(--ease-out);
+  }
+  .next a:hover :global(img) {
+    transform: scale(1.04);
+  }
+  .n-l {
+    margin-top: 12px;
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+  }
+  .n-s {
+    opacity: 0.7;
   }
   @media (max-width: 767px) {
-    .nf-t {
-      margin: 0 12px 12px;
-      padding: 24px;
+    .next ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>

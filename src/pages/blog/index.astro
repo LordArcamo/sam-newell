@@ -5,6 +5,7 @@ import InnerHero from '../../components/InnerHero.astro';
 import Pic from '../../components/Pic.astro';
 import TalkStrip from '../../components/TalkStrip.astro';
 import { img } from '../../lib/images';
+import { splitTitle as split } from '../../lib/title';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const latest = posts[0];
@@ -25,16 +26,16 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'long', day: 'nu
   <section class="posts sec wrap" aria-labelledby="posts-h">
     <h2 class="sr-only" id="posts-h">All notes</h2>
     <ol role="list" class="post-list">
-      {posts.map((p, i) => (
+      {posts.map((p, i) => { const t = split(p.data.title); return (
         <li class="post">
           {p.data.cover && <Pic src={p.data.cover} alt={p.data.coverAlt ?? ''} sizes="(max-width: 767px) 90vw, 30vw" ratio="r32" i={i} />}
           <div class="post-t" data-rv style={`--i:${i + 1}`}>
-            <p class="small">{p.data.tag} · <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time></p>
-            <h3><a href={`/blog/${p.id}/`}>{p.data.title}</a></h3>
-            <p>{p.data.description}</p>
+            <h3><a href={`/blog/${p.id}/`}>{t.head}</a></h3>
+            {t.tail && <p class="tail">{t.tail}</p>}
+            <p>{p.data.description}<span class="meta">{p.data.tag} · <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time></span></p>
           </div>
         </li>
-      ))}
+      ); })}
     </ol>
   </section>
   <TalkStrip />
@@ -58,9 +59,21 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'long', day: 'nu
   }
   .post h3 {
     font-size: var(--t-sub);
-    letter-spacing: -0.025em;
-    margin: 8px 0 12px;
-    max-width: 24ch;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0 0 12px;
+    max-width: 22ch;
+  }
+  .tail {
+    font-size: 18px;
+    margin: 0 0 16px;
+    max-width: 40ch;
+  }
+  .meta {
+    display: block;
+    margin-top: 20px;
+    opacity: 0.6;
   }
   .post h3 a {
     text-decoration: none;

@@ -3,7 +3,9 @@ import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Pic from '../../components/Pic.astro';
 import TalkStrip from '../../components/TalkStrip.astro';
-import { SITE } from '../../data/site';
+import { SITE, ZILLOW } from '../../data/site';
+import { img } from '../../lib/images';
+import { splitTitle } from '../../lib/title';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -12,6 +14,7 @@ export async function getStaticPaths() {
 const { post, others } = Astro.props;
 const { Content } = await render(post);
 const d = post.data;
+const t = splitTitle(d.title);
 const fmt = (x: Date) => x.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 const path = `/blog/${post.id}/`;
 const modified = d.updated ?? d.date;
@@ -42,18 +45,23 @@ const jsonld = [
 >
   <article class="art">
     <header class="art-h wrap">
-      <p class="small"><a href="/blog/">Notes from Sam</a> · {d.tag} · <time datetime={d.date.toISOString()}>{fmt(d.date)}</time></p>
-      <h1 class="h art-title">{d.title}</h1>
-      <p class="lead">{d.description}</p>
+      <h1 class="art-title"><span class="ln"><span>{t.head}</span></span></h1>
+      {t.tail && <p class="art-tail" data-rv style="--i:1">{t.tail}</p>}
+      <p class="lead" data-rv style="--i:2">{d.description}</p>
+      <p class="small art-meta" data-rv style="--i:3"><a href="/blog/">Notes from Sam</a> · {d.tag} · <time datetime={d.date.toISOString()}>{fmt(d.date)}</time></p>
     </header>
     {d.cover && (
-      <div class="art-cover">
+      <div class="art-cover" data-drift="4">
         <Pic src={d.cover} alt={d.coverAlt ?? ''} sizes="(max-width: 767px) 100vw, 1100px" ratio="r1610" eager />
       </div>
     )}
     <div class="prose wrap">
       <Content />
     </div>
+    <aside class="by wrap" aria-label="About the author">
+      <div class="by-p" data-shutter><Pic src={img('photos/sam-portrait-2026-10.jpg')} alt="Sam Newell" sizes="(max-width: 767px) 30vw, 160px" ratio="r45" pos="50% 25%" rv={false} /></div>
+      <p data-rv><strong>Sam Newell</strong> is a real estate broker in Lehi, Utah: {ZILLOW.sold} homes sold, {ZILLOW.rating} on {ZILLOW.reviews} Zillow reviews.</p>
+    </aside>
   </article>
   {others.length > 0 && (
     <section class="more-notes sec wrap" aria-labelledby="mn-h">
@@ -61,8 +69,8 @@ const jsonld = [
       <ul role="list" class="mn">
         {others.map((p, i) => (
           <li>
-            {p.data.cover && <Pic src={p.data.cover} alt={p.data.coverAlt ?? ''} sizes="(max-width: 767px) 90vw, 30vw" ratio="r32" i={i} />}
-            <h3><a href={`/blog/${p.id}/`}>{p.data.title}</a></h3>
+            {p.data.cover && <div data-shutter><Pic src={p.data.cover} alt={p.data.coverAlt ?? ''} sizes="(max-width: 767px) 90vw, 30vw" ratio="r32" i={i} rv={false} /></div>}
+            <h3><a href={`/blog/${p.id}/`}>{splitTitle(p.data.title).head}</a></h3>
           </li>
         ))}
       </ul>
@@ -81,10 +89,24 @@ const jsonld = [
     font-weight: 600;
   }
   .art-title {
-    font-size: clamp(36px, 3.8vw, 60px);
-    margin: 16px 0 20px;
+    font-size: clamp(30px, 5vw, 80px);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin: 0 0 20px;
+    max-width: 18ch;
+  }
+  .art-tail {
+    font-size: 24px;
+    margin: 0 0 16px;
+    max-width: 36ch;
+  }
+  .art-meta {
+    margin-top: 24px;
+    opacity: 0.7;
   }
   .art-cover {
+    overflow: hidden;
     max-width: 1100px;
     margin-inline: auto;
     padding-inline: var(--m);
@@ -96,7 +118,7 @@ const jsonld = [
     line-height: 1.65;
   }
   .prose :global(h2) {
-    font-size: 32px;
+    font-size: clamp(22px, 5.6vw, 32px);
     letter-spacing: -0.025em;
     margin: 56px 0 14px;
   }
@@ -112,6 +134,38 @@ const jsonld = [
     font-weight: 600;
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
+  }
+  .by {
+    max-width: calc(68ch + 2 * var(--m));
+    margin: 64px auto 0;
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 24px;
+    align-items: end;
+  }
+  .by p {
+    max-width: 40ch;
+  }
+  .ln {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+  }
+  .ln > span {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .ln > span {
+      animation: art-rise 1s var(--ease-expo) 0.15s both;
+    }
+    :global(html.arriving) .ln > span {
+      animation-delay: 0.85s;
+    }
+    @keyframes art-rise {
+      from {
+        transform: translateY(105%);
+      }
+    }
   }
   .mn {
     display: grid;
