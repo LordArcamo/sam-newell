@@ -94,15 +94,32 @@ const nar = (image.width / image.height).toFixed(3);
         transform: scale(1.09) translate3d(-1%, -0.8%, 0);
       }
     }
-    /* arriving through the curtain: the title rises out of its mask as the curtain lifts */
-    :global(html.arriving) .ln > span {
-      display: inline-block;
-      transform: translateY(105%);
-      animation: ih-rise 1s var(--ease-expo) 0.85s forwards;
+    /* the title rises out of its mask: on a direct visit after 0.2 s; through the curtain as it lifts
+       (html.lift, wipe.ts), with a fail-safe in case no script runs */
+    :global(.js) .ln > span {
+      animation: ih-rise 1s var(--ease-expo) 0.2s both;
+    }
+    :global(html.via) .ln > span {
+      animation-name: ih-rise-via;
+      animation-delay: 1.6s;
+    }
+    :global(html.via.lift) .ln > span {
+      animation-name: ih-rise-lift;
+      animation-delay: 0.3s;
     }
     @keyframes ih-rise {
-      to {
-        transform: none;
+      from {
+        transform: translateY(105%);
+      }
+    }
+    @keyframes ih-rise-via {
+      from {
+        transform: translateY(105%);
+      }
+    }
+    @keyframes ih-rise-lift {
+      from {
+        transform: translateY(105%);
       }
     }
   }

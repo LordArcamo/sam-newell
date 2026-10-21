@@ -145,7 +145,7 @@ void ZILLOW;
           var rm = matchMedia('(prefers-reduced-motion: reduce)').matches, ss = sessionStorage, tool = /[?&](record|capture)/.test(q);
           if (!rm && !tool && location.pathname === '/' && !ss.getItem('sn-op')) { h.classList.add('op'); ss.setItem('sn-op', '1'); }
           var w = ss.getItem('sn-wipe');
-          if (w) { ss.removeItem('sn-wipe'); if (!rm) { h.classList.add('arriving'); h.dataset.wipe = w; } }
+          if (w) { ss.removeItem('sn-wipe'); if (!rm) { h.classList.add('arriving', 'via'); h.dataset.wipe = w; } }
         } catch (x) {}
       })(document);
     </script>

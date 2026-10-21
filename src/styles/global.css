@@ -97,6 +97,7 @@
   --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-curtain: cubic-bezier(0.76, 0, 0.24, 1);
   --hover: 0.18s;
 }
 @media (max-width: 767px) {
@@ -560,24 +561,32 @@ html.arriving .curtain-m path {
 }
 html.leaving .curtain {
   transform: none;
-  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 0.5s var(--ease-curtain);
   pointer-events: auto;
 }
 html.leaving .curtain-t {
   opacity: 1;
   transition: opacity 0.3s 0.25s;
 }
-/* arriving: the curtain starts closed (set in <head> before first paint), shows the title card, then lifts.
-   Pure CSS with fill-mode, so it lifts even if no script runs. */
+/* arriving: the curtain starts closed (set in <head> before first paint) and shows the title card. wipe.ts lifts
+   it (html.lift) once the page's first picture has decoded, at most 900 ms in; the CSS fail-safe lifts it anyway. */
 html.arriving .curtain {
   transform: none;
-  animation: curtain-up 0.7s cubic-bezier(0.76, 0, 0.24, 1) 0.45s forwards;
+  animation: curtain-up 0.7s var(--ease-curtain) 1.25s forwards;
+}
+html.arriving.lift .curtain {
+  animation: curtain-lift 0.7s var(--ease-curtain) 0.05s forwards;
 }
 html.arriving .curtain-t {
   opacity: 1;
   animation: curtain-t 0.45s ease 0.3s forwards;
 }
 @keyframes curtain-up {
+  to {
+    transform: translateY(-101%);
+  }
+}
+@keyframes curtain-lift {
   to {
     transform: translateY(-101%);
   }

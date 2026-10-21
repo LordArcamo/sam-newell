@@ -12,8 +12,18 @@ export function initWipe() {
   addEventListener('pageshow', (e) => {
     if ((e as PageTransitionEvent).persisted) html.classList.remove('leaving', 'arriving');
   });
-  // the arriving curtain is done after ~1.2 s: drop the class so it never intercepts anything
-  if (html.classList.contains('arriving')) setTimeout(() => html.classList.remove('arriving'), 1300);
+  // Arriving: lift the curtain once the page's first picture has decoded (so it never lifts onto a black panel),
+  // at most 900 ms after navigation started; then drop the class so the curtain never intercepts anything.
+  if (html.classList.contains('arriving')) {
+    const img = document.querySelector<HTMLImageElement>('[data-ih] img, [data-hero-img]');
+    const cap = new Promise((r) => setTimeout(r, Math.max(0, 900 - performance.now())));
+    const ready = img ? (img.complete && img.naturalWidth ? img.decode() : new Promise((r) => img.addEventListener('load', () => img.decode().then(r, r), { once: true }))) : Promise.resolve();
+    Promise.race([ready.catch(() => {}), cap]).then(() => {
+      html.classList.add('lift');
+      setTimeout(() => html.classList.remove('arriving'), 800);
+    });
+    setTimeout(() => html.classList.remove('arriving'), 2200); // fail-safe
+  }
 
   document.addEventListener('click', (e) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
