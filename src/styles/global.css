@@ -4,38 +4,14 @@
      --paper = the ground (black), --ink = the type (white), --tone = the first surface step.
    .dark (v1's black band) therefore renders as a WHITE chapter here — the two-tone rhythm of the brief. */
 
-@font-face {
-  font-family: 'General Sans';
-  src: url('/fonts/GeneralSans-Semibold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
+/* First-screen faces only (measured on every page at 390 and 1440): General Sans Light (titles), Switzer Medium
+   (leads, nav), Switzer Semibold (buttons). The rest (General Sans 400/500/600, Switzer 400) are added by the boot
+   script in Base.astro: at once on the home page, whose first screen uses General Sans 500 and Switzer 400, and
+   after `load` everywhere else, so they never compete with the hero picture. A <noscript> copy covers no-JS. */
 @font-face {
   font-family: 'General Sans';
   src: url('/fonts/GeneralSans-Light.woff2') format('woff2');
   font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'General Sans';
-  src: url('/fonts/GeneralSans-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'General Sans';
-  src: url('/fonts/GeneralSans-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Switzer';
-  src: url('/fonts/Switzer-Regular.woff2') format('woff2');
-  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
@@ -53,7 +29,6 @@
   font-style: normal;
   font-display: swap;
 }
-/* Metric fallbacks so the swap barely moves the page */
 @font-face {
   font-family: 'General Sans Fallback';
   src: local('Arial');

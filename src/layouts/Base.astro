@@ -109,7 +109,7 @@ for (const l of ihPre) page = page.replace(l, '');
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href="/fonts/GeneralSans-Light.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/Switzer-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Switzer-Medium.woff2" as="font" type="font/woff2" crossorigin />
     <meta property="og:type" content={type} />
     <meta property="og:site_name" content="Sam Newell" />
     <meta property="og:title" content={title} />
@@ -143,6 +143,19 @@ for (const l of ihPre) page = page.replace(l, '');
         h.dataset.alt = alt.toFixed(1);
         h.dataset.t = String(t);
         if (/[?&]gl=off/.test(q)) h.dataset.gl = 'off';
+        // Faces not on the first screen (global.css keeps the first-screen ones): on the home page they are on it
+        // (General Sans 500 swatches, Switzer 400 line) and load at once; elsewhere they wait for the hero.
+        try {
+          var late = function (early) {
+            [['General Sans', 400, 'GeneralSans-Regular'], ['General Sans', 500, 'GeneralSans-Medium'], ['General Sans', 600, 'GeneralSans-Semibold'], ['Switzer', 400, 'Switzer-Regular']].forEach(function (f) {
+              if ((location.pathname === '/' && f[1] !== 600 && f[2] !== 'GeneralSans-Regular') === early)
+                d.fonts.add(new FontFace(f[0], 'url(/fonts/' + f[2] + '.woff2) format("woff2")', { weight: String(f[1]), display: 'swap' }));
+            });
+          };
+          late(true);
+          // after `load` and a presented frame (on a fast line `load` can come before the first paint)
+          addEventListener('load', function () { requestAnimationFrame(function () { requestAnimationFrame(function () { late(false); }); }); }, { once: true });
+        } catch (x) {}
         // Motion flags (Lehi Light): the opening plays once per session on the home page; a page arrived at
         // through the black curtain starts covered. Never with reduced motion, never in ?record/?capture.
         try {
@@ -153,6 +166,7 @@ for (const l of ihPre) page = page.replace(l, '');
         } catch (x) {}
       })(document);
     </script>
+    <noscript><style>@font-face{font-family:'General Sans';src:url(/fonts/GeneralSans-Regular.woff2) format('woff2');font-weight:400;font-display:swap}@font-face{font-family:'General Sans';src:url(/fonts/GeneralSans-Medium.woff2) format('woff2');font-weight:500;font-display:swap}@font-face{font-family:'General Sans';src:url(/fonts/GeneralSans-Semibold.woff2) format('woff2');font-weight:600;font-display:swap}@font-face{font-family:'Switzer';src:url(/fonts/Switzer-Regular.woff2) format('woff2');font-weight:400;font-display:swap}</style></noscript>
     <slot name="head" />
     <script type="application/ld+json" set:html={ld} />
   </head>
