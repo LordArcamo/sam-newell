@@ -33,8 +33,8 @@ export function initMap() {
   const labels = [...root.querySelectorAll<HTMLElement>('[data-label]')];
   const sn = root.querySelector<HTMLElement>('[data-sn]')!;
   const announce = root.querySelector<HTMLElement>('[data-announce]')!;
-  const panel = root.querySelector<HTMLElement>('[data-towns]')!;
-  const cardWrap = root.querySelector<HTMLElement>('[data-cards]')!;
+  const cardBox = root.querySelector<HTMLElement>('[data-cards]')!;
+  const fullBtn = root.querySelector<HTMLButtonElement>('[data-full]')!;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const townPt = Object.fromEntries(data.towns.map((t) => [t.slug, t]));
   const pinPt = Object.fromEntries(data.pins.map((p) => [p.id, p]));
@@ -44,20 +44,13 @@ export function initMap() {
   let vb = { x: 0, y: 0, s: 1 }; // viewBox origin (km) + px per km
   let anim = 0;
 
-  // The free area of the stage that the panel and card do not cover (desktop overlays them).
+  // Nothing covers the stage any more (split view): the free area is the stage, less room for the pin tags above the
+  // heads, the "Full map" button top-right and a margin at the foot.
   function free() {
     const W = stage.clientWidth, H = stage.clientHeight;
-    const overlay = getComputedStyle(cardWrap).position === 'absolute' && innerWidth >= 1024;
-    if (!overlay) return { W, H, l: 16, t: 16, w: W - 32, h: H - 32 };
-    // desktop: the card sits on the right, the slips along the bottom
-    const sr = stage.getBoundingClientRect();
-    const cardL = cardWrap.getBoundingClientRect().left - sr.left;
-    const slipsT = (root.querySelector<HTMLElement>('[data-toolbar]')?.getBoundingClientRect().top ?? sr.bottom) - sr.top;
-    // the heading's plate sits top-left: the map frames itself below it, so no town or pin lands under the words
-    const copyB = panel.getBoundingClientRect().bottom - sr.top;
-    // (the flat SVG overview keeps the full height: its contours read fine under the plate, and it is tall and narrow)
-    const t = gl || current ? Math.max(24, Math.min(copyB + 16, slipsT - 264)) : 24;
-    return { W, H, l: 24, t, w: Math.max(240, cardL - 48), h: Math.max(240, slipsT - 24 - t) };
+    const m = W < 600 ? 24 : 28;
+    const t = W < 600 ? 44 : 64;
+    return { W, H, l: m, t, w: Math.max(160, W - 2 * m), h: Math.max(160, H - t - m) };
   }
 
   function fit(b: Box) {
@@ -162,15 +155,24 @@ export function initMap() {
     if (gl) drawRoute(overview ? null : slug);
     else go(overview ? OVERVIEW : boxFor(slug!), opts.instant);
     if (opts.focus) buttons.find((b) => b.dataset.town === slug)?.focus();
+    fullBtn.hidden = !!overview;
     requestAnimationFrame(fadeCard);
   }
 
-  // The card's list scrolls inside it; a hairline over the actions says "more below" until the end is reached.
+  // Desktop: the card scrolls on its own and its actions stick to its foot; while more of it is below, they sit on a
+  // grey plate (no lines, no fades).
   const fadeCard = () => {
-    const sc = cards.find((c) => c.classList.contains('on'))?.querySelector<HTMLElement>('[data-tc-scroll]');
-    if (sc) sc.classList.toggle('is-cut', sc.scrollHeight - sc.scrollTop - sc.clientHeight > 2);
+    const scrolls = getComputedStyle(cardBox).overflowY === 'auto';
+    cardBox.classList.toggle('is-cut', scrolls && cardBox.scrollHeight - cardBox.scrollTop - cardBox.clientHeight > 2);
   };
-  root.querySelectorAll<HTMLElement>('[data-tc-scroll]').forEach((sc) => sc.addEventListener('scroll', fadeCard, { passive: true }));
+  cardBox.addEventListener('scroll', fadeCard, { passive: true });
+
+  // "Full map": back out to the whole valley; focus returns to the picked town in the list.
+  fullBtn.addEventListener('click', () => {
+    const back = buttons.find((b) => b.dataset.town === current);
+    select(null);
+    back?.focus();
+  });
 
   // Toolbar: click / Enter / Space select; arrows, Home and End move the roving focus.
   toolbar.addEventListener('click', (e) => {

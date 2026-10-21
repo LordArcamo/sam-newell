@@ -35,17 +35,22 @@ const mapData = {
 };
 ---
 <section class="map" id="map" aria-labelledby="map-h" data-map>
-  <div class="copy" data-towns>
-    <h2 class="h copy-h" id="map-h">Pick your town</h2>
-    <p class="lead">Every pin is a home Sam has listed or sold. Tap a town and the model flies there.</p>
-  </div>
-  <div class="slips num" role="toolbar" aria-label="Towns" aria-orientation="horizontal" data-toolbar>
-    {slips.map((c, i) => (
-      <button type="button" class="slip" style={`--h:${[172, 136, 158, 128, 146, 120, 150, 132][i % 8]}px;--r:${[0, -1.2, 0, 0, 1.5, 0, -0.8, 0][i % 8]}deg`} data-town={c.slug} aria-pressed={c.slug === DEFAULT ? 'true' : 'false'} tabindex={c.slug === DEFAULT ? 0 : -1} aria-controls="map-card">
-        <b>{c.name}</b>
-        <span>{c.count}{c.slug === 'lehi' ? ' · home base' : ''}</span>
-      </button>
-    ))}
+  <!-- Desktop: a split view. Left: the heading and the towns, then the picked town's card (it scrolls on its own, its
+       actions pinned at its foot). Right: the map, never covered. DOM order = tab order: towns, pins, card.
+       Below 900 px (portrait tablets, phones) it stacks: heading, map, towns, card. -->
+  <div class="rail" data-rail>
+    <div class="copy" data-towns>
+      <h2 class="copy-h" id="map-h">Pick your town</h2>
+      <p class="copy-lead">Every pin is a home Sam has listed or sold.<span class="lead-2"> Tap a town and the model flies there.</span></p>
+    </div>
+    <div class="slips num" role="toolbar" aria-label="Towns" aria-orientation="horizontal" data-toolbar>
+      {slips.map((c) => (
+        <button type="button" class="slip" data-town={c.slug} aria-pressed={c.slug === DEFAULT ? 'true' : 'false'} tabindex={c.slug === DEFAULT ? 0 : -1} aria-controls="map-card">
+          <b>{c.name}</b>
+          <span>{c.homes.length}<span class="sr-only"> {c.homes.length === 1 ? 'home' : 'homes'}</span></span>
+        </button>
+      ))}
+    </div>
   </div>
 
   <div class="stage" data-relief-mount="map" data-stage>
@@ -62,7 +67,8 @@ const mapData = {
       {TOWNS.map((t) => <span class="tl small" data-label={t.slug}>{t.name}</span>)}
       <span class="sn" data-sn><Logo variant="mark" title="" /></span>
     </div>
-    <!-- one tab stop: the town toolbar comes first; the pins are a single roving group (arrows move, Enter opens) -->
+    <button type="button" class="full" data-full hidden>Full map</button>
+    <!-- one tab stop: the town list comes first; the pins are a single roving group (arrows move, Enter opens) -->
     <p class="sr-only" id="pins-hint">Use the arrow keys to move between homes. Enter shows the home's town.</p>
     <div class="pins" role="toolbar" aria-label="Sam's homes on the map" aria-describedby="pins-hint" data-pins>
       {pins.map((h, i) => (
@@ -74,7 +80,8 @@ const mapData = {
     </div>
   </div>
 
-  <div class="card dark" id="map-card" data-cards>
+
+  <div class="card dark" id="map-card" data-cards data-lenis-prevent>
     <p class="sr-only" aria-live="polite" data-announce></p>
     {cards.map((c) => (
       <article class:list={['tc', { on: c.slug === DEFAULT }]} data-card={c.slug} aria-labelledby={`tc-${c.slug}`}>
@@ -93,8 +100,8 @@ const mapData = {
             <h3 class="tc-town" id={`tc-${c.slug}`}>{c.name}</h3>
             <p class="small">{c.count || 'No homes shown here yet.'}</p>
           </div>
-          <!-- the list and the quote scroll inside the card (a hairline over the actions while more is below); the actions never leave it -->
-          <div class="tc-scroll" data-lenis-prevent data-tc-scroll>
+          <!-- on desktop the card scrolls on its own and the actions stick to its foot, so they never leave the screen -->
+          <div class="tc-scroll">
             {c.homes.length > 0 ? (
               <ul role="list" class="tc-homes">
                 {c.homes.slice(0, 3).map((h) => (
@@ -140,20 +147,95 @@ const mapData = {
 </section>
 
 <style>
+  /* ——— layout. Desktop: rail | map, side by side, nothing over the map (user test 2026-10-21: the plate, card and
+     slips left ~20% of the map visible on a 1000×540 laptop). ——— */
   .map {
     position: relative;
-    height: 100svh;
-    min-height: 760px;
+    display: grid;
+    grid-template-columns: minmax(360px, 34%) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    height: calc(100svh - var(--bar));
+    min-height: 460px;
     overflow: hidden;
     background: #0a0a0a;
-    scroll-margin-top: calc(-1 * (var(--bar) + 16px)); /* the section fills the screen: land flush (jury P1-6) */
+    scroll-margin-top: -16px; /* lands right under the bar (html scroll-padding is bar + 16) */
+  }
+  .rail {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 40px 20px 0 var(--m);
   }
   .stage {
-    position: absolute;
-    inset: 0;
+    grid-column: 2;
+    grid-row: 1 / 3;
+    position: relative;
     overflow: hidden;
-    z-index: 0; /* its own stack: contours, canvas, route and pins stay under the copy, card and slips */
+    z-index: 0; /* its own stack: contours, canvas, route and pins */
   }
+
+  /* ——— the rail ——— */
+  .copy-h {
+    font-size: clamp(36px, 3.334vw, 56px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    font-weight: 400;
+  }
+  .copy-lead {
+    margin-top: 12px;
+    font-size: 17px;
+    line-height: 1.45;
+    max-width: 38ch;
+  }
+  /* the towns: compact chips (name + homes on the map), the picked one turns white */
+  .slips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 24px;
+  }
+  .slip {
+    display: inline-flex;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px;
+    align-items: center;
+    background: #1c1c1c;
+    color: #fff;
+    transition: background-color var(--hover), color var(--hover);
+  }
+  .slip b {
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+  }
+  .slip > span {
+    font-size: 14px;
+    opacity: 0.7;
+  }
+  .slip:hover {
+    background: #2e2e2e;
+  }
+  .slip[aria-pressed='true'] {
+    background: #fff;
+    color: #0a0a0a;
+  }
+  .slip:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+  /* the card: as tall as it needs, up to the room left under the towns; then it scrolls, actions pinned at its foot */
+  .card {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+    max-height: calc(100% - 20px - 28px);
+    margin: 20px 20px 0 var(--m);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  /* ——— the map stage ——— */
   .relief {
     width: 100%;
     height: 100%;
@@ -161,10 +243,7 @@ const mapData = {
   }
   .topo {
     position: absolute;
-    top: 4%;
-    left: 30%;
-    right: 440px;
-    bottom: 210px;
+    inset: 6%;
     z-index: 1;
     color: #fff;
     pointer-events: none;
@@ -323,107 +402,40 @@ const mapData = {
   .map.is-gl .overlay {
     display: none;
   }
-  .map.is-gl .pin i {
-    opacity: 0;
-  }
+  .map.is-gl .pin i,
   .map.is-gl .pin:hover i,
   .map.is-gl .pin:focus-visible i,
   .map.is-gl .pin.on i {
     opacity: 0;
   }
-  .map.is-gl .pin:focus-visible {
-    outline-color: var(--ink);
-  }
-
-  /* a solid plate: the words never sit straight on the relief (jury P0) */
-  .copy {
+  /* back out to the whole valley (only while a town is picked) */
+  .full {
     position: absolute;
-    top: 96px;
-    left: max(var(--m), 12vw);
-    width: min(520px, 60vw);
+    right: 16px;
+    top: 16px;
     z-index: 3;
-    pointer-events: none;
-    background: #0a0a0a;
-    padding: 24px 28px 26px;
-  }
-  .copy-h {
-    margin-bottom: 18px;
-  }
-  .slips {
-    position: absolute;
-    left: 12px;
-    right: 12px;
-    bottom: 0;
-    z-index: 3;
-    display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    gap: 10px;
-    align-items: end;
-  }
-  .slip {
-    height: var(--h);
+    min-height: 44px;
+    padding: 0 16px;
     background: #fff;
     color: #0a0a0a;
-    text-align: left;
-    padding: 18px 16px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transform: rotate(var(--r));
-    transform-origin: 50% 100%;
-    transition: transform 0.5s var(--ease-expo), background-color 0.3s;
-  }
-  .slip b {
-    font-family: var(--display);
     font-weight: 600;
-    font-size: 20px;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
+    font-size: 15px;
   }
-  .slip span {
-    font-size: 14px;
-    line-height: 1.45;
+  .full:hover {
+    background: #e6e6e6;
   }
-  .slip:hover {
-    transform: translateY(-10px) rotate(var(--r));
-  }
-  .slip[aria-pressed='true'] {
-    transform: translateY(-22px) rotate(0deg);
-  }
-  .slip[aria-pressed='true'] b {
-    text-decoration: underline;
-    text-decoration-thickness: 3px;
-    text-underline-offset: 6px;
-  }
-  .slip:focus-visible {
+  .full:focus-visible {
     outline: 3px solid #fff;
     outline-offset: 3px;
   }
 
-  /* the card is a flex column: picture and head fixed, the list and quote scroll, the actions pinned at the foot */
-  .card {
-    position: absolute;
-    right: var(--m);
-    top: 96px;
-    width: 390px;
-    max-height: calc(100% - 96px - 220px);
-    overflow: hidden;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-  }
+  /* ——— the town card ——— */
   :global(.js) .tc {
     display: none;
   }
   :global(.js) .tc.on {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    display: block;
     animation: card-in 0.15s ease-out;
-  }
-  .tc :global(.ph),
-  .tc .macro {
-    flex: none;
   }
   @keyframes card-in {
     from {
@@ -450,31 +462,7 @@ const mapData = {
   }
   .tc-body {
     --pad: 22px;
-    padding: 20px var(--pad) var(--pad);
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .tc-head {
-    flex: none;
-  }
-  .tc-scroll {
-    min-height: 0;
-    flex: 0 1 auto;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    margin: 0 -8px;
-    padding: 0 8px;
-  }
-  /* more below: the pinned actions sit on a grey plate, so the list reads as running on underneath (tone, no lines) */
-  .tc-scroll.is-cut + .tc-act {
-    background: #efefef;
-    margin: 0 calc(-1 * var(--pad)) calc(-1 * var(--pad));
-    padding: 16px var(--pad) var(--pad);
-  }
-  .tc-scroll.is-cut + .tc-act .btn.ghost {
-    background: #fff;
+    padding: 20px var(--pad) 0;
   }
   .tc-town {
     font-size: 32px;
@@ -509,7 +497,7 @@ const mapData = {
   .addr {
     font-family: var(--display);
     font-weight: 600;
-    font-size: 24px;
+    font-size: 22px;
     letter-spacing: -0.02em;
     line-height: 1.2;
   }
@@ -537,13 +525,6 @@ const mapData = {
   .card :global(.r169) {
     aspect-ratio: 21 / 9;
   }
-  /* short desktop screens: the card drops its picture so its text and buttons always fit */
-  @media (min-width: 1024px) and (max-height: 1000px) {
-    .card :global(.ph),
-    .card .macro {
-      display: none;
-    }
-  }
   .tc-q {
     margin: 16px 0 4px;
   }
@@ -567,12 +548,23 @@ const mapData = {
     display: inline-block;
     min-height: 24px;
   }
+  /* the actions stick to the card's foot while it runs on below; then they sit on a grey plate */
   .tc-act {
-    flex: none;
+    position: sticky;
+    bottom: 0;
     display: flex;
     gap: 8px;
-    padding-top: 16px;
     flex-wrap: wrap;
+    background: #fff;
+    margin: 0 calc(-1 * var(--pad));
+    padding: 16px var(--pad) var(--pad);
+    transition: background-color var(--hover);
+  }
+  .card:global(.is-cut) .tc-act {
+    background: #efefef;
+  }
+  .card:global(.is-cut) .tc-act .btn.ghost {
+    background: #fff;
   }
   .tc-act .btn {
     min-height: 48px;
@@ -585,6 +577,77 @@ const mapData = {
   }
   .btn.ghost:hover {
     background: #d9d9d9;
+  }
+  /* short screens: the card drops its picture so the list and the actions come first */
+  @media (min-width: 900px) and (max-height: 820px) {
+    .card :global(.ph),
+    .card .macro {
+      display: none;
+    }
+  }
+  /* very short screens: one line of lead, tighter rail */
+  @media (min-width: 900px) and (max-height: 700px) {
+    .rail {
+      padding-top: 22px;
+    }
+    .copy-h {
+      font-size: 36px;
+    }
+    .copy-lead {
+      margin-top: 6px;
+      font-size: 15px;
+    }
+    .lead-2 {
+      display: none;
+    }
+    .slips {
+      margin-top: 14px;
+      gap: 4px;
+    }
+    .slip {
+      min-height: 36px;
+      padding: 0 10px;
+      gap: 6px;
+    }
+    .slip b {
+      font-size: 15px;
+    }
+    .card {
+      margin-top: 14px;
+      max-height: calc(100% - 14px - 20px);
+    }
+    .tc-body {
+      --pad: 18px;
+      padding-top: 14px;
+    }
+    .tc-town {
+      font-size: 26px;
+    }
+    .addr {
+      font-size: 19px;
+    }
+    /* the pinned actions stay one short row: the Zillow link drops its plate */
+    .tc-act {
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 14px;
+      padding-top: 10px;
+      padding-bottom: 14px;
+    }
+    .tc-act .btn {
+      min-height: 44px;
+      padding: 0 14px;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+    .tc-act .btn.ghost,
+    .card:global(.is-cut) .tc-act .btn.ghost {
+      background: none;
+      padding: 0 2px;
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+    }
   }
 
   .sheet {
@@ -634,25 +697,30 @@ const mapData = {
 
   /* No JS: a plain list of towns → homes → reviews, readable top to bottom. */
   :global(html:not(.js)) .map {
+    display: block;
     height: auto;
     min-height: 0;
     overflow: visible;
+  }
+  :global(html:not(.js)) .rail {
+    padding: 96px var(--m) 32px;
+  }
+  :global(html:not(.js)) .card {
+    max-height: none;
+    overflow: visible;
+    margin: 0 var(--m) 64px;
   }
   :global(html:not(.js)) .stage,
   :global(html:not(.js)) .slips {
     display: none;
   }
-  :global(html:not(.js)) .copy {
-    position: static;
-    padding: 96px var(--m) 32px;
-  }
   :global(html:not(.js)) .card {
-    position: static;
-    width: auto;
-    max-height: none;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 2px;
+  }
+  :global(html:not(.js)) .tc-act {
+    position: static;
   }
   @media (prefers-reduced-motion: reduce) {
     .sheet[open],
@@ -661,73 +729,44 @@ const mapData = {
     }
   }
 
-  @media (max-width: 1023px) {
-    .topo {
-      top: 4%;
-      left: 4%;
-      right: 4%;
-      bottom: 4%;
-    }
+  /* ——— phones and tablets: map first (nothing over it), then the towns, then the card ——— */
+  @media (max-width: 899px) {
     .map {
-      height: auto;
-      min-height: 0;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
+      height: auto;
+      min-height: 0;
       scroll-margin-top: 0;
     }
+    .rail {
+      display: contents;
+    }
     .copy {
-      position: static;
       order: 1;
-      width: auto;
       padding: 72px var(--m) 24px;
     }
-    /* the slips become one horizontal strip under the map */
-    .slips {
-      position: static;
-      order: 3;
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x proximity;
-      scroll-padding-inline: var(--m);
-      gap: 8px;
-      padding: 26px var(--m) 16px;
-      scrollbar-width: none;
-      align-items: flex-end;
+    .copy-h {
+      font-size: clamp(40px, 9vw, 56px);
     }
-    .slip {
-      flex: none;
-      width: 168px;
-      height: auto;
-      min-height: 104px;
-      padding-bottom: 14px;
-      scroll-snap-align: start;
-      transform: none;
-    }
-    .slip:hover {
-      transform: none;
-    }
-    .slip[aria-pressed='true'] {
-      transform: translateY(-12px);
-    }
-    /* the map keeps its whole frame (design review: half the map was under the card); the card docks below the slips */
     .stage {
-      position: relative;
       order: 2;
       height: 62svh;
       min-height: 420px;
     }
+    .slips {
+      order: 3;
+      margin: 0;
+      padding: 20px var(--m) 0;
+    }
     .card {
-      position: static;
       order: 4;
-      width: auto;
       max-width: 640px;
       max-height: none;
-      margin: 0 var(--m) 56px;
       overflow: visible;
+      margin: 20px var(--m) 56px;
     }
-    .tc-scroll {
-      overflow: visible;
+    .tc-act {
+      position: static;
     }
     .card :global(.ph),
     .card .macro {
@@ -735,13 +774,10 @@ const mapData = {
     }
     .tc-body {
       --pad: 18px;
-      padding: 18px var(--pad) var(--pad);
+      padding-top: 18px;
     }
     .addr {
       font-size: 20px;
-    }
-    .tc-act {
-      margin-top: 14px;
     }
     .sheet {
       margin: auto 0 0 0;
@@ -749,8 +785,8 @@ const mapData = {
       height: 92dvh;
     }
   }
-  /* tablet: the card sits under the map as a picture beside the list */
-  @media (min-width: 600px) and (max-width: 1023px) {
+  /* tablet: the card under the map as a picture beside the list */
+  @media (min-width: 600px) and (max-width: 899px) {
     .card {
       max-width: 760px;
     }
@@ -764,34 +800,6 @@ const mapData = {
       aspect-ratio: auto;
       height: 100%;
       min-height: 240px;
-    }
-  }
-  /* phones: all eight towns at once, two to a row, nothing cut at the screen edge (jury P2 #20) */
-  @media (max-width: 599px) {
-    .slips {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      overflow: visible;
-      padding: 20px var(--m) 20px;
-      align-items: stretch;
-    }
-    .slip {
-      width: auto;
-      min-height: 84px;
-      padding: 12px 14px 12px;
-      gap: 4px;
-    }
-    .slip b {
-      font-size: 18px;
-    }
-    .slip span {
-      font-size: 14px;
-    }
-    /* the picked town steps down a tone (no outline): white type on #2e2e2e, still underlined */
-    .slip[aria-pressed='true'] {
-      transform: none;
-      background: #2e2e2e;
-      color: #fff;
     }
   }
 </style>

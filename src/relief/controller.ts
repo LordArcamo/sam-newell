@@ -3,8 +3,8 @@
  * flights, watchdog, ?record and ?capture modes.
  */
 import { gsap } from 'gsap';
-import { Vector3 } from 'three';
-import { Engine, RIGS, rigFor, type Pose as CamPose, type PinData, type TownData, type Rig } from './relief';
+import { Vector3, PerspectiveCamera } from 'three';
+import { Engine, RIGS, rigFor, camFromPose, type Pose as CamPose, type PinData, type TownData, type Rig } from './relief';
 import type { Tier } from './gpu';
 import type { Pose, ReliefHandle } from './mount';
 import posters from '../data/posters.json';
@@ -34,6 +34,9 @@ export class Controller {
   dead = false;
   mapPose!: CamPose;
   mapDirty = true;
+  /** What the map is showing (re-fitted to the stage on resize). */
+  mapGoal: Pose = 'overview';
+  refit = true;
   flying = false;
   shadowKey = '';
   lastRig: Rig | null = null;
@@ -65,7 +68,7 @@ export class Controller {
     await e.renderer.compileAsync(e.scene, e.camera);
     if (!RECORD && !CAPTURE) setInterval(() => this.relight(), 60_000);
     document.addEventListener('visibilitychange', () => this.kick());
-    addEventListener('resize', () => { this.mapDirty = true; this.kick(); });
+    addEventListener('resize', () => { this.mapDirty = true; this.refit = true; this.kick(); });
     addEventListener('scroll', () => this.kick(), { passive: true });
     if (CAPTURE) this.capture();
   }
@@ -87,16 +90,76 @@ export class Controller {
     return { tx: target.x, ty: target.y, tz: target.z, dist: 26, bearing: this.engine.bearing, elev: 30, vfov: 16 };
   }
 
-  /** Camera distance that keeps a town's pins (spanX × spanZ km) inside ~80% of the map's free area. */
-  fitDist(pose: CamPose, spanX: number, spanZ: number) {
+  /**
+   * The map's camera for a goal, fitted to the stage as it is now (any aspect, 0.7 to 2.4): the distance is the
+   * smallest at which every pin head (at its on-screen scale), the town and, where it belongs, the SN home pin sit
+   * inside the free area. Nothing clips the top, nothing looms in the foreground (user test, 1000×540).
+   */
+  poseFor(goal: Pose): CamPose {
+    const e = this.engine;
+    if (goal === 'overview' || goal === 'hero') return this.fit(this.overviewPose(), null, 55, 170);
+    const slug = 'town' in goal ? goal.town : e.opts.pins.find((x) => x.id === goal.home)?.town;
+    const f = slug ? e.townFrame(slug) : null;
+    return this.fit(this.townPose(f?.center ?? new Vector3()), slug ?? null, 18, 110);
+  }
+
+  /** Ground points + how tall the marker standing there is (pins scale with distance, see tick). */
+  framePoints(slug: string | null) {
+    const e = this.engine;
+    const pts: { p: Vector3; h: number; pin: boolean }[] = [];
+    // the overview frames the Utah County end of the valley (North Salt Lake is a town flight of its own)
+    const pins = e.opts.pins.filter((x) => (slug ? x.town === slug : x.y > -30));
+    for (const x of pins) {
+      const g = e.pinRoots.get(x.id);
+      if (g) pts.push({ p: g.position.clone(), h: 1.05, pin: true });
+    }
+    if (slug) {
+      const t = e.townTarget(slug);
+      if (t) pts.push({ p: t, h: 0.3, pin: false });
+    }
+    // the SN home pin: always in the overview; in a town only when it stands among that town's pins
+    const sn = e.snPin?.position.clone();
+    if (sn) {
+      const near = pts.length && pts.some((q) => Math.hypot(q.p.x - sn.x, q.p.z - sn.z) < 4);
+      if (!slug || slug === 'lehi' || near) pts.push({ p: sn, h: 2.7, pin: false });
+    }
+    return pts;
+  }
+
+  fit(base: CamPose, slug: string | null, minD: number, maxD: number): CamPose {
     const v = this.views.get('map');
-    const H = v?.el.clientHeight || innerHeight;
-    const fr = v?.free?.() ?? { w: v?.el.clientWidth || innerWidth, h: H };
-    const perPx = (2 * Math.tan((pose.vfov * Math.PI) / 360)) / H; // world units per px at distance 1
-    const head = 1.4; // pin needle + head
-    const byW = (spanX + 1.5) / (0.66 * fr.w * perPx); // near pins spread wider than the target plane: margin
-    const byH = (spanZ * Math.sin((pose.elev * Math.PI) / 180) + head + 0.6) / (0.72 * fr.h * perPx);
-    return Math.min(60, Math.max(pose.dist, byW, byH));
+    const W = v?.el.clientWidth || innerWidth, H = v?.el.clientHeight || innerHeight;
+    const fr = v?.free?.() ?? { l: 0, t: 0, w: W, h: H };
+    const pts = this.framePoints(slug);
+    if (!pts.length || !W || !H) return base;
+    const cam = new PerspectiveCamera(base.vfov, W / H, 0.5, 900);
+    const tmp = new Vector3();
+    const ok = (d: number) => {
+      const pose = { ...base, dist: d };
+      camFromPose(cam, pose);
+      cam.aspect = W / H;
+      cam.setViewOffset(W, H, W / 2 - (fr.l + fr.w / 2), H / 2 - (fr.t + fr.h / 2), W, H);
+      cam.updateMatrixWorld();
+      const pxPerUnit = H / (2 * d * Math.tan((base.vfov * Math.PI) / 360));
+      const k = Math.min(4, Math.max(1, 10 / (0.26 * pxPerUnit)));
+      return pts.every(({ p, h, pin }) => {
+        for (const y of [0, (pin ? k : 1) * h]) {
+          tmp.set(p.x, p.y + y, p.z).project(cam);
+          const x = ((tmp.x + 1) / 2) * W, yy = ((1 - tmp.y) / 2) * H;
+          // 18 px inside the free area: a pin head is ~12–20 px across, its centre must not sit on the edge
+          if (tmp.z >= 1 || x < fr.l + 18 || x > fr.l + fr.w - 18 || yy < fr.t || yy > fr.t + fr.h) return false;
+        }
+        return true;
+      });
+    };
+    if (ok(minD)) return { ...base, dist: minD };
+    let lo = minD, hi = maxD;
+    if (!ok(hi)) return { ...base, dist: hi };
+    for (let i = 0; i < 18; i++) {
+      const mid = (lo + hi) / 2;
+      if (ok(mid)) hi = mid; else lo = mid;
+    }
+    return { ...base, dist: hi };
   }
 
   attach(el: HTMLElement, role: Role): ReliefHandle {
@@ -119,7 +182,7 @@ export class Controller {
         return self.engine.project(id, el.clientWidth, el.clientHeight);
       },
       onFrame: (cb) => v.cbs.push(cb),
-      setFree: (fn) => { v.free = fn; self.mapDirty = true; self.kick(); },
+      setFree: (fn) => { v.free = fn; self.mapDirty = true; self.refit = true; self.kick(); },
       dispose: () => self.fallback(),
     };
   }
@@ -191,7 +254,11 @@ export class Controller {
       e.occlude(this.titleBox(v), reduce || !v.shown ? 1 : Math.min(1, (now - this.lastFrame) / 200));
       e.render();
       drew = true;
-    } else if (this.mapDirty || this.flying) {
+    } else if (this.mapDirty || this.flying || this.refit) {
+      if (this.refit && !this.flying) {
+        this.mapPose = this.poseFor(this.mapGoal);
+        this.refit = false;
+      }
       const f = v.free?.();
       const shift = f ? { cx: f.l + f.w / 2, cy: f.t + f.h / 2 } : undefined;
       const pose = { ...this.mapPose };
@@ -311,19 +378,9 @@ export class Controller {
 
   fly(p: Pose): Promise<void> {
     if (this.dead) return Promise.resolve();
-    const e = this.engine;
-    let dest: CamPose;
-    if (p === 'overview' || p === 'hero') dest = this.overviewPose();
-    else if ('town' in p) {
-      // frame the town with its pins (not just the town's name): wide towns pull the camera back a little
-      const f = e.townFrame(p.town);
-      dest = this.townPose(f?.center ?? new Vector3());
-      if (f) dest.dist = this.fitDist(dest, f.spanX, f.spanZ);
-    }
-    else {
-      const g = e.pinRoots.get(p.home);
-      dest = g ? { ...this.townPose(g.position.clone()), dist: 20 } : this.overviewPose();
-    }
+    // a picked home flies to its town's frame (the pin and its row light up); every goal is fitted to the stage
+    this.mapGoal = p;
+    const dest = this.poseFor(p);
     const from = { ...this.mapPose };
     let db = ((dest.bearing - from.bearing + 540) % 360) - 180;
     db = Math.max(-45, Math.min(45, db));

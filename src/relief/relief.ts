@@ -78,7 +78,7 @@ export function followBearing(sunAzFromSouth: number) {
 
 export interface Pose { tx: number; ty: number; tz: number; dist: number; bearing: number; elev: number; vfov: number }
 
-function camFromPose(cam: PerspectiveCamera, p: Pose) {
+export function camFromPose(cam: PerspectiveCamera, p: Pose) {
   const b = p.bearing * deg, e = p.elev * deg;
   cam.position.set(p.tx + p.dist * Math.cos(e) * Math.sin(b), p.ty + p.dist * Math.sin(e), p.tz - p.dist * Math.cos(e) * Math.cos(b));
   cam.up.set(0, 1, 0);
