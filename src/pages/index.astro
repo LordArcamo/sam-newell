@@ -32,10 +32,10 @@ const panels = [
 ];
 // One scene: each statement cuts to its own picture of a home Sam has listed (captioned with its address).
 const steps = [
-  { t: 'Know what you’re buying.', href: '/buy/', photo: 'listings/scene-1872-rear-twilight.jpg', alt: 'The back of 1872 S Country Ln W, Lehi, lit at dusk', cap: '1872 S Country Ln W, Lehi', pos: '50% 55%' },
-  { t: 'Priced on numbers, not hope.', href: '/sell/', photo: 'listings/scene-1056-aerial.jpg', alt: 'The neighbourhood around 1056 W Stonehaven Dr, North Salt Lake, from above', cap: 'Around 1056 W Stonehaven Dr, North Salt Lake', pos: '50% 50%' },
-  { t: 'Underwrite it like Sam.', href: '/invest/', photo: 'listings/scene-1714-living.jpg', alt: 'The open living room and kitchen at 1714 N 3870 W, Lehi', cap: '1714 N 3870 W, Lehi', pos: '50% 55%' },
-  ...(CONFIRM.mfiClub ? [{ t: 'Invest alongside MFI Club.', href: '/invest/#mfi-club', photo: 'listings/scene-1872-lake-aerial.jpg', alt: 'Lehi and Utah Lake from above 1872 S Country Ln W', cap: 'Lehi and Utah Lake, from above 1872 S Country Ln W', pos: '50% 50%' }] : []),
+  { t: 'Know what you’re buying.', href: '/buy/', photo: 'listings/scene-1872-rear-twilight.jpg', alt: 'The back of 1872 S Country Ln W, Lehi, lit at dusk', cap: '1872 S Country Ln W, Lehi', pos: '50% 55%', note: 'Sam studied construction management at BYU. On a showing he looks past the paint to the frame, the roof and what a fix really costs.', more: 'Buying with Sam', moreHref: '/buy/' },
+  { t: 'Priced on numbers, not hope.', href: '/sell/', photo: 'listings/scene-1056-aerial.jpg', alt: 'The neighbourhood around 1056 W Stonehaven Dr, North Salt Lake, from above', cap: 'Around 1056 W Stonehaven Dr, North Salt Lake', pos: '50% 50%', note: 'Sam prices your home from recent sales near you, not from hope, and shows you the sales he used.', more: 'Selling with Sam', moreHref: '/sell/' },
+  { t: 'Underwrite it like Sam.', href: '/invest/', photo: 'listings/scene-1714-living.jpg', alt: 'The open living room and kitchen at 1714 N 3870 W, Lehi', cap: '1714 N 3870 W, Lehi', pos: '50% 55%', note: 'Rentals are Sam’s specialty. Run the numbers the way he does before you make an offer.', more: 'Run the numbers', moreHref: '/invest/#calc' },
+  ...(CONFIRM.mfiClub ? [{ t: 'Invest alongside MFI Club.', href: '/invest/#mfi-club', photo: 'listings/scene-1872-lake-aerial.jpg', alt: 'Lehi and Utah Lake from above 1872 S Country Ln W', cap: 'Lehi and Utah Lake, from above 1872 S Country Ln W', pos: '50% 50%', note: `Sam founded ${MFI.name} in Lehi in ${MFI.founded}. It buys and runs larger apartment buildings.`, more: 'About MFI Club', moreHref: '/invest/#mfi-club' }] : []),
 ];
 const figures = [
   { big: String(ZILLOW.rating), small: `out of 5 from ${ZILLOW.reviews} reviews on Zillow` },
@@ -91,24 +91,24 @@ const jsonld = [
     <p class="see-all wrap"><a class="more" href={ZILLOW.profile} rel="noopener" target="_blank">See all {ZILLOW.sold} on Zillow <Arrow /></a></p>
   </section>
 
-  <!-- 4 · Buy, sell or invest: one scene; each statement cuts to its own home (clip from the bottom edge) -->
+  <!-- 4 · Buy, sell or invest: one scene; one statement at a time, each cutting to its own home -->
   <section class="scene" aria-labelledby="scene-h" data-scene style={`--n:${steps.length}`}>
     <h2 class="sr-only" id="scene-h">Buy, sell or invest</h2>
     <div class="scene-pin">
-      <div class="scene-shade" aria-hidden="true"></div>
-      <p class="scene-lead">Buy, sell or invest.</p>
+      <p class="scene-lead">Buy, sell or invest. <span class="scene-idx num" aria-hidden="true"><span data-scene-i>1</span> / {steps.length}</span></p>
       <ol role="list" class="stack">
         {steps.map((s, i) => (
           <li data-step={i} class:list={[{ on: i === 0 }]}>
             <figure class:list={['sb', { in: i === 0 }]} data-slide={i}>
               <Pic src={img(s.photo)} alt={s.alt} sizes="100vw" pos={s.pos} rv={false} />
+              <span class="sb-shade" aria-hidden="true"></span>
               <figcaption class="sb-cap">{s.cap}</figcaption>
             </figure>
             <a class="st-a" href={s.href}>{s.t}</a>
+            <p class="st-note">{s.note} <a class="link" href={s.moreHref}>{s.more}</a></p>
           </li>
         ))}
       </ol>
-      <p class="scene-note">Sam studied construction management at BYU. On a showing he looks past the paint to the frame, the roof and what a fix really costs. <a class="link" href="/buy/">Buying with Sam</a></p>
     </div>
   </section>
 
@@ -347,7 +347,8 @@ const jsonld = [
     font-size: 19px;
   }
 
-  /* 4 · one scene (pinned by CSS sticky; motion.ts hands the light from line to line and cuts the pictures) */
+  /* 4 · one scene (pinned by CSS sticky; motion.ts hands the screen from one statement to the next and cuts the
+     pictures). One statement, one note and one caption at a time: the others are hidden, never ghosted. */
   .scene {
     position: relative;
     height: calc(var(--n) * 60vh + 100vh);
@@ -357,12 +358,7 @@ const jsonld = [
     top: 0;
     height: 100svh;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 12vh;
   }
-  /* every picture fills the pinned screen; the active one and those before it are open, the rest wait below */
   .sb {
     position: absolute;
     inset: 0;
@@ -383,77 +379,116 @@ const jsonld = [
   .sb:global(.in) :global(img) {
     transform: none;
   }
-  .sb-cap {
-    position: absolute;
-    right: var(--m);
-    bottom: 40px;
-    z-index: 2;
-    font-size: 15px;
-    font-weight: 500;
-    color: #fff;
-  }
-  .scene-shade {
+  /* the scrim belongs to each picture, so the caption sits on top of it at full white */
+  .sb-shade {
     position: absolute;
     inset: 0;
-    z-index: 1;
-    background: rgb(10 10 10 / 0.35);
+    background: rgb(10 10 10 / 0.38);
     pointer-events: none;
   }
-  .scene-shade::after {
+  .sb-shade::after {
     content: '';
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 34%;
-    background: linear-gradient(to top, rgb(10 10 10 / 0.7), rgb(10 10 10 / 0)); /* taste-skill-ignore gradient: neutral scrim under the note on a photo */
+    height: 38%;
+    background: linear-gradient(to top, rgb(10 10 10 / 0.72), rgb(10 10 10 / 0)); /* taste-skill-ignore gradient: neutral scrim under the note on a photo */
+  }
+  .sb-cap {
+    position: absolute;
+    right: var(--m);
+    bottom: 40px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
   }
   .scene-lead {
-    position: relative;
+    position: absolute;
+    top: 12vh;
+    left: 0;
+    right: 0;
     z-index: 2;
+    text-align: center;
     font-weight: 500;
     font-size: 18px;
-    margin-bottom: 18px;
+  }
+  .scene-idx {
+    margin-left: 10px;
+    font-weight: 600;
   }
   .stack {
-    display: grid;
-    gap: 2px;
-    text-align: center;
+    margin: 0;
   }
   .st-a {
-    position: relative;
+    position: absolute;
+    top: calc(12vh + 44px);
+    left: 50%;
     z-index: 2;
-    display: inline-block;
+    width: max-content;
+    max-width: 90vw;
     font-family: var(--display);
     font-weight: 400;
-    font-size: 48px;
+    font-size: 56px;
     letter-spacing: -0.03em;
-    line-height: 1.15;
+    line-height: 1.1;
+    text-align: center;
     text-decoration: none;
-    opacity: 0.35;
-    transform: scale(0.62);
-    transition: transform 0.7s var(--ease-expo), opacity 0.7s var(--ease-expo);
-  }
-  .stack li:global(.on) .st-a {
-    opacity: 1;
-    transform: none;
+    transform: translateX(-50%);
   }
   .st-a:hover {
     text-decoration: underline;
     text-decoration-thickness: 2px;
     text-underline-offset: 8px;
   }
-  .scene-note {
+  .st-note {
     position: absolute;
     bottom: 40px;
     left: 50%;
-    transform: translateX(-50%);
-    width: min(560px, 60vw);
-    text-align: center;
     z-index: 2;
+    width: min(560px, 56vw);
+    transform: translateX(-50%);
+    text-align: center;
     font-size: 18px;
   }
-  /* no motion, or a phone: the four statements stack, each under its own picture */
+  /* with motion running (motion.ts adds .live) only the active step shows; it arrives like a title card */
+  .scene:global(.live) li:not(:global(.on)) .st-a,
+  .scene:global(.live) li:not(:global(.on)) .st-note,
+  .scene:global(.live) li:not(:global(.on)) .sb-cap {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .scene:global(.live) .st-a {
+    transition: opacity 0.6s var(--ease-expo), transform 0.7s var(--ease-expo), visibility 0.6s;
+  }
+  .scene:global(.live) li:not(:global(.on)) .st-a {
+    transform: translateX(-50%) scale(0.94);
+  }
+  .scene:global(.live) .st-note,
+  .scene:global(.live) .sb-cap {
+    transition: opacity 0.5s var(--ease-out), visibility 0.5s;
+  }
+  /* before motion runs (or if it never does), every statement is listed at full strength over the first picture */
+  .scene:not(:global(.live)) .stack {
+    position: absolute;
+    top: calc(12vh + 44px);
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+  }
+  .scene:not(:global(.live)) .st-a {
+    position: static;
+    transform: none;
+    font-size: 40px;
+  }
+  .scene:not(:global(.live)) li:not(:first-child) .st-note,
+  .scene:not(:global(.live)) li:not(:first-child) .sb-cap {
+    display: none;
+  }
+  /* no motion, or a phone: the statements stack, each under its own picture with its note */
   @media (max-width: 900px), (prefers-reduced-motion: reduce) {
     .scene {
       height: auto;
@@ -461,16 +496,23 @@ const jsonld = [
     .scene-pin {
       position: relative;
       height: auto;
-      display: block;
-      padding: 96px var(--m);
       overflow: visible;
+      padding: 96px var(--m);
     }
-    .scene-shade {
+    .scene-lead {
+      position: static;
+      text-align: left;
+      margin-bottom: 32px;
+    }
+    .scene-idx {
       display: none;
     }
-    .stack {
-      gap: 56px;
-      text-align: left;
+    .stack,
+    .scene:not(:global(.live)) .stack {
+      position: static;
+      display: grid;
+      justify-items: stretch;
+      gap: 64px;
     }
     .sb {
       position: relative;
@@ -482,6 +524,9 @@ const jsonld = [
     .sb :global(img) {
       transform: none;
     }
+    .sb-shade {
+      display: none;
+    }
     .sb-cap {
       left: 12px;
       right: auto;
@@ -491,17 +536,27 @@ const jsonld = [
       padding: 4px 8px;
       background: rgb(10 10 10 / 0.72);
     }
-    .st-a {
-      opacity: 1;
+    .st-a,
+    .scene:not(:global(.live)) .st-a {
+      position: static;
+      display: block;
+      width: auto;
+      max-width: none;
       transform: none;
+      text-align: left;
       font-size: 32px;
     }
-    .scene-note {
+    .st-note {
       position: static;
-      transform: none;
       width: auto;
+      transform: none;
       text-align: left;
-      margin-top: 56px;
+      margin-top: 12px;
+      font-size: 17px;
+    }
+    .scene:not(:global(.live)) li:not(:first-child) .st-note,
+    .scene:not(:global(.live)) li:not(:first-child) .sb-cap {
+      display: block;
     }
   }
   @media (max-width: 900px) {

@@ -38,7 +38,12 @@ export function initMotion() {
     document.querySelectorAll<HTMLElement>('[data-scene]').forEach((scene) => {
       const items = [...scene.querySelectorAll<HTMLElement>('[data-step]')];
       const slides = [...scene.querySelectorAll<HTMLElement>('[data-slide]')];
+      const idx = scene.querySelector<HTMLElement>('[data-scene-i]');
       scene.classList.add('live');
+      items.forEach((li, k) => {
+        li.inert = k !== 0;
+        li.toggleAttribute('aria-hidden', k !== 0);
+      });
       // the next pictures are clipped away until their cut, so the browser would wait to load them: ask now
       slides.forEach((f) => f.querySelectorAll('img').forEach((i) => (i.loading = 'eager')));
       let last = -1;
@@ -50,8 +55,14 @@ export function initMotion() {
           const i = Math.min(items.length - 1, Math.floor(st.progress * items.length * 0.999));
           if (i === last) return;
           last = i;
-          items.forEach((li, k) => li.classList.toggle('on', k === i));
+          items.forEach((li, k) => {
+            li.classList.toggle('on', k === i);
+            // only the step on screen can be read or reached; the others are hidden, not ghosted
+            li.inert = k !== i;
+            li.toggleAttribute('aria-hidden', k !== i);
+          });
           slides.forEach((f, k) => f.classList.toggle('in', k <= i));
+          if (idx) idx.textContent = String(i + 1);
         },
       });
     });
