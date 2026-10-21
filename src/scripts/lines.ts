@@ -84,8 +84,8 @@ export function initLines() {
         p.style.strokeDashoffset = String(v);
         anim = p.animate([{ strokeDashoffset: from }, { strokeDashoffset: v }], { duration: ms, easing });
       };
-      host.addEventListener('mouseenter', () => to(0, 900, 'cubic-bezier(0.22, 1, 0.36, 1)'));
-      host.addEventListener('mouseleave', () => to(L, 500, 'cubic-bezier(0.55, 0, 1, 0.45)'));
+      host.addEventListener('mouseenter', () => to(0, 1400, 'cubic-bezier(0.45, 0, 0.55, 1)'));
+      host.addEventListener('mouseleave', () => to(L, 600, 'cubic-bezier(0.55, 0, 1, 0.45)'));
       host.addEventListener('focus', () => to(0, 600, 'cubic-bezier(0.22, 1, 0.36, 1)'));
       host.addEventListener('blur', () => to(L, 300, 'ease-in'));
       addEventListener('resize', () => {

@@ -236,26 +236,26 @@ const swatches = [
     text-align: center;
     white-space: nowrap;
   }
-  /* a quiet signature: short, 1px, 80% white, tucked under the baseline (the real profile, squashed) */
+  /* the signature under the name: the real profile, full white, tall enough to read as mountains */
   .name :global(.sky) {
     display: block;
     width: 100%;
-    height: clamp(26px, 3.4vw, 52px);
+    height: clamp(32px, 4.4vw, 64px);
     margin-top: 14px;
     color: #fff;
   }
   .name :global(.sky path) {
-    stroke-width: 1;
-    stroke-opacity: 0.8;
+    stroke-width: 1.5;
   }
   /* V6: hovering a swatch traces the same skyline along its foot (fine pointers only; static on keyboard focus) */
   .sw :global(.sw-sky) {
     display: none;
     position: absolute;
-    left: 18px;
-    bottom: 18px;
-    width: calc(100% - 70px);
-    height: 46px;
+    left: 20px;
+    bottom: 26px;
+    width: calc(100% - 96px);
+    height: 18px;
+    opacity: 0.7;
     pointer-events: none;
   }
   .s5 :global(.sw-sky) {
@@ -542,7 +542,7 @@ const swatches = [
       line-height: 0.95;
     }
     .name :global(.sky) {
-      height: 28px;
+      height: 32px;
       margin-top: 12px;
     }
     .sub {
