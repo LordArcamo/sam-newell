@@ -623,8 +623,10 @@ const jsonld = [
     left: 0;
     right: 0;
     bottom: 0;
-    height: 56%;
-    background: linear-gradient(to top, rgb(10 10 10 / 0.78), rgb(10 10 10 / 0.5) 45%, rgb(10 10 10 / 0)); /* taste-skill-ignore gradient: neutral scrim under the figure on a photo */
+    height: 68%;
+    /* the photo dissolves into the page black at its foot, so the figures below continue on the same ground
+       instead of meeting a hard edge (the old 0.78 foot read as the picture being cut off) */
+    background: linear-gradient(to top, rgb(10 10 10) 0%, rgb(10 10 10 / 0.86) 16%, rgb(10 10 10 / 0.5) 48%, rgb(10 10 10 / 0)); /* taste-skill-ignore gradient: neutral scrim under the figure on a photo */
   }
   .fig-n {
     position: absolute;
@@ -684,8 +686,8 @@ const jsonld = [
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 40px;
-    padding-top: 64px;
-    padding-bottom: 160px;
+    padding-top: 48px;
+    padding-bottom: 120px;
   }
   .subfigs dt {
     font-family: var(--display);
