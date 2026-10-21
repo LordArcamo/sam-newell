@@ -237,7 +237,12 @@ const jsonld = [
     };
     const now = /[?&](record|capture)/.test(location.search);
     if (now) start();
-    else if (matchMedia('(min-width: 768px)').matches) addEventListener('load', () => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 2000 }) : setTimeout(start, 800)), { once: true });
+    else if (matchMedia('(min-width: 768px)').matches) {
+      // desktop: the poster is the LCP and is identical to the first GL frame, so the engine (and its one-off
+      // texture upload) waits for the visitor's first move, or for 6 s of quiet after load
+      ['pointermove', 'scroll', 'keydown', 'touchstart'].forEach((ev) => addEventListener(ev, start, { once: true, passive: true }));
+      addEventListener('load', () => setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 2000 }) : start()), 6000), { once: true });
+    }
     else ['touchstart', 'scroll', 'keydown'].forEach((ev) => addEventListener(ev, start, { once: true, passive: true }));
   }
 </script>
@@ -329,10 +334,13 @@ const jsonld = [
   .pv {
     grid-area: 1 / 1;
     opacity: 0;
-    transition: opacity 0.2s;
+    visibility: hidden; /* not painted while idle (each holds a <use> of the whole relief) */
+    transition: opacity 0.2s, visibility 0s 0.2s;
   }
   .pv.on {
     opacity: 1;
+    visibility: visible;
+    transition: opacity 0.2s;
   }
   .pv figcaption {
     margin-top: 10px;
@@ -457,6 +465,8 @@ const jsonld = [
 
   /* 8 · about */
   .about {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1000px;
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
     gap: 4vw;

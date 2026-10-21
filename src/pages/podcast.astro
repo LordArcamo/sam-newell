@@ -62,7 +62,7 @@ const jsonld = [
         <EpisodeRow e={e} showNumber filter={groupOf(e.number)} />
       ))}
     </ul>
-    <p class="more-eps"><button type="button" class="btn" data-all hidden>Show all {EPISODES.length} episodes</button></p>
+    <p class="more-eps"><button type="button" class="btn" data-all>Show all {EPISODES.length} episodes</button></p>
   </section>
 
   <section class="story dark sec wrap" aria-labelledby="story-h">
@@ -94,13 +94,15 @@ const jsonld = [
   let all = false;
   const LIMIT = 20;
   const allBtn = document.querySelector<HTMLButtonElement>('[data-all]')!;
+  const list = document.querySelector<HTMLElement>('[data-eps]')!;
   const run = () => {
     const s = q.value.trim().toLowerCase();
     let n = 0;
     const filtering = !!s || !!group;
+    list.classList.toggle('all', all || filtering);
     rows.forEach((r) => {
       const ok = (!s || r.dataset.text!.includes(s)) && (!group || r.dataset.group === group);
-      r.hidden = !ok || (!all && !filtering && n >= LIMIT);
+      r.hidden = !ok;
       if (ok) n++;
     });
     allBtn.hidden = all || filtering || n <= LIMIT;
@@ -185,6 +187,13 @@ const jsonld = [
   .more-eps {
     grid-column: 2;
     margin-top: 24px;
+  }
+  /* collapsed before first paint (html.js is set in <head>), so nothing shifts; no-JS shows every episode */
+  :global(.js) .eps:not(.all) > :global(li:nth-child(n + 21)) {
+    display: none;
+  }
+  :global(html:not(.js)) .more-eps {
+    display: none;
   }
   @media (max-width: 1023px) {
     .more-eps {

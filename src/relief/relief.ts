@@ -162,7 +162,7 @@ function blobTexture() {
   const c = document.createElement('canvas');
   c.width = 64; c.height = 256;
   const g = c.getContext('2d')!;
-  // a soft streak: dark at the pin's foot, fading to nothing along the shadow (I-2)
+  // a soft streak: dark at the pin's foot, fading to nothing along the shadow (I-2) // taste-skill-ignore: WebGL sun shadow, not a CSS shadow
   const lin = g.createLinearGradient(0, 256, 0, 0);
   lin.addColorStop(0, 'rgba(0,0,0,0.55)');
   lin.addColorStop(0.15, 'rgba(0,0,0,0.35)');
@@ -297,7 +297,7 @@ export class Engine {
     this.scene.add(root);
     root.updateMatrixWorld(true);
 
-    // pins: disc = for sale, sphere = sold / past; needles cast no long shadow (I-2), a fading streak instead
+    // pins: disc = for sale, sphere = sold / past; needles cast no long shadow (I-2), a fading streak instead // taste-skill-ignore: WebGL sun shadow, not a CSS shadow
     const proto = { live: pins.scene.getObjectByName('pin_live_head')!, past: pins.scene.getObjectByName('pin_past_head')!, needle: pins.scene.getObjectByName('pin_needle')! };
     const streakTex = blobTexture();
     const streakMat = new MeshBasicMaterial({ map: streakTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, toneMapped: false });
@@ -323,7 +323,7 @@ export class Engine {
     this.snPin.traverse((o) => {
       const m = o as Mesh;
       if (!m.isMesh) return;
-      m.castShadow = o.name.includes('mark'); // the SN plate's shadow on Lehi stays; the needle's ruled line does not
+      m.castShadow = o.name.includes('mark'); // the SN plate's shadow on Lehi stays; the needle's ruled line does not // taste-skill-ignore: WebGL sun shadow, not a CSS shadow
     });
     this.snPin.position.set(0, this.heightAt(0, 0), 0);
     this.scene.add(this.snPin);
@@ -363,7 +363,7 @@ export class Engine {
       if (s.emissive) s.emissiveIntensity = L.night ? 0.8 : 0;
     }
     for (const l of this.labels) (l.material as MeshStandardMaterial).color.setHex(L.night ? 0xffffff : 0x0a0a0a);
-    // pin streaks point away from the sun, length = needle shadow capped at ~3 units, gone when the sun is down
+    // pin streaks point away from the sun, length = needle shadow capped at ~3 units, gone when the sun is down // taste-skill-ignore: WebGL sun shadow, not a CSS shadow
     const len = altitude > 0.02 ? Math.min(3, 1.0 / Math.tan(altitude)) : 0;
     const ang = Math.atan2(-dx, -dz);
     for (const s of this.pinStreaks) {
@@ -379,7 +379,7 @@ export class Engine {
     this.renderer.shadowMap.needsUpdate = true;
   }
 
-  /** Fit the ortho shadow camera to the footprint the camera sees (brief §4.3). */
+  /** Fit the ortho shadow camera to the footprint the camera sees (brief §4.3). */ // taste-skill-ignore: WebGL sun shadow, not a CSS shadow
   fitShadow(target: Vector3, radius: number) {
     const dir: Vector3 = this.sun.userData.dir ?? new Vector3(0, 1, 0);
     this.sun.position.copy(target).addScaledVector(dir, 120);

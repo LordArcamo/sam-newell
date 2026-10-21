@@ -176,7 +176,6 @@ export class Controller {
       e.setView(pose, W, H, RIGS[rig]);
       e.render();
       drew = true;
-      this.placeHeroTag(v);
     } else if (this.mapDirty || this.flying) {
       const f = v.free?.();
       const shift = f ? { cx: f.l + f.w / 2, cy: f.t + f.h / 2 } : undefined;
@@ -215,17 +214,6 @@ export class Controller {
     if (RECORD || CAPTURE) return undefined;
     const st = document.documentElement.dataset.sun as keyof (typeof posters.rigs)['desktop'] | undefined;
     return st ? posters.rigs[rig]?.[st]?.bearing : undefined;
-  }
-
-  /** Keep "Lehi · home base" on the SN plate while the camera moves (the tag lives in the poster frame). */
-  placeHeroTag(v: View) {
-    const tag = v.el.querySelector<HTMLElement>('.pin-tag');
-    const frame = v.el.querySelector<HTMLElement>('[data-hero-frame]');
-    if (!tag || !frame) return;
-    const p = this.engine.project('sn', v.el.clientWidth, v.el.clientHeight);
-    if (!p) return;
-    tag.style.left = `${((p.x - frame.offsetLeft) / frame.offsetWidth) * 100}%`;
-    tag.style.top = `${((p.y - frame.offsetTop) / frame.offsetHeight) * 100}%`;
   }
 
   /** I-1 safety: if the title's 5th-percentile contrast over the live frame drops below 4.5:1, show its plate. */

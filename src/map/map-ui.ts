@@ -55,7 +55,7 @@ export function initMap() {
   // stays reachable through the town card's list).
   let placed: { x: number; y: number }[] = [];
   const collides = (x: number, y: number) => {
-    if (placed.some((q) => Math.hypot(q.x - x, q.y - y) < 26)) return true;
+    if (placed.some((q) => Math.hypot(q.x - x, q.y - y) < 32)) return true;
     placed.push({ x, y });
     return false;
   };

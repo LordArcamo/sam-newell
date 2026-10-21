@@ -65,7 +65,6 @@ const order: Rig[] = ['desktop', 'tablet', 'phone'];
         })();
       </script>
       <noscript><img class="noscript-poster" src={fallback} width="2560" height="1440" alt="A white plaster relief model of the Wasatch Front seen from above Utah Lake" /></noscript>
-      <p class="pin-tag small" aria-hidden="true">Lehi · home base</p>
     </div>
   </div>
   <p class="caption small" data-caption>Lehi, Utah</p>
@@ -133,20 +132,6 @@ const order: Rig[] = ['desktop', 'tablet', 'phone'];
   .noscript-poster {
     position: absolute;
     inset: 0;
-  }
-  .pin-tag {
-    position: absolute;
-    z-index: 3;
-    left: var(--snx);
-    top: var(--sny);
-    margin: -38px 0 0 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--paper);
-    padding: 6px 10px 6px 8px;
-    font-weight: 600;
-    white-space: nowrap;
   }
   /* Gallery-white rule (model check I-1): a solid plate behind the title when the measured contrast < 4.5:1 */
   .hero.plate .title span {
@@ -227,9 +212,6 @@ const order: Rig[] = ['desktop', 'tablet', 'phone'];
     .hero-media {
       position: relative;
       height: var(--hh);
-    }
-    .pin-tag {
-      display: none;
     }
     .caption {
       top: 14px;
