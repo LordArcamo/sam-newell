@@ -32,24 +32,28 @@ export function initMotion() {
     gsap.fromTo(el, { yPercent: -6, scale: 1.06 }, { yPercent: 6, scale: 1, ease: 'none', scrollTrigger: { trigger: win, start: 'top bottom', end: 'bottom top', scrub: true } });
   });
 
-  // One scene, stepping statements: the pinned scene (CSS sticky) hands the light from one line to the next.
-  document.querySelectorAll<HTMLElement>('[data-scene]').forEach((scene) => {
-    const items = [...scene.querySelectorAll<HTMLElement>('[data-step]')];
-    const bg = scene.querySelector<HTMLElement>('.scene-bg');
-    ScrollTrigger.create({
-      trigger: scene,
-      start: 'top top',
-      end: 'bottom bottom',
-      onUpdate: (st) => {
-        const i = Math.min(items.length - 1, Math.floor(st.progress * items.length));
-        items.forEach((li, k) => li.classList.toggle('on', k === i));
-      },
+  // One scene: the pinned screen hands the light from one statement to the next and cuts to its picture
+  // (clip from the bottom edge, CSS). Phones and reduced motion get the stacked version (CSS), so nothing runs there.
+  if (desktop) {
+    document.querySelectorAll<HTMLElement>('[data-scene]').forEach((scene) => {
+      const items = [...scene.querySelectorAll<HTMLElement>('[data-step]')];
+      const slides = [...scene.querySelectorAll<HTMLElement>('[data-slide]')];
+      scene.classList.add('live');
+      let last = -1;
+      ScrollTrigger.create({
+        trigger: scene,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (st) => {
+          const i = Math.min(items.length - 1, Math.floor(st.progress * items.length * 0.999));
+          if (i === last) return;
+          last = i;
+          items.forEach((li, k) => li.classList.toggle('on', k === i));
+          slides.forEach((f, k) => f.classList.toggle('in', k <= i));
+        },
+      });
     });
-    if (bg) gsap.fromTo(bg, { scale: 1.1 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: scene, start: 'top top', end: 'bottom bottom', scrub: true } });
-    scene.querySelectorAll<HTMLElement>('.pair').forEach((p, k) => {
-      gsap.fromTo(p, { yPercent: k ? 30 : 50 }, { yPercent: k ? -30 : -40, ease: 'none', scrollTrigger: { trigger: scene, start: 'top top', end: 'bottom bottom', scrub: true } });
-    });
-  });
+  }
 
   // ——— Line work, scroll-scrubbed (review/motion-vectors.md) ———
   // V3: the real USGS contours draw outward from Lehi as the map chapter arrives; then the model (or the flat

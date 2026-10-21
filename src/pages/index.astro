@@ -30,11 +30,12 @@ const panels = [
   { h: byId('1714-n-3870-w-lehi'), photo: 'listings/full-1714-kitchen.jpg', alt: 'The kitchen at 1714 N 3870 W, Lehi', pos: '50% 50%' },
   { h: byId('sold-w-2330-n-lehi'), photo: 'listings/full-2330-exterior.jpg', alt: 'A townhome on W 2330 N, Lehi, sold by Sam', pos: '50% 60%' },
 ];
+// One scene: each statement cuts to its own picture of a home Sam has listed (captioned with its address).
 const steps = [
-  { t: 'Know what you’re buying.', href: '/buy/' },
-  { t: 'Priced on numbers, not hope.', href: '/sell/' },
-  { t: 'Underwrite it like Sam.', href: '/invest/' },
-  ...(CONFIRM.mfiClub ? [{ t: 'Invest alongside MFI Club.', href: '/invest/#mfi-club' }] : []),
+  { t: 'Know what you’re buying.', href: '/buy/', photo: 'listings/scene-1872-rear-twilight.jpg', alt: 'The back of 1872 S Country Ln W, Lehi, lit at dusk', cap: '1872 S Country Ln W, Lehi', pos: '50% 55%' },
+  { t: 'Priced on numbers, not hope.', href: '/sell/', photo: 'listings/scene-1056-aerial.jpg', alt: 'The neighbourhood around 1056 W Stonehaven Dr, North Salt Lake, from above', cap: 'Around 1056 W Stonehaven Dr, North Salt Lake', pos: '50% 50%' },
+  { t: 'Underwrite it like Sam.', href: '/invest/', photo: 'listings/scene-1714-living.jpg', alt: 'The open living room and kitchen at 1714 N 3870 W, Lehi', cap: '1714 N 3870 W, Lehi', pos: '50% 55%' },
+  ...(CONFIRM.mfiClub ? [{ t: 'Invest alongside MFI Club.', href: '/invest/#mfi-club', photo: 'listings/scene-1872-lake-aerial.jpg', alt: 'Lehi and Utah Lake from above 1872 S Country Ln W', cap: 'Lehi and Utah Lake, from above 1872 S Country Ln W', pos: '50% 50%' }] : []),
 ];
 const figures = [
   { big: String(ZILLOW.rating), small: `out of 5 from ${ZILLOW.reviews} reviews on Zillow` },
@@ -90,20 +91,23 @@ const jsonld = [
     <p class="see-all wrap"><a class="more" href={ZILLOW.profile} rel="noopener" target="_blank">See all {ZILLOW.sold} on Zillow <Arrow /></a></p>
   </section>
 
-  <!-- 4 · Buy, sell or invest: one scene, stepping statements -->
+  <!-- 4 · Buy, sell or invest: one scene; each statement cuts to its own home (clip from the bottom edge) -->
   <section class="scene" aria-labelledby="scene-h" data-scene style={`--n:${steps.length}`}>
+    <h2 class="sr-only" id="scene-h">Buy, sell or invest</h2>
     <div class="scene-pin">
-      <div class="scene-bg" data-cursor="Film"><Pic src={img('photos/framed-house-wasatch.jpg')} alt="A new house in timber framing below the Wasatch" sizes="100vw" pos="55% 45%" rv={false} /></div>
       <div class="scene-shade" aria-hidden="true"></div>
-      <h2 class="sr-only" id="scene-h">Buy, sell or invest</h2>
       <p class="scene-lead">Buy, sell or invest.</p>
       <ol role="list" class="stack">
         {steps.map((s, i) => (
-          <li data-step={i} class:list={[{ on: i === 0 }]}><a href={s.href}>{s.t}</a></li>
+          <li data-step={i} class:list={[{ on: i === 0 }]}>
+            <figure class:list={['sb', { in: i === 0 }]} data-slide={i}>
+              <Pic src={img(s.photo)} alt={s.alt} sizes="100vw" pos={s.pos} rv={false} />
+              <figcaption class="sb-cap">{s.cap}</figcaption>
+            </figure>
+            <a class="st-a" href={s.href}>{s.t}</a>
+          </li>
         ))}
       </ol>
-      <figure class="pair pa"><Pic src={img('photos/framing-site-garage.jpg')} alt="A house in framing on a hillside site, with the scaffolding still up" sizes="22vw" ratio="r32" rv={false} /></figure>
-      <figure class="pair pb"><Pic src={img('photos/framing-custom-home.jpg')} alt="A three-storey custom home framed by A Framing Company" sizes="22vw" ratio="r32" rv={false} /></figure>
       <p class="scene-note">Sam studied construction management at BYU. On a showing he looks past the paint to the frame, the roof and what a fix really costs. <a class="link" href="/buy/">Buying with Sam</a></p>
     </div>
   </section>
@@ -341,91 +345,167 @@ const jsonld = [
     font-size: 19px;
   }
 
-  /* 4 · one scene, stepping statements (pinned by CSS sticky; motion.ts steps the statements) */
+  /* 4 · one scene (pinned by CSS sticky; motion.ts hands the light from line to line and cuts the pictures) */
   .scene {
     position: relative;
-    height: calc(var(--n) * 80vh + 100vh);
+    height: calc(var(--n) * 60vh + 100vh);
   }
   .scene-pin {
     position: sticky;
     top: 0;
     height: 100svh;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 12vh;
   }
-  .scene-bg {
+  /* every picture fills the pinned screen; the active one and those before it are open, the rest wait below */
+  .sb {
     position: absolute;
     inset: 0;
+    z-index: 0;
+    clip-path: inset(100% 0 0 0);
+    transition: clip-path 1.1s var(--ease-expo);
   }
-  .scene-bg :global(.ph) {
+  .sb:global(.in) {
+    clip-path: inset(0 0 0 0);
+  }
+  .sb :global(.ph) {
     height: 100%;
+  }
+  .sb :global(img) {
+    transform: scale(1.06);
+    transition: transform 1.8s var(--ease-out);
+  }
+  .sb:global(.in) :global(img) {
+    transform: none;
+  }
+  .sb-cap {
+    position: absolute;
+    right: var(--m);
+    bottom: 40px;
+    z-index: 2;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
   }
   .scene-shade {
     position: absolute;
     inset: 0;
-    background: rgb(10 10 10 / 0.5);
+    z-index: 1;
+    background: rgb(10 10 10 / 0.35);
+    pointer-events: none;
+  }
+  .scene-shade::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 34%;
+    background: linear-gradient(to top, rgb(10 10 10 / 0.7), rgb(10 10 10 / 0)); /* taste-skill-ignore gradient: neutral scrim under the note on a photo */
   }
   .scene-lead {
-    position: absolute;
-    top: 11vh;
-    left: 0;
-    right: 0;
-    text-align: center;
+    position: relative;
+    z-index: 2;
     font-weight: 500;
     font-size: 18px;
-    z-index: 2;
+    margin-bottom: 18px;
   }
   .stack {
-    position: absolute;
-    top: 17vh;
-    left: 0;
-    right: 0;
-    z-index: 2;
-    text-align: center;
     display: grid;
-    gap: 6px;
+    gap: 2px;
+    text-align: center;
   }
-  .stack li {
+  .st-a {
+    position: relative;
+    z-index: 2;
+    display: inline-block;
     font-family: var(--display);
     font-weight: 400;
     font-size: 48px;
     letter-spacing: -0.03em;
     line-height: 1.15;
-    transform: scale(0.5);
-    transition: transform 0.6s var(--ease-expo);
+    text-decoration: none;
+    opacity: 0.35;
+    transform: scale(0.62);
+    transition: transform 0.7s var(--ease-expo), opacity 0.7s var(--ease-expo);
   }
-  .stack li.on {
+  .stack li:global(.on) .st-a {
+    opacity: 1;
     transform: none;
   }
-  .stack a {
-    text-decoration: none;
-  }
-  .stack a:hover {
+  .st-a:hover {
     text-decoration: underline;
     text-decoration-thickness: 2px;
     text-underline-offset: 8px;
-  }
-  .pair {
-    position: absolute;
-    z-index: 1;
-    width: 22vw;
-  }
-  .pa {
-    left: 5vw;
-    top: 44vh;
-  }
-  .pb {
-    right: 5vw;
-    top: 54vh;
   }
   .scene-note {
     position: absolute;
     bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    width: min(580px, 90vw);
+    width: min(560px, 60vw);
     text-align: center;
     z-index: 2;
-    font-size: 19px;
+    font-size: 18px;
+  }
+  /* no motion, or a phone: the four statements stack, each under its own picture */
+  @media (max-width: 900px), (prefers-reduced-motion: reduce) {
+    .scene {
+      height: auto;
+    }
+    .scene-pin {
+      position: relative;
+      height: auto;
+      display: block;
+      padding: 96px var(--m);
+      overflow: visible;
+    }
+    .scene-shade {
+      display: none;
+    }
+    .stack {
+      gap: 56px;
+      text-align: left;
+    }
+    .sb {
+      position: relative;
+      inset: auto;
+      clip-path: none;
+      aspect-ratio: 4 / 3;
+      margin-bottom: 18px;
+    }
+    .sb :global(img) {
+      transform: none;
+    }
+    .sb-cap {
+      left: 12px;
+      right: auto;
+      top: 12px;
+      bottom: auto;
+      font-size: 14px;
+      padding: 4px 8px;
+      background: rgb(10 10 10 / 0.72);
+    }
+    .st-a {
+      opacity: 1;
+      transform: none;
+      font-size: 32px;
+    }
+    .scene-note {
+      position: static;
+      transform: none;
+      width: auto;
+      text-align: left;
+      margin-top: 56px;
+    }
+  }
+  @media (max-width: 900px) {
+    .sb {
+      aspect-ratio: 4 / 5;
+    }
   }
 
   /* 6 · 235 */
@@ -685,22 +765,6 @@ const jsonld = [
     background: #303030;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .stack li {
-      transform: none;
-      font-size: 36px;
-    }
-    .scene {
-      height: auto;
-    }
-    .scene-pin {
-      position: relative;
-      height: auto;
-      min-height: 100svh;
-      padding-bottom: 160px;
-    }
-  }
-
   @media (max-width: 900px) {
     .intro {
       height: auto;
@@ -742,26 +806,6 @@ const jsonld = [
     }
     .v {
       text-align: left;
-    }
-    .stack li {
-      font-size: 30px;
-    }
-    .pair {
-      width: 40vw;
-    }
-    .pa {
-      top: auto;
-      bottom: 150px;
-      left: var(--m);
-    }
-    .pb {
-      top: auto;
-      bottom: 150px;
-      right: var(--m);
-    }
-    .scene-note {
-      font-size: 16px;
-      bottom: 24px;
     }
     .subfigs {
       grid-template-columns: 1fr;
