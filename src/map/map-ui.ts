@@ -1,6 +1,6 @@
-// Map controller (no-GPU SVG mode today; forwards to the GL handle once the model ships).
-// Town toolbar with roving tabindex (arrows, Home, End), Enter/Space select, Esc → overview,
-// pins as buttons, card swap with a polite announcement, deep link /?town=slug#map, calculator sheet.
+// Map controller: the SVG map without a GPU, the live relief with one (relief/mount.ts).
+// Town toolbar first (roving tabindex: arrows, Home, End; Enter/Space select; Esc → overview), then the pins as one
+// roving group, card swap with a polite announcement, deep link /?town=slug#map, calculator sheet.
 import { mountRelief, type ReliefHandle } from '../relief/mount';
 import { initCalcs, setPrice } from '../calc/calc';
 
@@ -45,7 +45,11 @@ export function initMap() {
     const sr = stage.getBoundingClientRect();
     const cardL = cardWrap.getBoundingClientRect().left - sr.left;
     const slipsT = (root.querySelector<HTMLElement>('[data-toolbar]')?.getBoundingClientRect().top ?? sr.bottom) - sr.top;
-    return { W, H, l: 24, t: 24, w: Math.max(240, cardL - 48), h: Math.max(240, slipsT - 48) };
+    // the heading's plate sits top-left: the map frames itself below it, so no town or pin lands under the words
+    const copyB = panel.getBoundingClientRect().bottom - sr.top;
+    // (the flat SVG overview keeps the full height: its contours read fine under the plate, and it is tall and narrow)
+    const t = gl || current ? Math.max(24, Math.min(copyB + 16, slipsT - 264)) : 24;
+    return { W, H, l: 24, t, w: Math.max(240, cardL - 48), h: Math.max(240, slipsT - 24 - t) };
   }
 
   function fit(b: Box) {
@@ -91,6 +95,7 @@ export function initMap() {
     });
     const spx = (data.sn.x - v.x) * v.s, spy = (data.sn.y - v.y) * v.s;
     sn.style.transform = `translate(${(spx - 15).toFixed(1)}px, ${(spy - 34).toFixed(1)}px)`;
+    keepStop();
   }
 
   function go(b: Box, instant = false) {
@@ -140,7 +145,7 @@ export function initMap() {
     const card = cards.find((c) => c.dataset.card === show);
     if (slug && card && !opts.overview) {
       const name = card.querySelector('h3')?.textContent ?? '';
-      const count = card.querySelector('.tc-body > p')?.textContent ?? '';
+      const count = card.querySelector('.tc-head > p')?.textContent ?? '';
       announce.textContent = `${name}: ${count}`;
     }
     const overview = !slug || opts.overview;
@@ -149,7 +154,15 @@ export function initMap() {
     if (gl) drawRoute(overview ? null : slug);
     else go(overview ? OVERVIEW : boxFor(slug!), opts.instant);
     if (opts.focus) buttons.find((b) => b.dataset.town === slug)?.focus();
+    requestAnimationFrame(fadeCard);
   }
+
+  // The card's list scrolls inside it; a fade at its foot says "more below" until the end is reached.
+  const fadeCard = () => {
+    const sc = cards.find((c) => c.classList.contains('on'))?.querySelector<HTMLElement>('[data-tc-scroll]');
+    if (sc) sc.classList.toggle('fade', sc.scrollHeight - sc.scrollTop - sc.clientHeight > 2);
+  };
+  root.querySelectorAll<HTMLElement>('[data-tc-scroll]').forEach((sc) => sc.addEventListener('scroll', fadeCard, { passive: true }));
 
   // Toolbar: click / Enter / Space select; arrows, Home and End move the roving focus.
   toolbar.addEventListener('click', (e) => {
@@ -184,9 +197,36 @@ export function initMap() {
 
   pins.forEach((p) =>
     p.addEventListener('click', () => {
+      rove(p);
       select(p.dataset.town!, { home: p.dataset.pin });
     }),
   );
+
+  // Pins: one tab stop (after the toolbar), arrows move between the pins on screen, Enter/Space opens (native button).
+  const shown = (p: HTMLButtonElement) => p.style.visibility !== 'hidden';
+  const rove = (to: HTMLButtonElement) => pins.forEach((p) => (p.tabIndex = p === to ? 0 : -1));
+  root.querySelector<HTMLElement>('[data-pins]')!.addEventListener('keydown', (e) => {
+    const list = pins.filter(shown);
+    const i = list.indexOf(document.activeElement as HTMLButtonElement);
+    if (i < 0 || !list.length) return;
+    let j = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % list.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + list.length) % list.length;
+    else if (e.key === 'Home') j = 0;
+    else if (e.key === 'End') j = list.length - 1;
+    if (j < 0) return;
+    e.preventDefault();
+    rove(list[j]);
+    list[j].focus();
+  });
+  // pins hide when they leave the frame or overlap: the group's tab stop always lands on one that is showing
+  const keepStop = () => {
+    const stop = pins.find((p) => p.tabIndex === 0);
+    if (stop && shown(stop)) return;
+    if (stop && document.activeElement === stop) return; // never yank focus mid-flight
+    const next = pins.find(shown);
+    if (next) rove(next);
+  };
 
   // Calculator sheet (native <dialog>: focus trap + Esc for free).
   const sheet = root.querySelector<HTMLDialogElement>('[data-sheet]')!;
@@ -221,9 +261,8 @@ export function initMap() {
   const deep = new URLSearchParams(location.search).get('town');
   const startTown = deep && townPt[deep] ? deep : null;
   const layout = () => (current ? go(boxFor(current), true) : go(OVERVIEW, true));
-  new ResizeObserver(() => layout()).observe(stage);
+  new ResizeObserver(() => { layout(); fadeCard(); }).observe(stage);
   select(startTown ?? 'lehi', { instant: true, overview: !startTown });
-  void panel;
 
   // The 3D: mount when the section nears the viewport. In GL mode the town labels and the SN mark are part of
   // the model, and the pin buttons follow the projected pin heads every rendered frame.
@@ -280,7 +319,10 @@ export function initMap() {
       el.classList.toggle('flop', p.x < 140);
       el.style.visibility = !p.visible || p.x < Math.max(0, minX) || p.y < 0 || p.x > W || p.y > H || collides(p.x, p.y) ? 'hidden' : '';
     });
+    keepStop();
   };
+  // Reduced motion: the contour poster, still (no model, no flights), like the hero keeps its still instead of the film.
+  if (reduce.matches) return;
   const io = new IntersectionObserver(
     async (es) => {
       if (!es.some((e) => e.isIntersecting)) return;

@@ -4,9 +4,9 @@
  * Lit by the real sun over Lehi now (src/lib/sky.ts). Gallery-white neutral light.
  */
 import {
-  WebGLRenderer, Scene, PerspectiveCamera, DirectionalLight, HemisphereLight, Color, Vector3, Vector2, Mesh, Object3D,
+  WebGLRenderer, Scene, PerspectiveCamera, DirectionalLight, HemisphereLight, Color, Vector3, Vector2, Vector4, Mesh, Object3D,
   MeshStandardMaterial, MeshBasicMaterial, PlaneGeometry, CanvasTexture, NeutralToneMapping, SRGBColorSpace,
-  PCFSoftShadowMap, NoColorSpace, RepeatWrapping, LinearFilter, LinearMipmapLinearFilter, Texture, Raycaster, Box3,
+  PCFShadowMap, NoColorSpace, RepeatWrapping, LinearFilter, LinearMipmapLinearFilter, Texture, Raycaster, Box3,
   type WebGLProgramParametersWithUniforms, type Material,
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -56,6 +56,9 @@ export const RIGS: Record<Rig, RigSpec> = {
 };
 /** Same thresholds as the <picture> media queries in Hero.astro (viewport aspect). */
 export const rigFor = (aspect: number): Rig => (aspect >= 1.2 ? 'desktop' : aspect >= 0.75 ? 'tablet' : 'phone');
+
+/** Linear albedo of the night map's plaster (day 0.86): flats land near #262626 under the map's raking light. */
+const NIGHT_ALBEDO = 0.11;
 
 // Utah Lake north-half centroid, ≈ 40.30 N 111.80 W (scene km: 4.3 E, 10.2 S), on the inlay surface.
 const LAKE = new Vector3(4.3, 0.16, 10.2);
@@ -115,7 +118,11 @@ uniform float uGrainFadeNear;
 uniform float uGrainFadeFar;
 uniform float uGrainStrength;
 uniform vec2 uGroove;
+uniform float uNight;
+uniform vec4 uEdgeBox;
+uniform float uEdgeW;
 vec3 gReliefN;
+float gInk;
 float gGrainS;
 float gFade;
 float decodeG(float c) { float t = 2.0 * c - 1.0; return sign(t) * pow(abs(t), 1.5) * 5.0; }
@@ -153,7 +160,24 @@ const PLASTER_FRAG_COLOR = /* glsl */ `
   // I-15 groove from the distance field in alpha
   float dm = (gt.a - 0.2) / 0.8 * 250.0;
   float groove = 1.0 - smoothstep(uGroove.x, uGroove.y, dm);
-  diffuseColor.rgb *= (1.0 - ink) * (1.0 - 0.18 * groove) * (1.0 + 0.05 * (gGrainS - 0.5));
+  vec3 base = diffuseColor.rgb * (1.0 + 0.05 * (gGrainS - 0.5));
+  // by day the lines are ink on plaster; on the night map they are light on deep grey, like the SVG poster
+  diffuseColor.rgb = mix(base * (1.0 - ink) * (1.0 - 0.18 * groove), base * (1.0 + 2.5 * ink + 0.6 * groove), uNight);
+  gInk = ink + 0.25 * groove;
+}
+`;
+// The night map's contours carry a faint light of their own, so they read on the shadow side of the ridges too.
+const PLASTER_FRAG_EMISSIVE = /* glsl */ `
+totalEmissiveRadiance += uNight * vec3(0.045 * gInk);
+`;
+// The model's cut edge never shows: the ground dissolves into the void over the last uEdgeW km of the footprint.
+const PLASTER_FRAG_EDGE = /* glsl */ `
+{
+  vec2 dLo = vRWorld.xz - uEdgeBox.xy;
+  vec2 dHi = uEdgeBox.zw - vRWorld.xz;
+  float dEdge = min(min(dLo.x, dLo.y), min(dHi.x, dHi.y));
+  float keep = smoothstep(0.0, uEdgeW, dEdge);
+  gl_FragColor.rgb = mix(vec3(0.0392), gl_FragColor.rgb, mix(1.0, keep * keep, uNight));
 }
 `;
 const PLASTER_FRAG_ROUGH = /* glsl */ `
@@ -206,6 +230,10 @@ export class Engine {
   relief!: Mesh;
   plaster!: MeshStandardMaterial;
   labels: Mesh[] = [];
+  lakes: { mesh: Mesh; day: number }[] = [];
+  plinth: Mesh | null = null;
+  /** 1 on the map mount: dark plaster, light contours, the cut edge dissolved (shared shader uniform). */
+  night = { value: 0 };
   pinRoots = new Map<string, Object3D>();
   pinStreaks: Mesh[] = [];
   pinMats: Material[] = [];
@@ -229,7 +257,7 @@ export class Engine {
     this.renderer.toneMapping = NeutralToneMapping;
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = PCFSoftShadowMap;
+    this.renderer.shadowMap.type = PCFShadowMap; // r186: PCFSoft is gone (it warned); PCF + radius is the soft one
     this.renderer.shadowMap.autoUpdate = false;
     this.sun.castShadow = true;
     const size = opts.tier === 'T1' ? 2048 : 1024;
@@ -269,6 +297,9 @@ export class Engine {
           sh.uniforms.uGrainFadeFar = { value: 95 };
           sh.uniforms.uGrainStrength = { value: 0.3 };
           sh.uniforms.uGroove = { value: lod === 'hi' ? new Vector2(12, 18) : new Vector2(18, 26) };
+          sh.uniforms.uNight = this.night;
+          sh.uniforms.uEdgeBox = { value: new Vector4(MODEL_BOX.min.x, MODEL_BOX.min.z, MODEL_BOX.max.x, MODEL_BOX.max.z) };
+          sh.uniforms.uEdgeW = { value: 4.5 };
           sh.vertexShader = sh.vertexShader
             .replace('#include <common>', '#include <common>\n' + PLASTER_VERT_PARS)
             .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\n' + PLASTER_VERT);
@@ -276,7 +307,9 @@ export class Engine {
             .replace('#include <common>', '#include <common>\n' + PLASTER_FRAG_PARS)
             .replace('#include <color_fragment>', '#include <color_fragment>\n' + PLASTER_FRAG_COLOR)
             .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n' + PLASTER_FRAG_ROUGH)
-            .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n' + PLASTER_FRAG_NORMAL);
+            .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n' + PLASTER_FRAG_NORMAL)
+            .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + PLASTER_FRAG_EMISSIVE)
+            .replace('#include <fog_fragment>', '#include <fog_fragment>\n' + PLASTER_FRAG_EDGE);
         };
         m.material = mat;
         this.plaster = mat;
@@ -294,10 +327,12 @@ export class Engine {
       } else if (o.name === 'plinth') {
         m.receiveShadow = true;
         m.castShadow = true;
+        this.plinth = m;
       } else if (o.name.startsWith('lake')) {
         m.receiveShadow = true;
         const mat = m.material as MeshStandardMaterial;
         mat.roughness = 0.6;
+        this.lakes.push({ mesh: m, day: mat.color.getHex() });
       }
     });
     this.scene.add(root);
@@ -374,9 +409,18 @@ export class Engine {
     this.mapRole = on;
     const want = on;
     this.reading = want;
-    // the map is dark at every hour: a low raking light from the south-west draws the ridges, the ground stays deep
-    if (want) this.applyLight(24 * deg, -2.4, { ...LOOKS.night, key: 1.1, sky: 0.07, exposure: 1.35, voidc: 0x0a0a0a });
+    // the map is dark at every hour: a low raking light from the west-north-west (screen upper-left on the map's
+    // bearing) lights the Wasatch front that faces the camera; flats stay near #262626, the lakes deep grey, and the
+    // plinth walls are not drawn (the cut edge dissolves into the void instead)
+    if (want) this.applyLight(24 * deg, 1.92, { ...LOOKS.night, key: 1.6, sky: 0.08, exposure: 1.35, voidc: 0x0a0a0a });
     else this.applyLight(this.sunAlt, this.sunAz, lookFor(this.sunAlt / deg, this.sunAz));
+    this.night.value = on ? 1 : 0;
+    this.plaster?.color.setScalar(on ? NIGHT_ALBEDO : 0.86);
+    for (const l of this.lakes) {
+      (l.mesh.material as MeshStandardMaterial).color.setHex(on ? 0x474747 : l.day);
+      if (l.mesh.name === 'lake_gsl') l.mesh.visible = !on; // it sits in the dissolved corner
+    }
+    if (this.plinth) this.plinth.visible = !on;
     if (on) {
       for (const m of this.pinMats) {
         const st = m as MeshStandardMaterial;
@@ -585,6 +629,16 @@ export class Engine {
     const head = g.position.clone().add(new Vector3(0, id === 'sn' ? 2 : 1.05, 0));
     const p = head.project(this.camera);
     return { x: ((p.x + 1) / 2) * W, y: ((1 - p.y) / 2) * H, visible: p.z < 1 && p.x > -1.1 && p.x < 1.1 && p.y > -1.1 && p.y < 1.1 };
+  }
+
+  /** The town and its pins as one frame: the centre of their box (on the ground) and its larger side (km). */
+  townFrame(slug: string) {
+    const t = this.opts.towns.find((x) => x.slug === slug);
+    if (!t) return null;
+    const pts = [{ x: t.x, y: t.y }, ...this.opts.pins.filter((p) => p.town === slug)];
+    const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cz = (Math.min(...ys) + Math.max(...ys)) / 2;
+    return { center: new Vector3(cx, this.heightAt(cx, cz), cz), spanX: Math.max(...xs) - Math.min(...xs), spanZ: Math.max(...ys) - Math.min(...ys) };
   }
 
   townTarget(slug: string) {

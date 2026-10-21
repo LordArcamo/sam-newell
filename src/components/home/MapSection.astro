@@ -35,6 +35,19 @@ const mapData = {
 };
 ---
 <section class="map" id="map" aria-labelledby="map-h" data-map>
+  <div class="copy" data-towns>
+    <h2 class="h copy-h" id="map-h">Pick your town</h2>
+    <p class="lead">Every pin is a home Sam has listed or sold. Tap a town and the model flies there.</p>
+  </div>
+  <div class="slips num" role="toolbar" aria-label="Towns" aria-orientation="horizontal" data-toolbar>
+    {slips.map((c, i) => (
+      <button type="button" class="slip" style={`--h:${[172, 136, 158, 128, 146, 120, 150, 132][i % 8]}px;--r:${[0, -1.2, 0, 0, 1.5, 0, -0.8, 0][i % 8]}deg`} data-town={c.slug} aria-pressed={c.slug === DEFAULT ? 'true' : 'false'} tabindex={c.slug === DEFAULT ? 0 : -1} aria-controls="map-card">
+        <b>{c.name}</b>
+        <span>{c.count}{c.slug === 'lehi' ? ' · home base' : ''}</span>
+      </button>
+    ))}
+  </div>
+
   <div class="stage" data-relief-mount="map" data-stage>
     <!-- V3: the real USGS contours around Lehi (every 250 m, sorted by distance from Lehi), drawn outward as the
          chapter arrives; the model then crossfades in over them (motion.ts [data-draw="topo"]). -->
@@ -49,29 +62,16 @@ const mapData = {
       {TOWNS.map((t) => <span class="tl small" data-label={t.slug}>{t.name}</span>)}
       <span class="sn" data-sn><Logo variant="mark" title="" /></span>
     </div>
-    <ul class="pins" role="list" aria-label="Sam's homes on the map" data-pins>
-      {pins.map((h) => (
-        <li>
-          <button type="button" class:list={['pin', h.status]} data-pin={h.id} data-town={h.group} aria-label={h.label}>
-            <i aria-hidden="true"></i>
-            <span class="tag small" aria-hidden="true">{h.shown}, {h.townName}</span>
-          </button>
-        </li>
+    <!-- one tab stop: the town toolbar comes first; the pins are a single roving group (arrows move, Enter opens) -->
+    <p class="sr-only" id="pins-hint">Use the arrow keys to move between homes. Enter shows the home's town.</p>
+    <div class="pins" role="toolbar" aria-label="Sam's homes on the map" aria-describedby="pins-hint" data-pins>
+      {pins.map((h, i) => (
+        <button type="button" class:list={['pin', h.status]} data-pin={h.id} data-town={h.group} aria-label={h.label} tabindex={i === 0 ? 0 : -1}>
+          <i aria-hidden="true"></i>
+          <span class="tag small" aria-hidden="true">{h.shown}, {h.townName}</span>
+        </button>
       ))}
-    </ul>
-  </div>
-
-  <div class="copy" data-towns>
-    <h2 class="h copy-h" id="map-h">Pick your town</h2>
-    <p class="lead">Every pin is a home Sam has listed or sold. Tap a town and the model flies there.</p>
-  </div>
-  <div class="slips num" role="toolbar" aria-label="Towns" aria-orientation="horizontal" data-toolbar>
-    {slips.map((c, i) => (
-      <button type="button" class="slip" style={`--h:${[172, 136, 158, 128, 146, 120, 150, 132][i % 8]}px;--r:${[0, -1.2, 0, 0, 1.5, 0, -0.8, 0][i % 8]}deg`} data-town={c.slug} aria-pressed={c.slug === DEFAULT ? 'true' : 'false'} tabindex={c.slug === DEFAULT ? 0 : -1} aria-controls="map-card">
-        <b>{c.name}</b>
-        <span>{c.count}{c.slug === 'lehi' ? ' · home base' : ''}</span>
-      </button>
-    ))}
+    </div>
   </div>
 
   <div class="card dark" id="map-card" data-cards>
@@ -89,30 +89,35 @@ const mapData = {
           </div>
         )}
         <div class="tc-body">
-          <h3 class="tc-town" id={`tc-${c.slug}`}>{c.name}</h3>
-          <p class="small">{c.count || 'No homes shown here yet.'}</p>
-          {c.homes.length > 0 ? (
-            <ul role="list" class="tc-homes">
-              {c.homes.slice(0, 3).map((h) => (
-                <li data-home={h.id}>
-                  <a href={h.zillow} rel="noopener" target="_blank">
-                    <span class="addr">{h.shown}</span>
-                    <span class="det num">{h.detail}</span>
-                  </a>
-                  {h.status === 'for-sale' && <button type="button" class="run small" data-run={h.price}>Run the numbers</button>}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p class="empty">Ask Sam about {c.name}.</p>
-          )}
-          {c.homes.length > 3 && <p class="small tc-more">{c.homes.length - 3} more on the map and <a href={ZILLOW.profile} rel="noopener" target="_blank">on Zillow</a></p>}
-          {c.rv && (
-            <blockquote class="tc-q small">
-              <p>“{c.rv.excerpts.town}”</p>
-              <footer>{c.rv.name}, {reviewDate(c.rv.date)}, on Zillow</footer>
-            </blockquote>
-          )}
+          <div class="tc-head">
+            <h3 class="tc-town" id={`tc-${c.slug}`}>{c.name}</h3>
+            <p class="small">{c.count || 'No homes shown here yet.'}</p>
+          </div>
+          <!-- the list and the quote scroll inside the card (fade at the bottom edge); the actions never leave it -->
+          <div class="tc-scroll" data-lenis-prevent data-tc-scroll>
+            {c.homes.length > 0 ? (
+              <ul role="list" class="tc-homes">
+                {c.homes.slice(0, 3).map((h) => (
+                  <li data-home={h.id}>
+                    <a href={h.zillow} rel="noopener" target="_blank">
+                      <span class="addr">{h.shown}</span>
+                      <span class="det num">{h.detail}</span>
+                    </a>
+                    {h.status === 'for-sale' && <button type="button" class="run small" data-run={h.price}>Run the numbers</button>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="empty">Ask Sam about {c.name}.</p>
+            )}
+            {c.homes.length > 3 && <p class="small tc-more">{c.homes.length - 3} more on the map and <a href={ZILLOW.profile} rel="noopener" target="_blank">on Zillow</a></p>}
+            {c.rv && (
+              <figure class="tc-q small">
+                <blockquote><p>“{c.rv.excerpts.town}”</p></blockquote>
+                <figcaption>{c.rv.name}, {reviewDate(c.rv.date)}, on Zillow. <a href={`/reviews/#review-${c.rv.n}`} aria-label={`Read ${c.rv.name}'s full review`}>Read</a></figcaption>
+              </figure>
+            )}
+          </div>
           <div class="tc-act">
             <button type="button" class="btn light" data-run={c.homes.find((h) => h.status === 'for-sale')?.price ?? ''}>Run the numbers</button>
             <a class="btn ghost" href={ZILLOW.profile} rel="noopener" target="_blank">See on Zillow</a>
@@ -296,6 +301,12 @@ const mapData = {
     opacity: 1;
     transform: translate(-50%, 0);
   }
+  /* phones: a town's tags would stack on each other; the card lists them, a pin shows its own on tap or focus */
+  @media (max-width: 599px) {
+    .map.is-town .pin:not(.on, :focus-visible, :hover) .tag {
+      opacity: 0;
+    }
+  }
   /* tags never run off the stage sideways */
   .pin.flip .tag,
   .map.is-town .pin.flip .tag {
@@ -389,21 +400,30 @@ const mapData = {
     outline-offset: 3px;
   }
 
+  /* the card is a flex column: picture and head fixed, the list and quote scroll, the actions pinned at the foot */
   .card {
     position: absolute;
     right: var(--m);
     top: 96px;
     width: 390px;
     max-height: calc(100% - 96px - 220px);
-    overflow-y: auto;
+    overflow: hidden;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
   }
   :global(.js) .tc {
     display: none;
   }
   :global(.js) .tc.on {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
     animation: card-in 0.15s ease-out;
+  }
+  .tc :global(.ph),
+  .tc .macro {
+    flex: none;
   }
   @keyframes card-in {
     from {
@@ -430,6 +450,25 @@ const mapData = {
   }
   .tc-body {
     padding: 20px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .tc-head {
+    flex: none;
+  }
+  .tc-scroll {
+    min-height: 0;
+    flex: 0 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    margin: 0 -8px;
+    padding: 0 8px;
+  }
+  /* more below: the list fades out at its foot instead of stopping mid-line */
+  .tc-scroll.fade {
+    mask-image: linear-gradient(#000 calc(100% - 44px), transparent);
   }
   .tc-town {
     font-size: 32px;
@@ -493,23 +532,40 @@ const mapData = {
     aspect-ratio: 21 / 9;
   }
   /* short desktop screens: the card drops its picture so its text and buttons always fit */
-  @media (min-width: 1024px) and (max-height: 860px) {
+  @media (min-width: 1024px) and (max-height: 1000px) {
     .card :global(.ph),
     .card .macro {
       display: none;
     }
   }
   .tc-q {
-    margin-top: 16px;
+    margin: 16px 0 4px;
   }
-  .tc-q footer {
+  /* long quotes stop at three lines; "Read" opens the whole review */
+  .tc-q blockquote p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+  .tc-q figcaption {
     margin-top: 6px;
     font-weight: 400;
   }
+  .tc-q figcaption a {
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    display: inline-block;
+    min-height: 24px;
+  }
   .tc-act {
+    flex: none;
     display: flex;
     gap: 8px;
-    margin-top: 18px;
+    padding-top: 16px;
     flex-wrap: wrap;
   }
   .tc-act .btn {
@@ -627,6 +683,7 @@ const mapData = {
       display: flex;
       overflow-x: auto;
       scroll-snap-type: x proximity;
+      scroll-padding-inline: var(--m);
       gap: 8px;
       padding: 26px var(--m) 16px;
       scrollbar-width: none;
@@ -647,36 +704,31 @@ const mapData = {
     .slip[aria-pressed='true'] {
       transform: translateY(-12px);
     }
+    /* the map keeps its whole frame (design review: half the map was under the card); the card docks below the slips */
     .stage {
       position: relative;
       order: 2;
-      height: 78svh;
-      min-height: 520px;
+      height: 62svh;
+      min-height: 420px;
     }
-    /* the card docks over the bottom of the map, so a tap on a town shows at once */
     .card {
-      position: absolute;
-      left: var(--m);
-      right: var(--m);
-      top: auto;
-      bottom: calc(var(--slips-h, 150px) + var(--m));
-      width: auto;
-      max-height: none;
-      overflow: visible;
+      position: static;
       order: 4;
+      width: auto;
+      max-width: 640px;
+      max-height: none;
+      margin: 0 var(--m) 56px;
+      overflow: visible;
     }
-    /* compact docked card: two homes, the actions; the full list and the review stay on wider screens */
-    .tc-homes li:nth-child(n + 3),
-    .tc-q,
-    .tc-more {
-      display: none;
+    .tc-scroll {
+      overflow: visible;
     }
     .card :global(.ph),
     .card .macro {
       display: none;
     }
     .tc-body {
-      padding: 16px 18px 18px;
+      padding: 18px 18px 20px;
     }
     .addr {
       font-size: 20px;
@@ -688,6 +740,51 @@ const mapData = {
       margin: auto 0 0 0;
       width: 100vw;
       height: 92dvh;
+    }
+  }
+  /* tablet: the card sits under the map as a picture beside the list */
+  @media (min-width: 600px) and (max-width: 1023px) {
+    .card {
+      max-width: 760px;
+    }
+    :global(.js) .tc.on {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    }
+    .card :global(.ph),
+    .card .macro {
+      display: block;
+      aspect-ratio: auto;
+      height: 100%;
+      min-height: 240px;
+    }
+  }
+  /* phones: all eight towns at once, two to a row, nothing cut at the screen edge (jury P2 #20) */
+  @media (max-width: 599px) {
+    .slips {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      overflow: visible;
+      padding: 20px var(--m) 20px;
+      align-items: stretch;
+    }
+    .slip {
+      width: auto;
+      min-height: 84px;
+      padding: 12px 14px 12px;
+      gap: 4px;
+      border: 1px solid #fff;
+    }
+    .slip b {
+      font-size: 18px;
+    }
+    .slip span {
+      font-size: 14px;
+    }
+    .slip[aria-pressed='true'] {
+      transform: none;
+      background: var(--paper);
+      color: var(--ink);
     }
   }
 </style>

@@ -87,6 +87,18 @@ export class Controller {
     return { tx: target.x, ty: target.y, tz: target.z, dist: 26, bearing: this.engine.bearing, elev: 30, vfov: 16 };
   }
 
+  /** Camera distance that keeps a town's pins (spanX × spanZ km) inside ~80% of the map's free area. */
+  fitDist(pose: CamPose, spanX: number, spanZ: number) {
+    const v = this.views.get('map');
+    const H = v?.el.clientHeight || innerHeight;
+    const fr = v?.free?.() ?? { w: v?.el.clientWidth || innerWidth, h: H };
+    const perPx = (2 * Math.tan((pose.vfov * Math.PI) / 360)) / H; // world units per px at distance 1
+    const head = 1.4; // pin needle + head
+    const byW = (spanX + 1.5) / (0.66 * fr.w * perPx); // near pins spread wider than the target plane: margin
+    const byH = (spanZ * Math.sin((pose.elev * Math.PI) / 180) + head + 0.6) / (0.72 * fr.h * perPx);
+    return Math.min(60, Math.max(pose.dist, byW, byH));
+  }
+
   attach(el: HTMLElement, role: Role): ReliefHandle {
     const v: View = { el, role, visible: false, ratio: 0, shown: false, cbs: [] };
     this.views.set(role, v);
@@ -302,7 +314,12 @@ export class Controller {
     const e = this.engine;
     let dest: CamPose;
     if (p === 'overview' || p === 'hero') dest = this.overviewPose();
-    else if ('town' in p) dest = this.townPose(e.townTarget(p.town) ?? new Vector3());
+    else if ('town' in p) {
+      // frame the town with its pins (not just the town's name): wide towns pull the camera back a little
+      const f = e.townFrame(p.town);
+      dest = this.townPose(f?.center ?? new Vector3());
+      if (f) dest.dist = this.fitDist(dest, f.spanX, f.spanZ);
+    }
     else {
       const g = e.pinRoots.get(p.home);
       dest = g ? { ...this.townPose(g.position.clone()), dist: 20 } : this.overviewPose();
