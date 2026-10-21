@@ -89,7 +89,7 @@ export const REVIEWS: Review[] = [
   {
     n: 20, name: 'blairvandyke0', date: '2018-08-06', rating: 5, what: 'Bought a single family home in 2018 in Pleasant Grove', town: 'pleasant-grove',
     text: 'I just bought my third rental with Sam. He is exceptional. Existing properties or new construction, Sam provides careful, accurate and experience-based analysis. He gives inexperienced investors a greater capacity to learn the business without making unnecessary and costly mistakes. He is very service-oriented and committed to the success of his clients. Sam is fair, honest, and genuine. I am comfortable recommending his services to family, close friends, colleagues, and acquaintances. Work with Sam, your competence and confidence will rise as you build your portfolio from 1 to 100 properties. Good luck',
-    excerpts: { town: 'I just bought my third rental with Sam. He is exceptional.', invest: 'Existing properties or new construction, Sam provides careful, accurate and experience-based analysis. He gives inexperienced investors a greater capacity to learn the business without making unnecessary and costly mistakes.' },
+    excerpts: { town: 'I just bought my third rental with Sam. He is exceptional.', invest: 'Existing properties or new construction, Sam provides careful, accurate and experience-based analysis.' },
   },
 ];
 

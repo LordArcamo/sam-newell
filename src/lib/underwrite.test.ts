@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { monthlyPayment, balanceAfter, underwrite, EXAMPLE_INVEST, EXAMPLE_PAYMENT } from './underwrite.ts';
+import { monthlyPayment, balanceAfter, underwrite, EXAMPLE_INVEST, EXAMPLE_PAYMENT, EXAMPLE_RENTAL } from './underwrite.ts';
 
 const near = (a: number, b: number, tol = 0.01) => assert.ok(Math.abs(a - b) <= tol, `${a} ≉ ${b}`);
 
@@ -53,4 +53,12 @@ test('bad input never throws', () => {
   const r = underwrite({ ...EXAMPLE_INVEST, price: 0, down: Number.NaN, termYears: 0 });
   assert.equal(r.capRate, 0);
   assert.equal(r.payment, 0);
+});
+
+test('the opening rental example carries itself (about +$172 a month, DSCR above 1)', () => {
+  const r = underwrite(EXAMPLE_RENTAL);
+  near(r.payment, 1637.8, 0.5);
+  near(r.noi, 30_000 * 0.95 - (2_280 + 1_200 + 1_800 + 1_500), 0.01);
+  assert.ok(r.cashFlowMonth > 150 && r.cashFlowMonth < 200, String(r.cashFlowMonth));
+  assert.ok(r.dscr > 1.05, String(r.dscr));
 });

@@ -44,6 +44,16 @@ export const EXAMPLE_INVEST: UnderwriteInput = {
 
 export const EXAMPLE_PAYMENT: UnderwriteInput = { ...EXAMPLE_INVEST, down: 0.1 };
 
+/**
+ * The example the rental calculator opens on (design review #9): a Lehi-area townhome, self-managed, that roughly
+ * carries itself, labelled on the page as an example. [SAM TO CONFIRM every number]
+ */
+export const EXAMPLE_RENTAL: UnderwriteInput = {
+  price: 380_000, down: 0.3, apr: 0.0625, termYears: 30, rent: 2_500, vacancy: 0.05,
+  taxYear: 380_000 * 0.006, insuranceYear: 1_200, hoaMonth: 150, maintenance: 0.05, management: 0,
+  closing: 0.03, pmi: 0.005,
+};
+
 /** Monthly principal + interest. */
 export function monthlyPayment(loan: number, apr: number, termYears: number): number {
   const n = Math.round(termYears * 12);
