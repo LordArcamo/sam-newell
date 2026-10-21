@@ -14,9 +14,9 @@ import { CONTACT, BROKERAGE, LICENCE, BOOKING_URL, BOOKING_EXTERNAL } from '../d
     title="Talk to Sam"
     lead={`Call or text ${CONTACT.phone}, or book a time that suits you.`}
     cta={BOOKING_EXTERNAL ? { href: BOOKING_URL, label: 'Book a call', external: true } : { href: '#message', label: 'Send a message' }}
-    image={img('photos/family-river.jpg')}
-    alt="Sam with Heidi and Liam by a river in red-rock country"
-    pos="50% 40%"
+    image={img('photos/family-festival-colors.jpg')}
+    alt="Sam and Heidi covered in colour at a Festival of Colors"
+    pos="50% 30%"
   />
 
   <section class="ct sec wrap" aria-labelledby="ct-h">
@@ -55,15 +55,15 @@ import { CONTACT, BROKERAGE, LICENCE, BOOKING_URL, BOOKING_EXTERNAL } from '../d
     <h2 class="h" id="where-h" data-rv>Where Sam works</h2>
     <div class="where-grid">
       <figure>
-        <Pic src={img('photos/estate-lots-jordan-river.jpg')} alt="Estate lots above the Jordan River, Lehi" sizes="(max-width: 900px) 100vw, 28vw" ratio="r43" pos="50% 40%" />
+        <div data-shutter><Pic src={img('photos/estate-lots-jordan-river.jpg')} alt="Estate lots above the Jordan River, Lehi" sizes="(max-width: 900px) 100vw, 28vw" ratio="r43" pos="50% 40%" /></div>
         <figcaption class="small">Lehi, home base</figcaption>
       </figure>
       <figure>
-        <Pic src={img('listings/1056-w-stonehaven-dr-nsl.jpg')} alt="1056 W Stonehaven Dr, North Salt Lake" sizes="(max-width: 900px) 100vw, 28vw" ratio="r43" i={1} widths={[360, 550]} />
+        <div data-shutter><Pic src={img('listings/1056-w-stonehaven-dr-nsl.jpg')} alt="1056 W Stonehaven Dr, North Salt Lake" sizes="(max-width: 900px) 100vw, 28vw" ratio="r43" i={1} widths={[360, 550]} /></div>
         <figcaption class="small">North Salt Lake, listed now</figcaption>
       </figure>
       <figure>
-        <Pic src={img('photos/valley-view-utah-county.jpg')} alt="A Utah County valley from a new home" sizes="(max-width: 900px) 100vw, 28vw" ratio="r43" pos="50% 40%" i={2} />
+        <div data-shutter><Pic src={img('photos/valley-view-utah-county.jpg')} alt="A Utah County valley from a new home" sizes="(max-width: 900px) 100vw, 28vw" ratio="r43" pos="50% 40%" i={2} /></div>
         <figcaption class="small">Utah County</figcaption>
       </figure>
     </div>

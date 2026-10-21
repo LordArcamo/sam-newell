@@ -71,7 +71,7 @@ const count = (k: ReviewKind | 'all') => (k === 'all' ? list.length : list.filte
           </li>
           {i === 3 && (
             <li class="rv-pic rv-film" aria-hidden="true" data-pic>
-              <figure data-film="/film/keys.mp4" data-cursor="Play" data-shutter><Pic src={keysPoster} alt="" sizes="(max-width: 767px) 70vw, 30vw" ratio="r11" rv={false} widths={[360, 540, 720]} /></figure>
+              <figure data-film="/film/keys.mp4" data-film-once data-shutter><Pic src={keysPoster} alt="" sizes="(max-width: 767px) 70vw, 30vw" ratio="r11" rv={false} widths={[360, 540, 720]} /></figure>
             </li>
           )}
           {i === 10 && (

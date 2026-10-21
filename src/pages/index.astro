@@ -57,10 +57,10 @@ const jsonld = [
   <!-- 2 · Intro: the pinned sentence, his pictures pass -->
   <section class="intro" aria-label="What Sam does" data-intro>
     <p class="statement intro-s">Honest feedback on every house, and the numbers before you offer. That’s the whole job.</p>
-    <figure class="ip ip1" data-par="-14"><Pic src={img('photos/sam-portrait-2026-10.jpg')} alt="Sam Newell" sizes="(max-width: 767px) 70vw, 26vw" ratio="r45" pos="50% 25%" rv={false} /></figure>
+    <figure class="ip ip1" data-par="-14"><Pic src={img('photos/podcast-shoot-helicopter.jpg')} alt="Sam with a guest beside a helicopter on a Get Leveraged shoot" sizes="(max-width: 767px) 70vw, 26vw" ratio="r45" pos="50% 40%" rv={false} /></figure>
     <figure class="ip ip4" data-par="8"><Pic src={img('photos/framing-site-garage.jpg')} alt="A house in framing on a hillside site, with the scaffolding still up" sizes="(max-width: 767px) 90vw, 24vw" ratio="r32" rv={false} /></figure>
-    <figure class="ip ip2" data-par="10" data-cursor="Play" data-film="/film/studio.mp4"><Pic src={studioPoster} alt="Sam talking in the Get Leveraged studio" sizes="(max-width: 767px) 90vw, 40vw" ratio="r1610" rv={false} widths={[360, 540, 720]} /></figure>
-    <figure class="ip ip3" data-par="-6" data-cursor="Play" data-film="/film/keys.mp4"><Pic src={keysPoster} alt="Keys day: confetti under the Congrats sign at Sam's office as clients close on a home" sizes="(max-width: 767px) 60vw, 24vw" ratio="r11" rv={false} widths={[360, 540, 720]} /></figure>
+    <figure class="ip ip2" data-par="10" data-film="/film/studio.mp4"><Pic src={studioPoster} alt="Sam talking in the Get Leveraged studio" sizes="(max-width: 767px) 90vw, 40vw" ratio="r1610" rv={false} widths={[360, 540, 720]} /></figure>
+    <figure class="ip ip3" data-par="-6" data-film="/film/keys.mp4" data-film-once><Pic src={keysPoster} alt="Keys day: confetti under the Congrats sign at Sam's office as clients close on a home" sizes="(max-width: 767px) 60vw, 24vw" ratio="r11" rv={false} widths={[360, 540, 720]} /></figure>
   </section>
 
   <!-- 3 · For sale now, sold lately: full panels, one midline row (a sticky stack) -->
@@ -144,8 +144,8 @@ const jsonld = [
     <h2 class="h" id="about-h" data-rv>Lehi is home</h2>
     <p class="lead about-lead" data-rv style="--i:1">Sam sells homes up and down the Wasatch Front with {BROKERAGE.name}. He has been in Utah real estate for {SITE.yearsInRealEstate} years and answers calls and texts the same day.</p>
     <div class="tiles">
-      <div class="a-photo" data-shutter data-cursor="View">
-        <Pic src={img('photos/family-brighton-2026-10-square.jpg')} alt="Sam with Heidi and Liam among autumn aspens at Brighton" sizes="(max-width: 900px) 100vw, 48vw" ratio="r11" rv={false} />
+      <div class="a-photo" data-shutter>
+        <a class="a-link" href="/about/" data-cursor="View" aria-label="About Sam"><Pic src={img('photos/family-brighton-2026-10-square.jpg')} alt="Sam with Heidi and Liam among autumn aspens at Brighton" sizes="(max-width: 900px) 100vw, 48vw" ratio="r11" rv={false} /></a>
       </div>
       <div class="a-tile">
         <p class="a-block">Dad of two, fly fisherman, and a builder at heart: he still frames houses with his friend Oscar at A Framing Company. <a class="link" href="/about/">More about Sam</a></p>
@@ -162,7 +162,7 @@ const jsonld = [
 
   <!-- 9 · Get Leveraged: the printed sheet on black -->
   <section class="pod wrap" aria-labelledby="pod-h">
-    <div class="pod-cover" data-shutter data-cursor="Play"><Pic src={img('photos/get-leveraged-cover.jpg')} alt="Get Leveraged with Sam Newell, the show's cover" sizes="(max-width: 900px) 90vw, 36vw" ratio="r11" rv={false} /></div>
+    <div class="pod-cover" data-shutter><a class="a-link" href="/podcast/" data-cursor="Listen" aria-label="Get Leveraged, the archive"><Pic src={img('photos/get-leveraged-cover.jpg')} alt="Get Leveraged with Sam Newell, the show's cover" sizes="(max-width: 900px) 90vw, 36vw" ratio="r11" rv={false} /></a></div>
     <div class="sheet num" data-rv>
       <h2 id="pod-h">Get Leveraged</h2>
       <p class="meta">The archive: {PODCAST.episodes} episodes on investing, money and family, {PODCAST.first} to 2025. {PODCAST.rating} out of 5 on Apple from {PODCAST.ratings} ratings.</p>
@@ -285,24 +285,26 @@ const jsonld = [
     margin-inline: auto;
   }
   /* 4K upscales (2560 px) can go wider than 1536 */
-  .panel-img.wide {
+  .panel-img.wide,
+  .panel-img.wide + .row {
     width: min(100%, calc(72vh * 16 / 9));
   }
   .panel-img :global(.ph) {
     height: 100%;
     background: #141414;
   }
+  /* the row sits on the picture's own width, never out in the black margins */
   .row {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 50%;
     top: 50%;
-    transform: translateY(-50%);
+    width: min(100%, calc(72vh * 16 / 9), 1536px);
+    transform: translate(-50%, -50%);
     display: grid;
-    grid-template-columns: 22vw 1fr auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
     align-items: baseline;
     gap: 24px;
-    padding: 28px var(--m);
+    padding: 28px 32px;
     background: rgb(10 10 10 / 0.72);
     transition: background-color 0.4s;
   }
@@ -610,14 +612,14 @@ const jsonld = [
     padding: 180px var(--m);
   }
   .q-photo {
-    grid-column: 2 / 6;
+    grid-column: 1 / 6;
   }
   .q-text {
     grid-column: 7 / 12;
     align-self: center;
   }
   .q-text .statement {
-    font-size: clamp(26px, 2.5vw, 36px);
+    font-size: clamp(24px, 2.1vw, 30px);
   }
   .q-text figcaption {
     margin-top: 32px;
@@ -647,6 +649,9 @@ const jsonld = [
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
+  }
+  .a-link {
+    display: block;
   }
   .a-photo {
     position: relative;
@@ -695,7 +700,7 @@ const jsonld = [
     padding: 56px 60px;
   }
   .sheet h2 {
-    font-size: 52px;
+    font-size: 40px;
     margin-bottom: 12px;
   }
   .meta {
@@ -800,6 +805,7 @@ const jsonld = [
       height: 125vw;
     }
     .row {
+      width: 100%;
       grid-template-columns: 1fr;
       gap: 6px;
       padding: 20px var(--m);

@@ -33,7 +33,7 @@ const swatches = [
 ];
 ---
 <section class="hero" data-hero aria-labelledby="hero-title">
-  <div class="view" data-cursor="Film">
+  <div class="view">
     <div class="still" data-still>
       <picture>
         <source type="image/avif" data-k="avif" sizes="(max-width: 900px) 100vw, 84vw" />
@@ -63,6 +63,7 @@ const swatches = [
       <Skyline class="sky" draw="hero" />
     </div>
     <p class="sub">Realtor in Lehi, Utah. Buying, selling and investing on the Wasatch Front: <b class="num">{ZILLOW.sold}</b> homes sold, <b class="num">{ZILLOW.rating}</b> on <b class="num">{ZILLOW.reviews}</b> Zillow reviews.</p>
+    <p class="sub-m">Realtor in Lehi, Utah · <b class="num">{ZILLOW.sold}</b> homes sold</p>
     <a class="btn act" href={BOOKING_URL} {...bookingAttrs}>Book a call with Sam <Arrow /></a>
     <p class="clock num" data-clock>Lehi, Utah</p>
     <!-- opening sequence (html.op only) -->
@@ -304,6 +305,10 @@ const swatches = [
   .act:active {
     transform: translateX(-50%) scale(0.97);
   }
+  /* phones: the one line that says who Sam is (the full line is too long for the view) */
+  .sub-m {
+    display: none;
+  }
   .clock {
     position: absolute;
     right: 28px;
@@ -434,6 +439,7 @@ const swatches = [
   :global(html.op) .logo,
   :global(html.op) .sub,
   :global(html.op) .act,
+  :global(html.op) .sub-m,
   :global(html.op) .clock {
     opacity: 0;
     animation: op-in 0.8s var(--ease-out) 1.5s forwards;
@@ -452,6 +458,7 @@ const swatches = [
   :global(html.op-skip) .sub,
   :global(html.op-skip) .act,
   :global(html.op-skip) .clock,
+  :global(html.op-skip) .sub-m,
   :global(html.op-skip) .sw {
     animation-duration: 0.01s !important;
     animation-delay: 0s !important;
@@ -487,7 +494,7 @@ const swatches = [
       transform: none;
     }
     .title {
-      font-size: 17vw;
+      font-size: clamp(60px, 16vw, 92px);
       white-space: normal;
       line-height: 0.95;
     }
@@ -502,9 +509,23 @@ const swatches = [
       bottom: 24px;
       white-space: nowrap;
     }
+    .sub-m {
+      display: block;
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 88px;
+      z-index: 2;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .sub-m b {
+      font-weight: 600;
+    }
     .clock {
       right: 16px;
-      bottom: 92px;
+      bottom: 124px;
       font-size: 14px;
     }
     .swatches {

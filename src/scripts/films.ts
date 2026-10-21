@@ -12,7 +12,8 @@ export function initFilms() {
         if (e.isIntersecting && !v) {
           v = document.createElement('video');
           v.muted = true;
-          v.loop = true;
+          // a short moment (the keys-day confetti) plays once and rests on its last frame instead of visibly looping
+          v.loop = el.dataset.filmOnce === undefined;
           v.playsInline = true;
           v.setAttribute('playsinline', '');
           v.setAttribute('aria-hidden', 'true');
@@ -23,7 +24,7 @@ export function initFilms() {
           (el.querySelector('.ph') ?? el).appendChild(v);
         }
         if (!v) continue;
-        if (e.isIntersecting && !document.hidden) v.play().catch(() => {});
+        if (e.isIntersecting && !document.hidden && !v.ended) v.play().catch(() => {});
         else v.pause();
       }
     },

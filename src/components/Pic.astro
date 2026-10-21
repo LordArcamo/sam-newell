@@ -26,7 +26,7 @@ if (!ws.includes(src.width) && src.width < 2000) ws.push(src.width);
     widths={ws}
     sizes={sizes}
     formats={['avif', 'webp']}
-    quality={58}
+    quality={eager ? 50 : 58}
     loading={eager ? 'eager' : 'lazy'}
     fetchpriority={eager ? 'high' : 'auto'}
     decoding={eager ? 'sync' : 'async'}

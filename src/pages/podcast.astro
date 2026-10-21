@@ -37,7 +37,6 @@ const jsonld = [
     image={img('photos/podcast-studio.jpg')}
     alt="Sam in the Get Leveraged interview room"
     pos="50% 35%"
-    cursor="Play"
   >
     <p class="small">{PODCAST.rating} out of 5 on Apple from {PODCAST.ratings} ratings. Also on <a class="link" href={PODCAST.spotify} rel="noopener" target="_blank">Spotify</a>.</p>
   </InnerHero>
@@ -57,7 +56,7 @@ const jsonld = [
         </div>
         <p class="small" aria-live="polite" data-count>{EPISODES.length} episodes</p>
       </div>
-      <div class="arch-p" data-film="/film/studio.mp4" data-cursor="Play"><Pic src={studioPoster} alt="Sam talking in the Get Leveraged studio" sizes="(max-width: 767px) 70vw, 26vw" ratio="r1610" rv={false} widths={[360, 540, 720]} /></div>
+      <div class="arch-p" data-film="/film/studio.mp4"><Pic src={studioPoster} alt="Sam talking in the Get Leveraged studio" sizes="(max-width: 767px) 70vw, 26vw" ratio="r1610" rv={false} widths={[360, 540, 720]} /></div>
     </div>
     <ul role="list" class="eps" data-eps>
       {EPISODES.map((e) => (
