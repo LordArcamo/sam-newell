@@ -114,6 +114,36 @@ export function initMotion() {
     });
   });
 
+  // /buy/'s walkthrough: the screen holds while the wall builds itself in a framer's order, plate, studs one by
+  // one, header, jacks, the window's sill and cripples, and last the drywall line; each note lands with its part.
+  if (desktop) {
+    document.querySelectorAll<HTMLElement>('[data-walk]').forEach((sec) => {
+      const svg = sec.querySelector<SVGSVGElement>('svg');
+      if (!svg) return;
+      sec.classList.add('live');
+      svg.classList.add('drawn-ready');
+      const notes = [...sec.querySelectorAll<HTMLElement>('[data-at]')];
+      const tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top top', end: 'bottom bottom', scrub: 0.6, invalidateOnRefresh: true } });
+      const at: Record<string, number> = {};
+      let t = 0;
+      svg.querySelectorAll<SVGPathElement>('path').forEach((p) => {
+        const k = p.dataset.k!;
+        const d = k === 'plate' ? 0.5 : k === 'stud' ? 0.32 : k === 'drywall' ? 1.4 : k === 'cripple' ? 0.2 : 0.5;
+        if (at[k] === undefined) at[k] = t;
+        tl.fromTo(p, undrawn(p), { strokeDashoffset: 0, duration: d, ease: 'none' }, t);
+        t += k === 'stud' || k === 'cripple' ? d * 0.55 : d * 0.9;
+      });
+      const board = svg.querySelector<SVGPathElement>('path[data-k="drywall"]');
+      if (board) tl.fromTo(board, { fillOpacity: 0 }, { fillOpacity: 0.07, duration: 0.5, ease: 'none' });
+      tl.to({}, { duration: 0.6 }); // a held beat on the finished wall before the pin lets go
+      const total = tl.duration();
+      tl.eventCallback('onUpdate', () => {
+        const now = tl.progress() * total;
+        notes.forEach((n) => n.classList.toggle('on', now >= (at[n.dataset.at!] ?? 0) + 0.15));
+      });
+    });
+  }
+
   // Rules that draw with the reader: the /about/ years, the Steps progress line on /buy/ and /sell/.
   document.querySelectorAll<SVGSVGElement>('[data-draw="rule"]').forEach((svg) => {
     const host = svg.closest<HTMLElement>('[data-rule-host]') ?? svg;

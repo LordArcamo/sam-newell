@@ -6,40 +6,11 @@
  * piece, in the order a framer builds it, so the drawing scrubs bottom plate → top plates → studs left to right →
  * header → jacks → sill → cripples (motion.ts, [data-draw="wall"]). Reduced motion: drawn, static.
  */
+import { wallPieces, L, H } from '../lib/wall';
 interface Props { class?: string; label?: string }
 const { class: cls = '', label = 'A wall frame drawn in elevation: plates, studs at 16 inches on centre, and a window with its header' } = Astro.props;
 
-const L = 144; // a 12' wall
-const T = 1.5; // 2× lumber face
-const H = T + 92.625 + 2 * T; // 97.125": bottom plate, precut stud, double top plate
-const y = (h: number) => H - h; // inches above the floor → SVG y
-const rect = (x: number, h0: number, w: number, hh: number) => `M${x} ${y(h0)}H${x + w}V${y(h0 + hh)}H${x}Z`;
-
-// the window: 36" rough opening centred at 64", header bottom at 82.5", rough sill top at 42"
-const RO = { l: 46, r: 82, top: 82.5, sill: 42 };
-const studTop = T + 92.625;
-const pieces: { d: string; k: string }[] = [];
-pieces.push({ k: 'plate', d: rect(0, 0, L, T) });
-pieces.push({ k: 'plate', d: rect(0, studTop, L, T) });
-pieces.push({ k: 'plate', d: rect(0, studTop + T, L, T) });
-// common studs at 16" o.c. (the first and last flush with the ends), skipping the window bay
-const centres = [T / 2];
-for (let c = 16; c < L - T; c += 16) centres.push(c);
-centres.push(L - T / 2);
-const kings = [RO.l - 2 * T, RO.r + T]; // left edges of the king studs
-const studXs = centres.map((c) => c - T / 2).filter((x) => !(x + T > kings[0] - 0.01 && x < kings[1] + T + 0.01));
-for (const x of [...studXs, ...kings].sort((a, b) => a - b)) pieces.push({ k: 'stud', d: rect(x, T, T, 92.625) });
-pieces.push({ k: 'header', d: rect(RO.l - T, RO.top, RO.r - RO.l + 2 * T, 9.25) });
-pieces.push({ k: 'jack', d: rect(RO.l - T, T, T, RO.top - T) });
-pieces.push({ k: 'jack', d: rect(RO.r, T, T, RO.top - T) });
-pieces.push({ k: 'sill', d: rect(RO.l, RO.sill - T, RO.r - RO.l, T) });
-// cripples on the 16" layout, under the sill and over the header
-for (const c of centres) {
-  const x = c - T / 2;
-  if (x < RO.l || x + T > RO.r) continue;
-  pieces.push({ k: 'cripple', d: rect(x, T, T, RO.sill - 2 * T) });
-  pieces.push({ k: 'cripple', d: rect(x, RO.top + 9.25, T, studTop - RO.top - 9.25) });
-}
+const pieces = wallPieces();
 ---
 <svg class:list={['line-art', 'wall', cls]} viewBox={`-1 -1 ${L + 2} ${H + 2}`} role="img" aria-label={label} data-draw="wall">
   {pieces.map((p) => <path d={p.d} data-k={p.k} />)}

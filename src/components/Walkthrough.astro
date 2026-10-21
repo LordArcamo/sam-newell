@@ -1,0 +1,127 @@
+---
+/**
+ * /buy/'s own moment: the walkthrough. The screen holds (about 1.5 screens of scroll) while a real wall frame draws
+ * itself the way a framer builds it, plate, then the studs one by one, the header, the window rough-in, and last the
+ * drywall line that hides it all; a short note names each part as it lands (motion.ts [data-walk]).
+ * Phones and reduced motion: the drawing is complete and the notes sit under it as a list.
+ */
+import { wallPieces, L, H } from '../lib/wall';
+const pieces = wallPieces(true);
+// where each note sits, in % of the drawing (x from the left, y from the top); `at` is the piece that brings it in
+const notes = [
+  { at: 'stud', x: 0, y: 103, t: 'The frame: plates and studs, 16 inches apart' },
+  { at: 'header', x: 29, y: -9, t: 'The header that carries the opening' },
+  { at: 'sill', x: 59, y: 40, t: 'The window rough-in' },
+  { at: 'drywall', x: 97, y: 74, t: 'Then the drywall, and what a fix behind it really costs', right: true },
+];
+---
+<section class="wt" aria-labelledby="wt-h" data-walk>
+  <div class="wt-pin">
+    <div class="wt-copy">
+      <h2 class="h" id="wt-h" data-rv>Look past the paint</h2>
+      <p class="lead wt-lead" data-rv style="--i:1">Sam studied construction management at BYU and still works on framing jobs. On a showing he looks past the paint to the frame, the roof and what a fix really costs.</p>
+    </div>
+    <figure class="wt-fig">
+      <svg class="line-art wt-wall" viewBox={`-4 -4 ${L + 8} ${H + 8}`} role="img" aria-label="A wall frame drawn in elevation: plates, studs at 16 inches on centre, a window with its header and rough sill, and the drywall line over it">
+        {pieces.map((p) => <path d={p.d} data-k={p.k} />)}
+      </svg>
+      <ol role="list" class="wt-notes">
+        {notes.map((n) => (
+          <li data-at={n.at} class:list={{ right: n.right }} style={`--x:${n.x};--y:${n.y}`}>{n.t}</li>
+        ))}
+      </ol>
+    </figure>
+  </div>
+</section>
+<style>
+  .wt {
+    position: relative;
+  }
+  .wt-pin {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: 48px 6vw;
+    align-items: center;
+    padding: 120px var(--m);
+  }
+  .wt-copy .h {
+    margin-bottom: 24px;
+    max-width: 10ch;
+  }
+  .wt-lead {
+    max-width: 34ch;
+  }
+  .wt-fig {
+    position: relative;
+    margin: 40px 0;
+  }
+  .wt-wall {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 64vh;
+    color: var(--ink);
+  }
+  /* the board: its own line, then a faint face over the frame (window left open) */
+  .wt-wall path[data-k='drywall'] {
+    stroke-width: 1.5;
+    fill: currentColor;
+    fill-opacity: 0.07;
+    fill-rule: evenodd;
+  }
+  .wt-notes {
+    margin-top: 28px;
+    display: grid;
+    gap: 10px;
+  }
+  .wt-notes li {
+    font-size: 16px;
+    font-weight: 500;
+  }
+  /* desktop with motion: the screen holds while the wall draws; each note appears beside its part */
+  @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+    :global(.js) .wt {
+      height: calc(100svh + 150vh);
+    }
+    :global(.js) .wt .wt-pin {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      padding-block: calc(var(--bar) + 32px) 48px;
+    }
+    :global(.js) .wt .wt-notes {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      pointer-events: none;
+    }
+    :global(.js) .wt .wt-notes li {
+      position: absolute;
+      left: calc(var(--x) * 1%);
+      top: calc(var(--y) * 1%);
+      padding: 3px 8px;
+      background: var(--paper);
+      white-space: nowrap;
+    }
+    /* hidden only once motion is driving them */
+    .wt:global(.live) .wt-notes li {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s var(--ease-expo), transform 0.7s var(--ease-expo);
+    }
+    :global(.js) .wt .wt-notes li.right {
+      left: auto;
+      right: calc((100 - var(--x)) * 1%);
+    }
+    .wt:global(.live) .wt-notes li:global(.on) {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (max-width: 900px) {
+    .wt-pin {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 96px var(--m);
+    }
+  }
+</style>
