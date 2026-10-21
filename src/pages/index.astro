@@ -119,13 +119,13 @@ const jsonld = [
   <section class="fig" aria-labelledby="fig-h">
     <div class="fig-photo" data-shutter><Pic src={img('listings/full-1872-drone-wasatch.jpg')} alt="Dusk over Lehi and the Wasatch from above one of Sam's listings, 1872 S Country Ln W" sizes="100vw" pos="50% 40%" rv={false} widths={[768, 1152, 1536, 2048, 2560]} /></div>
     <div class="fig-shade" aria-hidden="true"></div>
-    <p class="fig-n num" aria-hidden="true" data-rise data-odo>{ZILLOW.sold}</p>
+    <p class="fig-n num" aria-hidden="true" data-mask="0">{ZILLOW.sold}</p>
     <h2 class="sr-only" id="fig-h">{ZILLOW.sold} homes sold</h2>
     <p class="fig-exp">Homes Sam has sold, as counted on his Zillow profile in {ZILLOW.asOf}.</p>
   </section>
   <dl class="subfigs wrap num">
     {figures.map((f, i) => (
-      <div data-rv style={`--i:${i}`}><dt data-odo>{f.big}</dt><dd>{f.small}</dd></div>
+      <div data-rv style={`--i:${i}`}><dt data-mask={i}>{f.big}</dt><dd>{f.small}</dd></div>
     ))}
   </dl>
 
@@ -577,22 +577,6 @@ const jsonld = [
     .sb {
       aspect-ratio: 4 / 5;
     }
-  }
-
-  /* odometer figures (motion.ts): each digit window is 1.15em with tabular figures, so a frame mid-roll shows
-     one digit and a clean gap, never two halves */
-  .fig :global(.odo-on),
-  .subfigs :global(.odo-on) {
-    line-height: 1.15 !important;
-    font-variant-numeric: tabular-nums;
-  }
-  .fig :global(.odo-on > [aria-hidden]),
-  .subfigs :global(.odo-on > [aria-hidden]) {
-    height: 1.15em;
-  }
-  .fig :global(.odo::before),
-  .subfigs :global(.odo::before) {
-    line-height: 1.15;
   }
 
   /* 6 · 235 */

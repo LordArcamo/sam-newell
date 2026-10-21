@@ -15,7 +15,7 @@ function splitHeading(h: HTMLElement) {
   const inner: HTMLElement[] = [];
   words.forEach((w, i) => {
     const mask = document.createElement('span');
-    mask.style.cssText = 'display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:0.1em;margin-bottom:-0.1em';
+    mask.style.cssText = 'display:inline-block;overflow:hidden;vertical-align:bottom;padding:0.14em 0 0.1em;margin:-0.14em 0 -0.1em';
     const t = document.createElement('span');
     t.style.cssText = 'display:inline-block;transform:translateY(105%)';
     t.textContent = w;
@@ -27,11 +27,11 @@ function splitHeading(h: HTMLElement) {
   h.dataset.split = 'done';
   return inner;
 }
-function rise(inner: HTMLElement[]) {
+function rise(inner: HTMLElement[], base = 0) {
   const tops = [...new Set(inner.map((t) => Math.round((t.parentElement as HTMLElement).offsetTop)))].sort((a, b) => a - b);
   inner.forEach((t) => {
     const line = tops.indexOf(Math.round((t.parentElement as HTMLElement).offsetTop));
-    t.style.transition = `transform 0.9s ${EXPO} ${line * 80}ms`;
+    t.style.transition = `transform 0.9s ${EXPO} ${base + line * 80}ms`;
     t.style.transform = 'none';
   });
 }
@@ -39,7 +39,8 @@ function rise(inner: HTMLElement[]) {
 export function initReveals() {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   // section headings: masked line rise instead of the fade-up
-  const heads = reduce ? [] : [...document.querySelectorAll<HTMLElement>('h2.h[data-rv]')];
+  // section headings and the big figures (235, 4.9, $450M+, 2,000+: one rise each, 90 ms apart)
+  const heads = reduce ? [] : [...document.querySelectorAll<HTMLElement>('h2.h[data-rv], [data-mask]')];
   const split = new Map<HTMLElement, HTMLElement[]>();
   heads.forEach((h) => {
     const r = h.getBoundingClientRect();
@@ -47,14 +48,15 @@ export function initReveals() {
     const inner = splitHeading(h);
     if (!inner) return;
     h.removeAttribute('data-rv');
-    h.dataset.rise = '';
+    h.dataset.masked = '';
     split.set(h, inner);
   });
   if (split.size) {
     const hio = new IntersectionObserver(
       (entries) => entries.forEach((e) => {
         if (!e.isIntersecting) return;
-        rise(split.get(e.target as HTMLElement)!);
+        const el = e.target as HTMLElement;
+        rise(split.get(el)!, 90 * (Number(el.dataset.mask) || 0));
         hio.unobserve(e.target);
       }),
       { rootMargin: '0px 0px -10% 0px' },

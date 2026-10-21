@@ -141,43 +141,6 @@ export function initMotion() {
     }
   });
 
-  // Figures roll into place like an odometer, once: each digit is a 0–9 column (drawn by CSS, not text) that
-  // settles on its value; the real figure stays in the element for screen readers.
-  document.querySelectorAll<HTMLElement>('[data-odo]').forEach((el) => {
-    const text = el.textContent ?? '';
-    if (!/\d/.test(text)) return;
-    const cols: HTMLElement[] = [];
-    el.textContent = '';
-    el.classList.add('odo-on');
-    if (!el.closest('[aria-hidden="true"]')) {
-      const sr = document.createElement('span');
-      sr.className = 'sr-only';
-      sr.textContent = text;
-      el.appendChild(sr);
-    }
-    for (const ch of text) {
-      const s = document.createElement('span');
-      s.setAttribute('aria-hidden', 'true');
-      if (/\d/.test(ch)) {
-        s.className = 'odo';
-        s.dataset.v = ch;
-        cols.push(s);
-      } else s.dataset.c = ch;
-      el.appendChild(s);
-    }
-    ScrollTrigger.create({
-      trigger: el,
-      start: 'top 92%',
-      once: true,
-      onEnter: () => cols.forEach((c, k) => gsap.to(c, { '--y': `${-10 * Number(c.dataset.v)}%`, duration: 1.2 + k * 0.06, delay: k * 0.06, ease: EXPO })),
-    });
-  });
-
-  // The 235 figure rises out of the shade as its chapter arrives.
-  document.querySelectorAll<HTMLElement>('[data-rise]').forEach((el) => {
-    gsap.fromTo(el, { yPercent: 35, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 95%', once: true } });
-  });
-
   // Big stills drift slowly while on screen (the film feeling, transform only).
   document.querySelectorAll<HTMLElement>('[data-drift]').forEach((el) => {
     const amt = Number(el.dataset.drift || 6);

@@ -321,30 +321,6 @@ button:hover .arrow {
     animation: draw-failsafe 0s linear 6s forwards;
   }
 }
-/* odometer figures (motion.ts [data-odo]): each digit a 0–9 column drawn by CSS that rolls to its value */
-.odo-on {
-  line-height: 1 !important;
-  white-space: nowrap;
-}
-.odo-on > [aria-hidden] {
-  display: inline-block;
-  vertical-align: top;
-  height: 1em;
-}
-.odo-on > [data-c]::before {
-  content: attr(data-c);
-}
-.odo {
-  --y: 0%;
-  overflow: hidden;
-}
-.odo::before {
-  content: '0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9';
-  display: block;
-  white-space: pre;
-  line-height: 1;
-  transform: translateY(var(--y));
-}
 @keyframes draw-failsafe {
   to {
     opacity: 1;

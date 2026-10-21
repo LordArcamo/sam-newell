@@ -152,6 +152,20 @@ const { heading, steps, id = 'steps' } = Astro.props;
     .st.tall .st-img {
       width: 72%;
     }
+    /* the address sits on the picture, so it never reads as a label over the next step's heading */
+    .st-img {
+      position: relative;
+    }
+    .st-cap {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      margin: 0;
+      padding: 4px 8px;
+      background: rgb(10 10 10 / 0.72);
+      color: #fff;
+      opacity: 1;
+    }
     .st-list {
       gap: 72px;
     }
