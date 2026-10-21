@@ -9,7 +9,7 @@ export type Status = 'for-sale' | 'sold' | 'past';
 export interface Home {
   id: string; address: string; street: string; town: string; zip: string; status: Status;
   price?: number; side?: 'buyer' | 'seller' | 'both'; date?: string; beds?: number; baths?: number; sqft?: number;
-  photo?: string; zillow: string; showAddress: boolean;
+  photo?: string; photoKind?: 'exterior' | 'interior'; zillow: string; showAddress: boolean;
 }
 
 export const TOWN_NAME: Record<string, string> = Object.fromEntries(towns.map((t) => [t.slug, t.name]));

@@ -338,6 +338,10 @@ export class Engine {
     this.relight(this.now());
   }
 
+  pinScale(k: number) {
+    for (const [, g] of this.pinRoots) g.scale.setScalar(k);
+  }
+
   heightAt(x: number, z: number) {
     this.raycaster.set(new Vector3(x, 50, z), new Vector3(0, -1, 0));
     const hit = this.raycaster.intersectObject(this.relief, false)[0];
@@ -348,13 +352,31 @@ export class Engine {
     return this.opts.timeOverride ?? Date.now();
   }
 
+  reading = false;
   relight(ms: number, forced?: SkyState) {
     const { altitude, azimuth } = sunPosition(ms);
     this.sunAlt = altitude;
     this.sunAz = azimuth;
     this.state = forced ?? skyState(altitude / deg, azimuth);
-    const L = (this.look = forced ? LOOKS[forced] : lookFor(altitude / deg, azimuth));
     this.bearing = followBearing(azimuth);
+    this.reading = false;
+    this.applyLight(altitude, azimuth, forced ? LOOKS[forced] : lookFor(altitude / deg, azimuth));
+  }
+
+  /**
+   * The map is for reading: when the real sun is low or down (< 8°), it is lit by a fixed afternoon light
+   * (28° from the south-west, the noon look) instead of a flat dusk grey. The hero always keeps the true sun.
+   */
+  setReading(on: boolean) {
+    const want = on && this.sunAlt < 8 * deg;
+    if (want === this.reading) return;
+    this.reading = want;
+    if (want) this.applyLight(28 * deg, 50 * deg, LOOKS.noon);
+    else this.applyLight(this.sunAlt, this.sunAz, lookFor(this.sunAlt / deg, this.sunAz));
+  }
+
+  applyLight(altitude: number, azimuth: number, L: Look) {
+    this.look = L;
     const [dx, dy, dz] = sunDirection(altitude, azimuth);
     const key = altitude > 0 ? L.key : 0;
     this.sun.intensity = key;

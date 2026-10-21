@@ -72,17 +72,19 @@ export class Controller {
 
   relight() {
     this.engine.relight(this.engine.now());
+    this.engine.setReading(this.active?.role === 'map');
     this.shadowKey = '';
     this.mapDirty = true;
     this.kick();
   }
 
   overviewPose(): CamPose {
-    return { tx: 0.5, ty: 0.4, tz: -16.5, dist: 175, bearing: 180, elev: 58, vfov: 19.5 };
+    // design review #4: an oblique close-up, plinth edges outside the frame, on the hero's bearing
+    return { tx: 1.0, ty: 0.4, tz: -6.0, dist: 92, bearing: this.engine?.bearing ?? 205, elev: 38, vfov: 19.5 };
   }
 
   townPose(target: Vector3): CamPose {
-    return { tx: target.x, ty: target.y, tz: target.z, dist: 46, bearing: this.engine.bearing, elev: 40, vfov: 16 };
+    return { tx: target.x, ty: target.y, tz: target.z, dist: 26, bearing: this.engine.bearing, elev: 30, vfov: 16 };
   }
 
   attach(el: HTMLElement, role: Role): ReliefHandle {
@@ -115,6 +117,8 @@ export class Controller {
     for (const v of this.views.values()) if (v.visible && (!best || v.ratio > best.ratio)) best = v;
     if (best && best !== this.active) {
       this.active = best;
+      this.engine.setReading(best.role === 'map');
+      if (best.role === 'hero') this.engine.pinScale(1);
       const c = this.engine.canvas;
       c.classList.remove('on');
       best.el.appendChild(c);
@@ -179,10 +183,12 @@ export class Controller {
       const f = v.free?.();
       const shift = f ? { cx: f.l + f.w / 2, cy: f.t + f.h / 2 } : undefined;
       const pose = { ...this.mapPose };
-      if (f && pose.dist > 120) pose.dist *= H / Math.max(200, f.h);
-      const key = `map:${pose.tx.toFixed(1)}:${pose.tz.toFixed(1)}:${e.state}`;
+      // pins never shrink below a ~10 px head on screen (design review #4)
+      const pxPerUnit = H / (2 * pose.dist * Math.tan((pose.vfov * Math.PI) / 360));
+      e.pinScale(Math.min(4, Math.max(1, 10 / (0.26 * pxPerUnit))));
+      const key = `map:${pose.tx.toFixed(1)}:${pose.tz.toFixed(1)}:${e.state}:${e.reading}`;
       if (key !== this.shadowKey && (!this.flying || e.frame % 6 === 0)) {
-        e.fitShadow(new Vector3(pose.tx, 0.5, pose.tz), pose.dist > 120 ? 60 : 18);
+        e.fitShadow(new Vector3(pose.tx, 0.5, pose.tz), pose.dist > 60 ? 45 : 14);
         this.shadowKey = key;
       }
       e.setView(pose, W, H, null, shift);
@@ -299,7 +305,7 @@ export class Controller {
     else if ('town' in p) dest = this.townPose(e.townTarget(p.town) ?? new Vector3());
     else {
       const g = e.pinRoots.get(p.home);
-      dest = g ? { ...this.townPose(g.position.clone()), dist: 34 } : this.overviewPose();
+      dest = g ? { ...this.townPose(g.position.clone()), dist: 20 } : this.overviewPose();
     }
     const from = { ...this.mapPose };
     let db = ((dest.bearing - from.bearing + 540) % 360) - 180;

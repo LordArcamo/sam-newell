@@ -24,7 +24,7 @@ export function initMotion() {
 
   const desktop = matchMedia('(min-width: 1024px) and (pointer: fine)').matches;
   if (desktop) {
-    const lenis = new Lenis({ lerp: 0.12, syncTouch: false, anchors: { offset: -80 } });
+    const lenis = new Lenis({ lerp: 0.12, syncTouch: false, anchors: true }); // offsets come from CSS scroll-padding / scroll-margin
     (window as any).__lenis = lenis;
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.lagSmoothing(0);

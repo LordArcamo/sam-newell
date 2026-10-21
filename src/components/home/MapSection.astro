@@ -18,7 +18,7 @@ const cards = TOWNS.map((t) => {
   const homes = HOMES.filter((h) => h.group === t.slug).sort((a, b) => ['for-sale', 'sold', 'past'].indexOf(a.status) - ['for-sale', 'sold', 'past'].indexOf(b.status));
   const n = (s: string) => homes.filter((h) => h.status === s).length;
   const parts = [n('for-sale') && `${n('for-sale')} for sale`, n('sold') && `${n('sold')} sold lately`, n('past') && `${n('past')} past ${n('past') > 1 ? 'listings' : 'listing'}`].filter(Boolean);
-  const lead = homes.find((h) => h.photo);
+  const lead = homes.find((h) => h.photo && h.photoKind === 'exterior'); // the card shows a house, never a kitchen
   const rv = t.review ? REVIEWS.find((r) => r.n === t.review) : null;
   return { ...t, homes, count: parts.join(' · '), lead, rv };
 });
@@ -128,10 +128,12 @@ const mapData = {
     min-height: 760px;
     overflow: hidden;
     background: var(--tone);
+    scroll-margin-top: calc(-1 * (var(--bar) + 16px)); /* the section fills the screen: land flush (jury P1-6) */
   }
   .stage {
     position: absolute;
     inset: 0;
+    overflow: hidden;
   }
   .relief {
     width: 100%;
@@ -174,9 +176,9 @@ const mapData = {
     position: absolute;
     left: 0;
     top: 0;
-    width: 26px;
-    height: 26px;
-    margin: -13px 0 0 -13px;
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
     display: grid;
     place-items: center;
     pointer-events: auto;
@@ -221,9 +223,22 @@ const mapData = {
   }
   .pin:hover .tag,
   .pin:focus-visible .tag,
-  .pin.on .tag {
+  .pin.on .tag,
+  .map.is-town .pin .tag {
     opacity: 1;
     transform: translate(-50%, 0);
+  }
+  /* tags never run off the stage sideways */
+  .pin.flip .tag,
+  .map.is-town .pin.flip .tag {
+    left: auto;
+    right: 50%;
+    transform: translate(12px, 0);
+  }
+  .pin.flop .tag,
+  .map.is-town .pin.flop .tag {
+    left: 50%;
+    transform: translate(-12px, 0);
   }
   /* live relief: labels and the SN mark are in the model; the SVG stays underneath as the poster */
   .map.is-gl .overlay {
@@ -387,8 +402,12 @@ const mapData = {
   .tc-act {
     display: flex;
     gap: 8px;
-    margin-top: 18px;
+    margin: 18px -22px -22px;
+    padding: 14px 22px 22px;
     flex-wrap: wrap;
+    position: sticky;
+    bottom: 0;
+    background: var(--ink);
   }
   .tc-act .btn {
     min-height: 48px;
@@ -477,27 +496,35 @@ const mapData = {
     .map {
       height: auto;
       min-height: 0;
-      overflow: visible;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
+      scroll-margin-top: 0;
     }
     .panel {
       position: static;
       width: auto;
-      padding: 24px var(--m) 12px;
+      padding: 20px var(--m) 12px;
       order: 1;
     }
     .panel-h {
-      margin: 0 0 12px;
+      margin: 0 0 10px;
     }
+    /* one horizontal strip of towns (jury P1-7) */
     .town-list {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
       gap: 6px;
+      margin: 0 calc(-1 * var(--m));
+      padding: 0 var(--m) 6px;
+      scrollbar-width: none;
     }
     .town {
       flex: none;
-      background: var(--tone);
+      scroll-snap-align: start;
+      background: var(--paper);
       white-space: nowrap;
       min-height: 44px;
       font-size: 16px;
@@ -505,18 +532,30 @@ const mapData = {
     .stage {
       position: relative;
       order: 2;
-      height: 62svh;
-      min-height: 420px;
+      height: 78svh;
+      min-height: 520px;
     }
+    /* the card docks over the bottom of the map, so a tap on a town shows at once */
     .card {
-      position: static;
-      order: 3;
+      position: absolute;
+      left: var(--m);
+      right: var(--m);
+      bottom: var(--m);
       width: auto;
-      max-height: none;
-      overflow: visible;
+      max-height: 44%;
+      overflow-y: auto;
+      order: 3;
     }
-    .card :global(.ph) {
-      max-height: 260px;
+    .card :global(.ph),
+    .card .macro {
+      display: none;
+    }
+    .tc-body {
+      padding: 16px 18px 18px;
+    }
+    .tc-act {
+      margin: 14px -18px -18px;
+      padding: 12px 18px 18px;
     }
     .sheet {
       margin: auto 0 0 0;

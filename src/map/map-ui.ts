@@ -55,7 +55,7 @@ export function initMap() {
   // stays reachable through the town card's list).
   let placed: { x: number; y: number }[] = [];
   const collides = (x: number, y: number) => {
-    if (placed.some((q) => Math.hypot(q.x - x, q.y - y) < 32)) return true;
+    if (placed.some((q) => Math.hypot(q.x - x, q.y - y) < 36)) return true; // 44 px targets, 24 px cores never overlap
     placed.push({ x, y });
     return false;
   };
@@ -69,6 +69,7 @@ export function initMap() {
       const px = (p.x - v.x) * v.s, py = (p.y - v.y) * v.s;
       el.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px)`;
       const off = px < Math.max(-40, minX) || py < -40 || px > W + 40 || py > H + 40;
+      if (el.classList.contains('pin')) { el.classList.toggle('flip', px > W - 140); el.classList.toggle('flop', px < 140); }
       el.style.visibility = off || (el.classList.contains('pin') && collides(px, py)) ? 'hidden' : '';
     };
     if (gl) return; // the live relief positions pins itself (glFrame)
@@ -119,12 +120,14 @@ export function initMap() {
   function select(slug: string | null, opts: { home?: string; instant?: boolean; focus?: boolean; overview?: boolean } = {}) {
     current = slug;
     buttons.forEach((b) => {
-      const on = b.dataset.town === slug;
+      const on = b.dataset.town === slug && !opts.overview; // the overview presses no town (jury P1-8)
       b.setAttribute('aria-pressed', String(on));
       if (slug) b.tabIndex = on ? 0 : -1;
     });
+    if (opts.overview) buttons.forEach((b) => (b.tabIndex = b.dataset.town === slug ? 0 : -1)); // roving stop stays on Lehi
     if (!slug) buttons.forEach((b, i) => (b.tabIndex = i === 0 ? 0 : -1));
-    labels.forEach((l) => l.classList.toggle('on', l.dataset.label === slug));
+    labels.forEach((l) => l.classList.toggle('on', l.dataset.label === slug && !opts.overview));
+    root.classList.toggle('is-town', !!slug && !opts.overview);
     const show = slug ?? 'lehi';
     cards.forEach((c) => c.classList.toggle('on', c.dataset.card === show));
     pins.forEach((p) => p.classList.toggle('on', !!opts.home && p.dataset.pin === opts.home));
@@ -227,6 +230,8 @@ export function initMap() {
       const p = gl!.project(el.dataset.pin!);
       if (!p) return;
       el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)`;
+      el.classList.toggle('flip', p.x > W - 140);
+      el.classList.toggle('flop', p.x < 140);
       el.style.visibility = !p.visible || p.x < Math.max(0, minX) || p.y < 0 || p.x > W || p.y > H || collides(p.x, p.y) ? 'hidden' : '';
     });
   };
