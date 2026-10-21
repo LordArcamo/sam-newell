@@ -265,7 +265,10 @@ const fallback = await getImage({ src: image, width: Math.min(1280, image.width)
   .ln {
     display: block;
     overflow: hidden;
-    padding-bottom: 0.06em;
+    /* room above the cap height inside the mask (line-height 0.98 clipped the top of "Get Leveraged" at 820);
+       the negative margin keeps the line spacing unchanged */
+    padding: 0.1em 0 0.06em;
+    margin-top: -0.1em;
   }
   .ln > span {
     display: inline-block;
