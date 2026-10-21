@@ -2,7 +2,6 @@
 /** Two verbatim reviews: one large, one offset. Never a row of identical cards. */
 import type { Review } from '../data/reviews';
 import { reviewDate } from '../data/reviews';
-import { ZILLOW } from '../data/site';
 interface Props { a: { r: Review; key: string }; b: { r: Review; key: string }; heading: string; dark?: boolean }
 const { a, b, heading, dark = false } = Astro.props;
 ---
@@ -16,7 +15,7 @@ const { a, b, heading, dark = false } = Astro.props;
     <blockquote class="lead"><p>“{b.r.excerpts[b.key]}”</p></blockquote>
     <figcaption>{b.r.name}, {b.r.what.toLowerCase()}, {reviewDate(b.r.date)}, on Zillow</figcaption>
   </figure>
-  <p class="qs-more small" data-rv style="--i:3"><a class="link" href={ZILLOW.profile} rel="noopener" target="_blank">All {ZILLOW.reviews} reviews on Zillow</a></p>
+  <p class="qs-more small" data-rv style="--i:3"><a class="link" href="/reviews/">Read all the reviews</a></p>
 </section>
 <style>
   .qs {

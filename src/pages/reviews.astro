@@ -1,0 +1,243 @@
+---
+/**
+ * Every usable Zillow review, verbatim, newest first (user 2026-10-21: "have the reviews").
+ * No AggregateRating / Review schema: Google treats self-hosted reviews of the site owner as self-serving.
+ */
+import Base from '../layouts/Base.astro';
+import InnerHero from '../components/InnerHero.astro';
+import Pic from '../components/Pic.astro';
+import TalkStrip from '../components/TalkStrip.astro';
+import { img } from '../lib/images';
+import { REVIEWS, reviewDate, reviewKinds, type ReviewKind } from '../data/reviews';
+import { ZILLOW } from '../data/site';
+import towns from '../data/towns.json';
+import keysPoster from '../assets/film/keys.jpg';
+
+const townName = Object.fromEntries(towns.map((t) => [t.slug, t.name]));
+const list = [...REVIEWS].sort((a, b) => b.date.localeCompare(a.date) || a.n - b.n).map((r) => {
+  const m = r.what.match(/^(.*?) in ((?:UT \d{5})|(?:[A-Z][\w .'-]*(?:, [A-Z]{2})?))$/);
+  const deal = m ? m[1] : r.what;
+  const inPart = m ? m[2] : '';
+  const zip = /^UT \d{5}$/.test(inPart);
+  const place = r.town ? (zip ? `${townName[r.town]}, ${inPart}` : townName[r.town]) : inPart;
+  return { ...r, deal, place, kinds: reviewKinds(r) };
+});
+const FILTERS: { k: ReviewKind | 'all'; label: string }[] = [
+  { k: 'all', label: 'All' },
+  { k: 'bought', label: 'Bought' },
+  { k: 'sold', label: 'Sold' },
+  { k: 'showed', label: 'Showed' },
+  { k: 'rented', label: 'Rented' },
+];
+const count = (k: ReviewKind | 'all') => (k === 'all' ? list.length : list.filter((r) => r.kinds.includes(k)).length);
+---
+<Base
+  title="Reviews of Sam Newell | 4.9 on 45 Zillow Reviews"
+  description={`Clients of Lehi real estate agent Sam Newell in their own words: ${list.length} Zillow reviews, word for word, from first-time buyers, sellers and investors.`}
+  crumbs={[{ name: 'Reviews', path: '/reviews/' }]}
+>
+  <InnerHero
+    title="In their words"
+    lead={`${list.length} reviews from Sam’s Zillow profile, word for word, newest first.`}
+    image={img('photos/closing-confetti-neon.jpg')}
+    alt="Confetti under the Congrats sign at Sam's office as two clients close on their first home"
+    pos="50% 30%"
+  >
+    <p class="rv-score"><a href={ZILLOW.profile} rel="noopener" target="_blank">{ZILLOW.rating}<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.94 6.1 6.56.9-4.8 4.6 1.18 6.6L12 17.5l-5.88 3.2 1.18-6.6-4.8-4.6 6.56-.9z" /></svg><span class="sr-only"> stars</span> · {ZILLOW.reviews} reviews on Zillow <span aria-hidden="true">→</span></a></p>
+  </InnerHero>
+
+  <section class="rv sec wrap" aria-labelledby="rv-h">
+    <h2 class="sr-only" id="rv-h">All reviews</h2>
+    <div class="rv-f" role="group" aria-label="Show reviews from clients who" data-rv-filter hidden>
+      {FILTERS.map((f) => (
+        <button type="button" class="rv-b" data-k={f.k} aria-pressed={f.k === 'all' ? 'true' : 'false'} disabled={count(f.k) === 0}>
+          {f.label} <span class="rv-c num">{count(f.k)}</span>
+        </button>
+      ))}
+    </div>
+    <p class="sr-only" aria-live="polite" data-rv-status></p>
+    <ol role="list" class="rv-list" data-rv-list>
+      {list.map((r, i) => (
+        <>
+          <li class="rv-i" data-kinds={r.kinds.join(' ')} id={`review-${r.n}`}>
+            <p class="rv-m" data-rv>
+              <span class="rv-n">{r.name}</span>
+              <span>{reviewDate(r.date)}</span>
+              <span>{r.deal}</span>
+              {r.place && <span>{r.place}</span>}
+            </p>
+            <blockquote class="rv-t" data-rv style="--i:1"><p>{r.text}</p></blockquote>
+          </li>
+          {i === 3 && (
+            <li class="rv-pic rv-film" aria-hidden="true" data-pic>
+              <figure data-film="/film/keys.mp4" data-cursor="Play" data-shutter><Pic src={keysPoster} alt="" sizes="(max-width: 767px) 70vw, 30vw" ratio="r11" rv={false} widths={[360, 540, 720]} /></figure>
+            </li>
+          )}
+          {i === 10 && (
+            <li class="rv-pic" aria-hidden="true" data-pic>
+              <figure data-shutter><Pic src={img('photos/closing-congrats-trio.jpg')} alt="" sizes="(max-width: 767px) 70vw, 30vw" ratio="r45" pos="50% 40%" rv={false} /></figure>
+            </li>
+          )}
+          {i === 18 && (
+            <li class="rv-pic" aria-hidden="true" data-pic>
+              <figure data-shutter><Pic src={img('photos/sam-portrait-2026-10.jpg')} alt="" sizes="(max-width: 767px) 70vw, 30vw" ratio="r45" pos="50% 25%" rv={false} /></figure>
+            </li>
+          )}
+        </>
+      ))}
+    </ol>
+    <p class="rv-more"><a class="link" href={ZILLOW.profile} rel="noopener" target="_blank">Read all {ZILLOW.reviews} on Zillow</a>, including the ones not shown here.</p>
+  </section>
+  <TalkStrip />
+</Base>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-rv-filter]');
+  const items = [...document.querySelectorAll<HTMLElement>('.rv-i')];
+  const pics = [...document.querySelectorAll<HTMLElement>('[data-pic]')];
+  const status = document.querySelector<HTMLElement>('[data-rv-status]');
+  if (bar) {
+    bar.hidden = false;
+    const buttons = [...bar.querySelectorAll<HTMLButtonElement>('button')];
+    bar.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('button');
+      if (!b || b.disabled) return;
+      const k = b.dataset.k!;
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      let n = 0;
+      items.forEach((li) => {
+        const show = k === 'all' || (li.dataset.kinds || '').split(' ').includes(k);
+        li.hidden = !show;
+        if (show) {
+          n++;
+          li.querySelectorAll('[data-rv]').forEach((el) => el.classList.add('in'));
+        }
+      });
+      pics.forEach((p) => (p.hidden = k !== 'all'));
+      if (status) status.textContent = `${n} review${n === 1 ? '' : 's'} shown`;
+    });
+  }
+</script>
+
+<style>
+  .rv-score {
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .rv-score a {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .star {
+    width: 0.95em;
+    height: 0.95em;
+    fill: currentColor;
+    vertical-align: -0.1em;
+    margin-left: 2px;
+  }
+  .rv-score a:hover {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
+  .rv-f {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 72px;
+  }
+  .rv-f[hidden] {
+    display: none;
+  }
+  .rv-b {
+    min-height: 48px;
+    padding: 0 20px;
+    background: var(--t2);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 500;
+    border: 0;
+    cursor: pointer;
+    transition: background-color 0.25s var(--ease-out), color 0.25s var(--ease-out);
+  }
+  .rv-b:hover {
+    background: var(--t4);
+  }
+  .rv-b[aria-pressed='true'] {
+    background: #fff;
+    color: #0a0a0a;
+  }
+  .rv-b:active {
+    transform: translateY(1px);
+  }
+  .rv-b:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .rv-c {
+    opacity: 0.6;
+    margin-left: 6px;
+  }
+  .rv-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 72px;
+  }
+  .rv-i {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: 24px 5vw;
+    align-items: start;
+  }
+  .rv-m {
+    display: grid;
+    gap: 4px;
+    font-size: 16px;
+  }
+  .rv-m span:not(.rv-n) {
+    opacity: 0.65;
+  }
+  .rv-n {
+    font-weight: 600;
+  }
+  .rv-t {
+    font-size: 22px;
+    line-height: 1.45;
+    max-width: 52ch;
+  }
+  .rv-pic {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: 5vw;
+  }
+  .rv-pic figure {
+    grid-column: 2;
+    width: min(100%, 420px);
+  }
+  .rv-pic:nth-of-type(even) figure {
+    justify-self: end;
+  }
+  .rv-more {
+    margin-top: 96px;
+  }
+  @media (max-width: 767px) {
+    .rv-i,
+    .rv-pic {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
+    .rv-pic figure {
+      grid-column: 1;
+      width: 72%;
+    }
+    .rv-t {
+      font-size: 19px;
+    }
+    .rv-list {
+      gap: 56px;
+    }
+  }
+</style>

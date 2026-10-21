@@ -3,6 +3,10 @@
  * inspo/zillow.md). Typos kept. Never use #14 (1-star), #23 (possible family member) or #4 (trailing "??").
  * Every `excerpts` entry must be a contiguous span of `text` (checked by src/lib/reviews.test.ts).
  * User OK to quote verbatim with the name as displayed, date, town and transaction type (2026-10-21).
+ * All 27 usable reviews of the 30 Zillow loaded (user: "have the reviews", 2026-10-21). Transaction lines are normalised
+ * the same way throughout ("Bought a Condo home in 2026 in Murray, UT" → "Bought a condo in 2026 in Murray");
+ * zip-only lines keep the zip, with the town slug mapped from it (84005 Eagle Mountain, 84601 Provo, 84062 Pleasant Grove,
+ * 84043 Lehi).
  */
 export interface Review {
   n: number;
@@ -77,6 +81,11 @@ export const REVIEWS: Review[] = [
     excerpts: { town: 'He understands real estate commercially and residentially to perfection and makes his clients feel like family.' },
   },
   {
+    n: 15, name: 'henrysasquatch7', date: '2018-08-09', rating: 5, what: 'Helped me rent a townhouse in Eagle Mountain', town: 'eagle-mountain',
+    text: 'Sam was great! Very straightforward and easy to work with. He was prompt about getting back to me when I couldn\'t get ahold of him. He was clear and easy to understand in the details of the whole process and it felt easy. Very efficient. I would recommend him to anyone.',
+    excerpts: {},
+  },
+  {
     n: 16, name: 'rickchungsiu3', date: '2018-08-07', rating: 5, what: 'Bought a home in 2017 in UT 84005', town: 'eagle-mountain',
     text: 'I\'ve worked with Sam on purchasing several properties. He has a great knowledge of the area and is always available to answer questions. I know he is very busy but he always gets back to me to answer any questions I have.',
     excerpts: { town: 'I\'ve worked with Sam on purchasing several properties. He has a great knowledge of the area and is always available to answer questions.', invest: 'I\'ve worked with Sam on purchasing several properties.' },
@@ -87,11 +96,80 @@ export const REVIEWS: Review[] = [
     excerpts: { town: 'He\'s quick to respond, provide insight, and always practices what he preaches.', sell: 'Since then he has been our agent on a number of transactions and has been excellent to work with.' },
   },
   {
+    n: 18, name: 'JoelRagar', date: '2018-08-06', rating: 5, what: 'Bought a home in 2017',
+    text: 'Sam got us the right house at the right price faster than I thought possible. It was an easy easy process. If you are looking for someone to show the care needed to help you make the emotional decision of buying a house and balance the business side with easy then you need Sam.',
+    excerpts: {},
+  },
+  {
+    // Zillow renders this review with its first sentence pair duplicated mid-word ("…reliable dilige he has helped me…");
+    // this is the single, un-duplicated text (inspo/zillow.md #19).
+    n: 19, name: 'jordschipper', date: '2018-08-06', rating: 5, what: 'Bought a condo in 2018 in Sandy',
+    text: 'He has helped me with the number of really unique real estate investment deals and they have all exceeded my expectations. Sam is a trustworthy, reliable diligent and intelligent agent. I will use him any chance I can.',
+    excerpts: {},
+  },
+  {
     n: 20, name: 'blairvandyke0', date: '2018-08-06', rating: 5, what: 'Bought a single family home in 2018 in Pleasant Grove', town: 'pleasant-grove',
     text: 'I just bought my third rental with Sam. He is exceptional. Existing properties or new construction, Sam provides careful, accurate and experience-based analysis. He gives inexperienced investors a greater capacity to learn the business without making unnecessary and costly mistakes. He is very service-oriented and committed to the success of his clients. Sam is fair, honest, and genuine. I am comfortable recommending his services to family, close friends, colleagues, and acquaintances. Work with Sam, your competence and confidence will rise as you build your portfolio from 1 to 100 properties. Good luck',
     excerpts: { town: 'I just bought my third rental with Sam. He is exceptional.', invest: 'Existing properties or new construction, Sam provides careful, accurate and experience-based analysis.' },
   },
+  {
+    n: 21, name: 'ruthmosesbergau', date: '2018-03-22', rating: 5, what: 'Bought a single family home in 2016 in Orem', town: 'orem',
+    text: 'Sam is an excellent realtor. He was with us every step of the way. Was available to show homes we wanted to see. We couldn\'t have asked for better service.',
+    excerpts: {},
+  },
+  {
+    n: 22, name: 'Shahshjssjs', date: '2018-03-20', rating: 5, what: 'Sold a single family home in 2017 in Nampa, ID',
+    text: 'He\'s professional, great at communicating, thorough, personable, reliable, and very knowledgeable about the trade. We\'re so glad we went with Sam!!! If you\'re on the hunt for a good realtor, your hunt is over. He\'s your man.',
+    excerpts: {},
+  },
+  {
+    n: 24, name: 'R McClain', date: '2016-11-09', rating: 5, what: 'Showed home in 2016 in UT 84601', town: 'provo',
+    text: 'Sam is an amazing realtor with tons of experience and knowledge. While working with Sam, he has really helped me to better understand the market and find the best option for me at this time. Sam definitely goes the extra mile and I have loved working with him.',
+    excerpts: {},
+  },
+  {
+    n: 25, name: 'Joshua Zippro', date: '2016-11-09', rating: 5, what: 'Showed home in 2016 in UT 84601', town: 'provo',
+    text: 'Sam gives me great real estate advice. He knows a ton about investing and sells a lot of investment properties I would not hesitate to refer Sam to a friend or family member!',
+    excerpts: {},
+  },
+  {
+    n: 26, name: 'Ryan Nielson', date: '2016-11-08', rating: 5, what: 'Sold a single family home in 2015 in Kosciusko, MS',
+    text: 'Sam made getting into my first home pretty simple he made my dream come true of getting my first house. Sam always was professional and worked hard for me.',
+    excerpts: {},
+  },
+  {
+    n: 27, name: 'ruthbergau', date: '2016-08-15', rating: 5, what: 'Bought a single family home in 2016 in Orem', town: 'orem',
+    text: 'Sam was awesome to work with. He held our hands every step of the way to purchase our home. Every time we had a question or was unsure of what the next process was Sam was there. He even came to our home to make sure we understood all that was going on. You won\'t find a better realtor than Sam Newell. We are very excited and happy to have made this decision to stay in Utah.',
+    excerpts: {},
+  },
+  {
+    n: 28, name: 'Annette Bean', date: '2016-08-08', rating: 5, what: 'Bought a home in 2013 in UT 84062', town: 'pleasant-grove',
+    text: 'Sam was helpful, competent, and easy to work with. He put us on an email list so we would receive listings that fit our interests, as they became available - which was very helpful.',
+    excerpts: {},
+  },
+  {
+    n: 29, name: 'gardner nielson', date: '2016-08-02', rating: 5, what: 'Showed home in 2016 in UT 84043', town: 'lehi',
+    text: 'Sam is a great agent. We had bad experiences with other agents before, but he was top notch. We went through some difficult decisions throughout our home buying experience, but Sam was always there to help when we needed it. Sam goes the extra mile to make sure things get done quickly and really cares about his clients.',
+    excerpts: {},
+  },
+  {
+    n: 30, name: 'saldanapadri', date: '2016-07-28', rating: 5, what: 'Bought a single family home in 2016 in Pleasant Grove', town: 'pleasant-grove',
+    text: 'Sam, is the best realtor that we know, after having a bad experience with a previous realtor we ended up loosing $1,000+ when Sam heard of this he immediately offered to take $1,000 off to make up for our loss! Sam is always available to meet with us or take a call with any questions he is very flexible, always has our best interest and makes sure everything is going smooth. I highly recommend Sam for anyone who is looking for a great experience!',
+    excerpts: {},
+  },
 ];
+
+/** The kind of help, for the /reviews/ filter. "Bought and sold" counts as both. */
+export type ReviewKind = 'bought' | 'sold' | 'showed' | 'rented';
+export const reviewKinds = (r: Review): ReviewKind[] => {
+  const w = r.what.toLowerCase();
+  const k: ReviewKind[] = [];
+  if (/\bbought\b/.test(w)) k.push('bought');
+  if (/\bsold\b/.test(w)) k.push('sold');
+  if (/^showed\b/.test(w)) k.push('showed');
+  if (/\brent\b/.test(w)) k.push('rented');
+  return k;
+};
 
 export const review = (n: number) => {
   const r = REVIEWS.find((x) => x.n === n);

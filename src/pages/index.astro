@@ -129,6 +129,7 @@ const jsonld = [
     <figure class="q-text" data-rv>
       <blockquote class="statement"><p>“{keaton.excerpts.home}”</p></blockquote>
       <figcaption>{keaton.name}, bought a home in 2026 · {reviewDate(keaton.date)}, on <a class="link" href={ZILLOW.profile} rel="noopener" target="_blank">Zillow</a></figcaption>
+      <p class="q-all"><a class="link" href="/reviews/">Read all the reviews <span aria-hidden="true">→</span></a></p>
     </figure>
   </section>
 
@@ -496,6 +497,11 @@ const jsonld = [
     margin-top: 32px;
     font-size: 16px;
     font-weight: 500;
+  }
+  .q-all {
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: 600;
   }
 
   /* 8 · about */

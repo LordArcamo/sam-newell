@@ -3,7 +3,7 @@
 // fails the link still works, and the arriving curtain lifts on a CSS animation (no script needed).
 const NAMES: Record<string, string> = {
   '/': 'Sam Newell', '/buy/': 'Buy', '/sell/': 'Sell', '/invest/': 'Invest', '/podcast/': 'Get Leveraged',
-  '/about/': 'About Sam', '/contact/': 'Talk to Sam', '/blog/': 'Notes from Sam', '/privacy/': 'Privacy', '/terms/': 'Terms',
+  '/about/': 'About Sam', '/contact/': 'Talk to Sam', '/blog/': 'Notes from Sam', '/reviews/': 'Reviews', '/privacy/': 'Privacy', '/terms/': 'Terms',
 };
 
 export function initWipe() {
