@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/v2", "destination": "https://sam-newell-v2.vercel.app/v2/" },
+    { "source": "/v2/:path*", "destination": "https://sam-newell-v2.vercel.app/v2/:path*" }
+  ]
+}
